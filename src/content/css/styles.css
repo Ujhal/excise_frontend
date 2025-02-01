@@ -1,0 +1,384 @@
+@import '../css/google/googleapi.css';
+
+/* for body tag */
+.full-height {
+
+  min-height: 100vh !important;
+  display: flex;
+  flex-direction: column;
+  font-family: Baskerville, 'Baskerville Old Face', 'Goudy Old Style', Garamond, 'Times New Roman', serif;
+}
+
+.hipster {
+
+  width: 100%;
+  min-height: 100vh;
+  background: url('../../content/images/st2.png') no-repeat center;
+  background-size: cover;
+  display: block;
+  margin: 0 !important;
+  padding: 0;
+  height: 100%;
+
+
+
+}
+
+
+
+/* wait autoprefixer update to allow simple generation of high pixel density media query */
+/* @media only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (-moz-min-device-pixel-ratio: 2),
+only screen and (-o-min-device-pixel-ratio: 2/1),
+only screen and (min-resolution: 192dpi),
+only screen and (min-resolution: 2dppx) { */
+  .hipster {
+    background: url('../../content/images/st2.png') no-repeat center top;
+    background-size: 100% 100%;
+   /*  min-width: 100%; */
+
+  }
+/* } */
+
+.cus-page-title {
+  font-size: 1.95rem;
+  font-weight: 600;
+  text-align: justify !important;
+  /*  font-family: Baskerville, "Baskerville Old Face", "Goudy Old Style", Garamond, "Times New Roman", serif; */
+}
+
+.lead {
+  /* font-size: 1.35rem; */
+  /* font-size: clamp(.8rem, 3vw + .8rem, 1.35rem); */
+  font-size: clamp(.8rem, calc(3vw + 5vh + .8rem), 1.35rem);
+  font-weight: 520;
+  padding: 10px;
+  text-align: justify !important;
+  /*  font-family: Baskerville, "Baskerville Old Face", "Goudy Old Style", Garamond, "Times New Roman", serif; */
+   font-family: Merriweather,  serif;
+}
+
+.bg-voilet {
+  background-color: rgb(238, 135, 238) !important;
+}
+
+.bg-voilet:focus,
+.bg-voilet:hover,
+button.bg-voilet:focus,
+button.bg-voilet:hover {
+  background-color: rgb(190, 122, 219) !important;
+}
+
+.bg-custom1 {
+  background-color: rgb(118, 126, 3) !important;
+}
+
+.bg-custom1:focus,
+.bg-custom1:hover,
+button.bg-custom1:focus,
+button.bg-custom1:hover {
+  background-color: rgb(79, 85, 3) !important;
+}
+.bg-custom2 {
+  background-color: rgb(126, 3, 30) !important;
+}
+
+.bg-custom2:focus,
+.bg-custom2:hover,
+button.bg-custom2:focus,
+button.bg-custom2:hover {
+  background-color: rgb(58, 1, 14) !important;
+}
+
+mat-sidenav {
+  background-image: linear-gradient(rgba(108,190,199, 0.98), rgba(160,71,71, 0.7));
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  z-index: -1;
+  width: 100%;
+  max-width: 20%;
+  min-width: 15%;
+  height: 100%;
+  display: block;
+  top: 0;
+  left: 0;
+  box-shadow: 7px 0 60px rgba(0, 0, 0, 0.05);
+}
+
+/* Styling Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: #A04747;
+  border: 3px solid rgb(212, 212, 212);
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgb(212, 212, 212);
+}
+
+.img-fluid.cus-sidebar-icons {
+  width: 26px;
+  margin-right: 14px;
+  display: inline-block;
+}
+
+.img-fluid.card-icon {
+  width: 30px;
+  margin-right: 5px;
+}
+
+.img-fluid.cus-about-icons {
+  width: 26px;
+}
+
+.icon-box .img-fluid.cus-about-icons.orange {
+  display: inline-block;
+}
+
+.icon-box .img-fluid.cus-about-icons.white {
+  display: none;
+}
+
+.container-fluid {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  padding-top: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+p {
+  /* Center horizontally*/
+  text-align: center;
+}
+
+.title {
+  color: #333;
+  font-weight: 600;
+  font-size: 32px;
+  width: 100% !important;
+  /*  font-family: Baskerville, "Baskerville Old Face", "Goudy Old Style", Garamond, "Times New Roman", serif; */
+}
+
+mat-sidenav .nav-dropdown-cus {
+  /* color: #2483C5; */
+  background-color: rgba(0, 0, 0, 0);
+  font-weight: 500;
+  font-size: 20px;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  font-family: Baskerville, 'Baskerville Old Face', 'Goudy Old Style', Garamond, 'Times New Roman', serif;
+}
+
+.nav-header-cus {
+  color: #fff;
+  /* color: #673AB7; */
+  font-weight: 500;
+  font-size: 20px;
+  width: 100% !important;
+  font-family: Baskerville, 'Baskerville Old Face', 'Goudy Old Style', Garamond, 'Times New Roman', serif;
+}
+
+.nav-item-cus {
+  color: #fff;
+  /* color: #673AB7; */
+  font-weight: 400;
+  font-size: 18px;
+  width: 100% !important;
+  font-family: Baskerville, 'Baskerville Old Face', 'Goudy Old Style', Garamond, 'Times New Roman', serif;
+}
+
+a.mdc-list-item:hover {
+  background: #6CBEC7 !important;
+}
+
+.img-fluid.card-icon {
+  width: 30px;
+  margin-right: 5px;
+}
+
+.page-card-header {
+  background: #6CBEC7 !important;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  padding-top: 3px !important;
+  padding-bottom: 3px !important;
+}
+
+.page-card-content {
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
+}
+
+.my-form-full-width {
+  min-width: 100% !important;
+}
+
+.no-margin {
+  margin-top: -16px;
+}
+
+.page-title {
+  color: #333;
+  font-weight: 500;
+  font-size: 26px;
+  width: 100% !important;
+  font-family: Baskerville, 'Baskerville Old Face', 'Goudy Old Style', Garamond, 'Times New Roman', serif;
+
+  /*   font-family: Baskerville, "Baskerville Old Face", "Goudy Old Style", Garamond, "Times New Roman", serif; */
+}
+
+small {
+  font-weight: 400;
+}
+
+.maticon {
+  vertical-align: sub;
+  margin-right: 10px;
+}
+
+.sidenav-inner-btn {
+  top: 0px;
+  left: auto;
+  right: 10px;
+  bottom: 0;
+  font-size: 0rem;
+}
+
+.profile-detail {
+  text-align: center;
+}
+
+h5 {
+  color: black;
+  font-weight: 600;
+  margin: 0.4rem 0;
+  text-align: center;
+}
+
+.profile-img {
+  border-radius: 50px;
+  margin-bottom: 1px;
+  width: 60px !important;
+  height: 60px !important;
+}
+
+.profile-divider {
+  border-top-color: brown;
+  margin-left: 5px;
+  margin-right: 5px;
+  border-top-width: 3px;
+}
+
+.fs-tags {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: left;
+  color: #5e5447;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-family: Baskerville, 'Baskerville Old Face', 'Goudy Old Style', Garamond, 'Times New Roman', serif;
+}
+
+.fs-data {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: justify;
+  white-space: normal;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  /*  overflow: hidden;
+  text-overflow: ellipsis; */
+  font-family: Baskerville, 'Baskerville Old Face', 'Goudy Old Style', Garamond, 'Times New Roman', serif;
+}
+
+.fs-paragraph-text-multi {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-align: justify;
+  white-space: normal;
+  color: #5e5447;
+  font-family: Baskerville, 'Baskerville Old Face', 'Goudy Old Style', Garamond, 'Times New Roman', serif;
+  text-transform: uppercase;
+}
+
+.mat-mdc-row:hover {
+  background-color: whitesmoke !important;
+}
+
+.mat-column-srNo {
+  flex: 0 0 5% !important;
+  padding-right: 10px;
+  min-width: 50px;
+}
+
+.mat-column-actions {
+  flex: 0 0 10% !important;
+}
+
+.mat-column-status {
+  flex: 0 0 10% !important;
+}
+
+.mat-mdc-table {
+  overflow-x: auto !important;
+  max-height: 80vh;
+}
+
+.mat-mdc-header-row {
+  min-width: 1200px;
+  background-color: whitesmoke !important;
+}
+
+.mat-mdc-row {
+  min-width: 1200px;
+}
+
+.mat-mdc-cell {
+  border: 1px solid lightgray !important;
+}
+
+.mat-mdc-header-cell {
+  border: 1px solid lightgray !important;
+  }
+
+.icon-menu {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: right;
+  color: #fff;
+  opacity: 0.5;
+  padding-right: 10px;
+}
+
+.icon-header {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: right;
+  margin-top: 5px;
+  color: #000;
+  opacity: 0.5;
+  padding-right: 10px;
+}
+
+.section-title{
+  color: #6CBEC7;
+  font-weight: 600;
+}
+.section-sub-title{
+  /* color: #007bff; */
+  color: #6CBEC7;
+  font-size: 20px;
+}

@@ -1,0 +1,53 @@
+<div class="container-fluid">
+    <mat-card class="mat-card">
+      <mat-card-header class="page-card-header">
+        <div class="icon-header ml-2">
+          <i class="icofont icofont-dashboard-web float-left"></i>
+        </div>
+        <span class="page-title">District List</span>
+      </mat-card-header>
+      <mat-card-content class="page-card-content">
+       
+          <mat-table [dataSource]="districtDataSource" class="mat-table">
+            <ng-container matColumnDef="srno">
+              <mat-header-cell *matHeaderCellDef> Sr. No. </mat-header-cell>
+              <mat-cell *matCellDef="let user; let i=index"> {{i+1}} </mat-cell>
+            </ng-container>
+            <!-- District Name Column -->
+            <ng-container matColumnDef="District">
+              <mat-header-cell *matHeaderCellDef> District </mat-header-cell>
+              <mat-cell *matCellDef="let element"> {{element.District}} </mat-cell>
+            </ng-container>
+  
+            <!-- District Code Column -->
+            <ng-container matColumnDef="DistrictCode">
+              <mat-header-cell *matHeaderCellDef> District Code </mat-header-cell>
+              <mat-cell *matCellDef="let element"> {{element.DistrictCode}} </mat-cell>
+            </ng-container>
+  
+            <!-- State Column -->
+            <ng-container matColumnDef="State">
+              <mat-header-cell *matHeaderCellDef> State </mat-header-cell>
+              <mat-cell *matCellDef="let element"> {{element.stateName}} </mat-cell>
+            </ng-container>
+  
+            <!-- Active Column -->
+            <ng-container matColumnDef="Active">
+              <mat-header-cell *matHeaderCellDef> Active </mat-header-cell>
+              <mat-cell *matCellDef="let element">
+                <mat-slide-toggle
+                  [checked]="element.IsActive"
+                  (change)="onToggleActive($event, element)">
+                </mat-slide-toggle>
+              </mat-cell>
+            </ng-container>
+            
+  
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+          </mat-table>
+       
+      </mat-card-content>
+    </mat-card>
+  </div>
+  
