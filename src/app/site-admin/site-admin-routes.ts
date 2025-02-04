@@ -5,12 +5,13 @@ import { UserRouteAccessService } from '../config/user-route-access.service';
 
 const routes: Routes = [
   {
-    path: '', // Parent route
+    path: '',
     loadComponent: () => import('./home/home.component').then(m => m.HomeComponent),
+    canActivate: [UserRouteAccessService],
     children: [
       {
         path: 'dashboard',
-        loadComponent: () => import('./dashboardtest/dashboardtest.component').then(m => m.DashboardtestComponent),
+        loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
       {
         path: 'new-district',
@@ -20,12 +21,25 @@ const routes: Routes = [
         path: 'list-district',
         loadComponent: () => import('./list-district/list-district.component').then(m => m.ListDistrictComponent),
       },
+      {
+        path: 'add-subdivision',
+        loadComponent: () => import('./add-subdivision/add-subdivision.component').then(m => m.AddSubdivisionComponent),
+      },
+      {
+        path: 'list-subdivision',
+        loadComponent: () => import('./list-subdivision/list-subdivision.component').then(m => m.ListSubdivisionComponent),
+      },
+      {
+        path: 'add-user',
+        loadComponent: () => import('./add-user/add-user.component').then(m => m.AddUserComponent),
+      },
+      {
+        path: 'list-user',
+        loadComponent: () => import('./list-user/list-user.component').then(m => m.ListUserComponent),
+      },
     ],
   },
 ];
 
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class SiteAdminRoutesModule {}
+
+export default routes;

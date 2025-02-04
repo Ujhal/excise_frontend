@@ -1,13 +1,14 @@
 export class Account {
     first_name!: string;
+    middle_name!: string;
     last_name!: string;
     username!: string;
     email!: string;
     password!: string;
-    password2?: string;
+    confirm_password?: string;
     role!: string;
     phonenumber!: string;
-    District!: string;  
-    SubDivision!: string;
+    district!: string;  
+    subDivision!: string;
     is_active!: boolean;
   }

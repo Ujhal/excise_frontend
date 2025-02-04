@@ -5,6 +5,7 @@ import { Dashboard } from '../shared/models/dashboard.model';
 import { SubDivision } from '../shared/models/subdivision.model';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
+import { Account } from '../shared/models/accounts';
 
 @Injectable({ providedIn: 'root' })
 export class SiteAdminService {
@@ -27,10 +28,21 @@ export class SiteAdminService {
     return this.http.post(`${this.apiUrl}/subdivision/`, subdivision);
   }
   getSubDivision(): Observable<SubDivision[]> {
-    return this.http.get<SubDivision[]>(`${this.apiUrl}/subdivision/`);
+    return this.http.get<SubDivision[]>(`${this.apiUrl}/subdivision/view`);
   }
+  getSubDivisionByDistrictCode(districtCode: number): Observable<SubDivision[]> {
+    return this.http.get<SubDivision[]>(`${this.apiUrl}/subdivision/by-district-code/${districtCode}/`);
+  }
+  
   updateSubDivision(id: number, changes: Partial<SubDivision>): Observable<SubDivision> {
     return this.http.put<SubDivision>(`${this.apiUrl}/subdivision/${id}/`, changes);
+  }
+
+  saveUser(user: Account): Observable<any> {
+    return this.http.post(`${this.apiUrl}/register/`, user);
+  }
+  getUsers(): Observable<any> {
+    return this.http.get<Account[]>(`${this.apiUrl}/register/`);
   }
 
   getAdminDashboard(): Observable<Dashboard> {

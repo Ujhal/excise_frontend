@@ -75,6 +75,9 @@ export class LoginComponent extends BaseComponent {
       case 'site_admin':
         this.router.navigate(['site-admin/dashboard']);
         break;
+      case '2':
+          this.router.navigate(['licensee/dashboard']);
+          break;
   }
 }
 }

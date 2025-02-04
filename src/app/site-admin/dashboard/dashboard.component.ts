@@ -17,21 +17,19 @@ import { RouterModule } from '@angular/router';
 })
 export class DashboardComponent extends BaseComponent implements OnInit {
   siteAdminDashboard!: Dashboard;
-  loaded=false;
 
   constructor(
-    base: BaseDependency,
+    private base: BaseDependency,
     private siteAdminService: SiteAdminService,
   ) {
     super(base);
   }
 
   ngOnInit(): void {
-    console.log('iam called now ')
+    console.log('dashboard component called ')
+    this.siteAdminDashboard = new Dashboard();
     this.siteAdminService.getAdminDashboard().subscribe(res => {
-      console.log('Dashboard Data:', res); // Debugging
       this.siteAdminDashboard = res;
-      this.loaded = true;
     });
   }
 }

@@ -1,0 +1,106 @@
+<div class="container-fluid">
+    <mat-card>
+      <mat-card-header class="page-card-header">
+        <div class="icon-header ml-2"><i class="icofont icofont-dashboard-web float-left"></i></div>
+        <span class="page-title">Add Subdivision</span>
+      </mat-card-header>
+      <mat-card-content class="page-card-content">
+        <form #newSubdivisionForm="ngForm">
+  
+          <div class="row mb-3">
+            <div class="col-xl-4 col-lg-4 col-md-4">
+              <mat-form-field class="my-form-full-width" appearance="outline">
+                <mat-label>Sub-Division Name</mat-label>
+                <input
+                  matInput
+                  [(ngModel)]="subdivision.SubDivisionName"
+                  name="subdivisionName"
+                  #subdivisionName="ngModel"
+                  placeholder="Enter Sub-Division Name"
+                  maxlength="150"
+                  minlength="3"
+                  [pattern]="patternConstants.NAME"
+                  [required]="true"
+                />
+              </mat-form-field>
+              <div class="no-margin" *ngIf="(subdivisionName.dirty || subdivisionName.touched) && subdivisionName.invalid">
+                <mat-error *ngIf="subdivisionName.errors">
+                  <small>This field is required</small>
+                </mat-error>
+                <mat-error *ngIf="subdivisionName.errors">
+                  <small>Minimum length is 3</small>
+                </mat-error>
+                <mat-error *ngIf="subdivisionName.errors">
+                  <small>Maximum length is 150</small>
+                </mat-error>
+                <mat-error *ngIf="subdivisionName.errors">
+                  <small>Invalid format</small>
+                </mat-error>
+              </div>
+            </div>
+            <div class="col-xl-4 col-lg-4 col-md-4">
+              <mat-form-field class="my-form-full-width" appearance="outline">
+                <mat-label>Sub-Division Name in Local Language</mat-label>
+                <input
+                  matInput
+                  placeholder="Enter Sub-Division Name in Local Language"
+                  name="subdivisionNameLocal"
+                  #subdivisionNameLocal="ngModel"
+                  [(ngModel)]="subdivision.SubDivisionNameLL"
+                />
+              </mat-form-field>
+            </div>
+            <div class="col-xl-4 col-lg-4 col-md-4">
+              <mat-form-field class="my-form-full-width" appearance="outline">
+                <mat-label>Sub-Division Code</mat-label>
+                <input
+                  matInput
+                  [pattern]="patternConstants.NUMBER"
+                  placeholder="Enter Sub-Division Code"
+                  name="subdivisionCode"
+                  #subdivisionCode="ngModel"
+                  [(ngModel)]="subdivision.SubDivisionCode"
+                  required
+                />
+              </mat-form-field>
+              <div class="no-margin" *ngIf="(subdivisionCode.dirty || subdivisionCode.touched) && subdivisionCode.invalid">
+                <mat-error *ngIf="subdivisionCode.errors">
+                  <small>This field is required</small>
+                </mat-error>
+                <mat-error *ngIf="subdivisionCode.errors">
+                  <small>Please enter a valid Sub-Division Code (numbers only).</small>
+                </mat-error>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-xl-4 col-lg-4 col-md-4">
+                <mat-form-field class="my-form-full-width" appearance="outline">
+                  <mat-label>District</mat-label>
+                  <mat-select placeholder="Select District" name="district" #district="ngModel" [(ngModel)]="subdivision.DistrictCode" required>
+                    <mat-option>--</mat-option>
+                    <mat-option *ngFor="let dist of districts" [value]="dist.DistrictCode">
+                      {{ dist.District }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <div class="no-margin" *ngIf="(district.dirty || district.touched) && district.invalid">
+                  <mat-error *ngIf="district.errors">
+                    <small>This field is required</small>
+                  </mat-error>
+                </div>
+              </div>
+          </div>
+  
+          <div class="row mb-3">
+            <div class="col-xl-4 col-lg-4 col-md-4">
+              <button mat-raised-button color="primary" (click)="save()" [disabled]="newSubdivisionForm.form.invalid">Save</button>
+              <button mat-raised-button color="warn" (click)="cancel()">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  

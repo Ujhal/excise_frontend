@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -6,11 +6,13 @@ import { BaseComponent } from '../../base/base.components';
 import { BaseDependency } from '../../base/dependency/base.dependendency';
 import { Account } from '../../shared/models/accounts';
 import { MaterialModule } from '../../material.module';
+import { DashboardComponent } from "../dashboard/dashboard.component";
+import { MatSidenavModule } from '@angular/material/sidenav';
 
 @Component({
   selector: 'app-home',
   standalone: true, // Mark as standalone
-  imports: [CommonModule, RouterModule,MaterialModule], // Import necessary modules
+  imports: [CommonModule, RouterModule, MaterialModule, DashboardComponent,MatSidenavModule], // Import necessary modules
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
@@ -27,7 +29,7 @@ export class HomeComponent extends BaseComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log('iam loaded')
+    console.log('home called ')
     this.accountService.getAuthenticationState().subscribe(acc => {
       if (acc !== null) {
         this.user = acc;
@@ -44,12 +46,9 @@ export class HomeComponent extends BaseComponent implements OnInit {
       this.loaded = true;
     });
   }
-
-  snavToggle(): void {
-    this.sidenav.toggle();
+  
+  snavToggle(sidenav: any) {
+    sidenav.toggle();
   }
 
-  onDestroy(): void {
-    if (this.subscription) this.subscription.unsubscribe();
-  }
 }

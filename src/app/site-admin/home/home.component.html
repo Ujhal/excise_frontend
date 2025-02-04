@@ -1,7 +1,7 @@
 <mat-sidenav-container class="mat-elevation-z8" style="padding: 0; min-height: 800px" *ngIf="loaded">
     <mat-sidenav #sidenav mode="side" [opened]="true">
       <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-        <button class="mr-auto" class="sidenav-inner-btn" mat-icon-button (click)="snavToggle()" color="primary">
+        <button class="mr-auto" class="sidenav-inner-btn" mat-icon-button (click)="snavToggle(sidenav)" color="primary">
           <fa-icon icon="arrow-left" color="primary"></fa-icon>
         </button>
       </div>
@@ -77,7 +77,7 @@
     </mat-sidenav>
     <mat-sidenav-content>
         <div class="col-xl-12 col-lg-12 col-md-12">
-          <button mat-icon-button (click)="snavToggle()" *ngIf="!this.sidenav.opened" color="primary">
+          <button mat-icon-button (click)="snavToggle(sidenav)" color="primary">
             <fa-icon icon="bars" color="primary"></fa-icon>
           </button>
         </div>
