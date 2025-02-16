@@ -75,7 +75,7 @@ img{
         align-items: center;
         text-align: center;
         border: 1px solid #DCDCDC;
-        padding: 15px;
+        padding: 19px;
     }
 
 
@@ -125,7 +125,7 @@ img{
         padding-left: 0;
         padding-bottom: 0;
         padding-right:0;
-        gap: 25px;
+        gap: 22px;
     }
     .link-container, .heading, .button-container{
         padding-left: 10px;
@@ -142,9 +142,6 @@ img{
         .date{
             font-size: 10px;              
         }
-    }
-    .button-container{
-        padding-bottom: 10px;
     }
 
 }
@@ -201,11 +198,12 @@ img{
     }  
 
     .address-container{
+        display: flex;
+        flex-direction: column;
         padding: 5px;
+        gap: 10px;
 
         .address-title{
-            padding: 5px;
-            
             .title1{
                 font-size: medium;
                 font-weight: 400;
@@ -213,7 +211,6 @@ img{
         }
 
         .address{
-            padding: 5px;
             font-size: small;
         }
     
