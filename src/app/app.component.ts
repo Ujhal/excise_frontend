@@ -4,10 +4,11 @@ import { FooterComponent } from './layouts/footer/footer.component';
 import { MainComponent } from './layouts/main/main.component';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { fontAwesomeIcons } from './config/font-awesome-icons';
+import { CarouselComponent } from "./layouts/carousel/carousel.component";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet,NavbarComponent,FooterComponent,MainComponent,FontAwesomeModule],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent, MainComponent, FontAwesomeModule, CarouselComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
