@@ -1,0 +1,116 @@
+<div class="container-fluid">
+    <mat-card>
+      <mat-card-header class="page-card-header">
+        <div class="icon-header ml-2">
+          <i class="icofont icofont-dashboard-web float-left"></i>
+        </div>
+        
+      </mat-card-header>
+      <mat-card-content class="page-card-content">
+        <form #newUserForm="ngForm" (ngSubmit)="submit()">
+          <div class="row mb-3">
+            <!-- First Name -->
+            <div class="col-xl-4 col-lg-4 col-md-4">
+              <mat-form-field class="my-form-full-width" appearance="outline">
+                <mat-label>First Name</mat-label>
+                <input matInput [(ngModel)]="user.first_name" name="firstName" placeholder="Enter First Name" required />
+              </mat-form-field>
+            </div>
+  
+            <!-- Middle Name -->
+            <div class="col-xl-4 col-lg-4 col-md-4">
+              <mat-form-field class="my-form-full-width" appearance="outline">
+                <mat-label>Middle Name</mat-label>
+                <input matInput [(ngModel)]="user.middle_name" name="middleName" placeholder="Enter Middle Name" />
+              </mat-form-field>
+            </div>
+  
+            <!-- Last Name -->
+            <div class="col-xl-4 col-lg-4 col-md-4">
+              <mat-form-field class="my-form-full-width" appearance="outline">
+                <mat-label>Last Name</mat-label>
+                <input matInput [(ngModel)]="user.last_name" name="lastName" placeholder="Enter Last Name" required />
+              </mat-form-field>
+            </div>
+          </div>
+  
+          <div class="row mb-3">
+            <!-- Email -->
+            <div class="col-xl-4 col-lg-4 col-md-4">
+              <mat-form-field class="my-form-full-width" appearance="outline">
+                <mat-label>Email</mat-label>
+                <input matInput [(ngModel)]="user.email" name="email" placeholder="Enter Email" type="email" required />
+              </mat-form-field>
+            </div>
+  
+            <!-- Phone Number -->
+            <div class="col-xl-4 col-lg-4 col-md-4">
+              <mat-form-field class="my-form-full-width" appearance="outline">
+                <mat-label>Phone Number</mat-label>
+                <input matInput [(ngModel)]="user.phonenumber" name="phonenumber" placeholder="Enter Phone Number" required pattern="^\d{10}$" />
+              </mat-form-field>
+            </div>
+  
+            <!-- District -->
+            <div class="col-xl-4 col-lg-4 col-md-4">
+              <mat-form-field class="my-form-full-width" appearance="outline">
+                <mat-label>District</mat-label>
+                <mat-select matInput placeholder="Enter District" [(ngModel)]="user.district"
+                  name="district" required>
+                  <mat-option 
+                    (onSelectionChange)="onDistrictChange(district.DistrictCode)" 
+                    *ngFor="let district of districts" 
+                    [value]="district.DistrictCode">
+                    {{district.DistrictNameLL}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="col-xl-4 col-lg-4 col-md-4">
+                <mat-form-field class="my-form-full-width" appearance="outline">
+                  <mat-label>Subdivision</mat-label>
+                  <mat-select matInput placeholder="Enter Subdivision" [(ngModel)]="user.subDivision"
+                    name="subdivision" required>
+                    <mat-option 
+                      *ngFor="let subDivision of subdivisons" 
+                      [value]="subDivision.SubDivisionCode">
+                      {{subDivision.SubDivisionName}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+          </div>
+
+          
+  
+          <div class="row mb-3">
+            <!-- Password -->
+            <div class="col-xl-4 col-lg-4 col-md-4">
+              <mat-form-field class="my-form-full-width" appearance="outline">
+                <mat-label>Password</mat-label>
+                <input matInput type="password" [(ngModel)]="user.password" name="password" placeholder="Enter Password" required minlength="8" />
+              </mat-form-field>
+            </div>
+  
+            <!-- Confirm Password -->
+            <div class="col-xl-4 col-lg-4 col-md-4">
+              <mat-form-field class="my-form-full-width" appearance="outline">
+                <mat-label>Confirm Password</mat-label>
+                <input matInput type="password" [(ngModel)]="user.confirm_password" name="confirmPassword" placeholder="Confirm Password" required />
+              </mat-form-field>
+            </div>
+          </div>
+  
+          <!-- Submit Button -->
+          <div class="row mb-3">
+            <div class="col-xl-4 col-lg-4 col-md-4">
+              <button mat-raised-button color="primary" type="submit" [disabled]="newUserForm.invalid">Submit</button>
+              <button mat-raised-button color="warn" type="button" (click)="cancel()">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  

@@ -6,6 +6,7 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@a
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { CsrfInterceptor } from './services/csrfInterceptor';
 import { provideToastr, ToastrModule } from 'ngx-toastr';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,7 +16,8 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     provideRouter(routes),
     { provide: HTTP_INTERCEPTORS, useClass: CsrfInterceptor, multi: true },
-    provideToastr()
+    provideToastr(),
+    provideAnimations()
   
   ]
 };

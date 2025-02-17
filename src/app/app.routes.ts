@@ -19,8 +19,13 @@ export const routes: Routes = [
       authorities: [Authority.SITE_ADMIN],
     },
     canActivate: [UserRouteAccessService],
-    loadChildren: () => import('./site-admin/site-admin-routes').then(m => m.SiteAdminRoutesModule),
-},
+    loadChildren: () => import('./site-admin/site-admin-routes'),
+  },
+
+  {
+    path: 'licensee',
+    loadChildren: () => import('./licensee/licensee.routes').then((m) => m.licenseeRoutes),
+  },
 ];
 
 export default routes;

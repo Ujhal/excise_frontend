@@ -1,0 +1,120 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,900');
+*{
+    font-family: 'Poppins', sans-serif;
+}
+
+footer{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: #000000;
+}
+
+.footer1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+}
+
+.content-container {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    gap: 230px;
+
+    color: #ffffff;
+}
+
+.site-info{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 22px;
+}
+
+.dept-info{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.seal{
+    /* Auto layout */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    background: #FFFFFF;
+    border-radius: 6px;
+
+    img{
+        /* Seal_of_Sikkim_greyscale 2 */
+        width: 40px;
+        height: 40px;
+    }
+}
+
+.dept-name{
+    display: flex;
+    flex-direction: column;
+
+    font-weight: 300;
+    line-height: 1.4;
+    font-size: 12px;
+}
+
+.copyright{
+    display: flex;
+    flex-direction: column;
+
+    font-weight: 300;
+    line-height: 1.4;
+    font-size: 10px;
+
+    color: #bac0c4;
+}
+
+.links-container{
+    display: grid;
+    grid-template-columns: auto auto auto;
+    column-gap: 40px;
+
+    font-size: 11px;
+}
+
+.column{
+    /* Auto layout */
+    display: grid;
+    grid-template-rows: auto auto auto;
+    align-items: flex-start;
+    gap: 13px;
+}
+
+.link a {
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Use the parent element's color */
+}
+
+
+
+.footer2 {
+    /* Auto layout */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    border-top: 0.3px solid rgb(79, 79, 79);
+
+    align-self: stretch;
+}
+
+.logo-container img {
+    max-width: 110px; /* Adjust this to control size */
+    object-fit: contain;
+    padding: 4px 0px;
+}
+

@@ -1,0 +1,84 @@
+<div class="container-fluid">
+    <mat-card class="mat-card">
+      <mat-card-header class="page-card-header">
+        <div class="icon-header ml-2">
+          <i class="icofont icofont-dashboard-web float-left"></i>
+        </div>
+        <span class="page-title">User List</span>
+      </mat-card-header>
+      <mat-card-content class="page-card-content">
+        <div class="row mb-3" *ngIf="users?.data?.length! > 0">
+          <div class="col-xl-4 col-lg-4 col-md-4 mt-2">
+            <mat-form-field class="my-form-full-width" appearance="outline">
+              <mat-label>Type here to Search</mat-label>
+              <input
+                matInput
+                class="my-form-full-width"
+                placeholder="Type here to Search"
+                (keyup)="applyFilter($any($event.target).value)"
+              />
+              <!-- -->
+            </mat-form-field>
+          </div>
+        </div>
+        
+          <table mat-table [dataSource]="users" >
+    
+            <!-- Username Column -->
+            <ng-container matColumnDef="srno">
+              <th mat-header-cell *matHeaderCellDef> Sr. No. </th>
+              <td mat-cell *matCellDef="let user; let i=index"> {{i+1}} </td>
+            </ng-container>
+            <ng-container matColumnDef="firstName">
+              <th mat-header-cell *matHeaderCellDef> First Name </th>
+              <td mat-cell *matCellDef="let user"> {{user.first_name}} </td>
+            </ng-container>
+            <ng-container matColumnDef="lastName">
+              <th mat-header-cell *matHeaderCellDef> Last Name </th>
+              <td mat-cell *matCellDef="let user"> {{user.last_name}} </td>
+            </ng-container>
+            <ng-container matColumnDef="username">
+              <th mat-header-cell *matHeaderCellDef> Username </th>
+              <td mat-cell *matCellDef="let user"> {{user.username}} </td>
+            </ng-container>
+    
+            <!-- Designation Column -->
+            <ng-container matColumnDef="contactNumber">
+              <th mat-header-cell *matHeaderCellDef> Phone Number </th>
+              <td mat-cell *matCellDef="let user"> {{user.phonenumber}} </td>
+            </ng-container>
+            <!-- Designation Column -->
+            <ng-container matColumnDef="emailId">
+              <th mat-header-cell *matHeaderCellDef> Email </th>
+              <td mat-cell *matCellDef="let user"> {{user.email}} </td>
+            </ng-container>
+            <!-- Designation Column -->
+            <ng-container matColumnDef="role">
+              <th mat-header-cell *matHeaderCellDef> Role </th>
+              <td mat-cell *matCellDef="let user"> {{ getRoleName(user.role) }} </td>
+            </ng-container>
+  
+            <ng-container matColumnDef="created_by">
+              <th mat-header-cell *matHeaderCellDef> Created By </th>
+              <td mat-cell *matCellDef="let user"> {{ user.created_by }} </td>
+            </ng-container>
+    
+            <!-- Show Button Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef> Actions </th>
+              <td mat-cell *matCellDef="let user">
+                <button mat-icon-button  class="mr-1" (click)="showDetails(user)" matTooltip="View">
+                  <mat-icon color="primary">preview</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+    
+            <!-- Table Header and Row Definitions -->
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    
+          </table>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    
