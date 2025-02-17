@@ -7,7 +7,7 @@ import { fontAwesomeIcons } from './config/font-awesome-icons';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet,NavbarComponent,FooterComponent,MainComponent,FontAwesomeModule],
+  imports: [RouterOutlet,NavbarComponent,FooterComponent,FontAwesomeModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

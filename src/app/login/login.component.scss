@@ -1,0 +1,286 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* Background Container */
+.background-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('../../content/images/mainbg.png') no-repeat center / cover;
+  z-index: -1;
+}
+
+/* Main Container */
+.main-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 20px;
+  min-height: 100vh; /* Ensures content is vertically centered */
+}
+
+/* Login Container */
+.login-container {
+  width: 100%;
+  max-width: 1200px; /* Limits the width on larger screens */
+  background: url('../../content/images//bck.jpg') no-repeat center center / cover;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Header Logos */
+.header-logos {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 50px;
+  width: 50px;
+  background: url('../../../src/content/images/sikkimlogoexc.png') no-repeat center / contain;
+}
+
+.navbar-title {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: black;
+}
+
+.navbar-version {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.eabkari-logo-container {
+  text-align: center;
+}
+
+.eabkari-logo {
+  width: 80px;
+  height: auto;
+}
+
+.eabkari-text {
+  font-size: 0.8rem;
+  color: #333;
+}
+
+/* Login Mode Toggle */
+.login-toggle {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 15px;
+}
+
+.login-toggle button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: #ddd;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.login-toggle button.active {
+  background: #2b93ff;
+  color: white;
+  font-weight: bold;
+}
+
+/* Login Form */
+.login-form {
+  width: 100%;
+  max-width: 300px; /* Prevents full-width stretching */
+}
+
+input[type="text"],
+input[type="password"],
+input[type="tel"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #3c4145;
+  border-radius: 5px;
+  background: #fff;
+  color: #333;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.lf--submit {
+  width: 100%;
+  padding: 12px;
+  background: #2b93ff;
+  color: white;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.lf--submit:hover {
+  background: #67c3ff;
+}
+
+/* Captcha */
+.captcha-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.captcha-image {
+  height: 40px;
+  border-radius: 5px;
+}
+
+.refresh-captcha {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.refresh-captcha:hover {
+  opacity: 0.8;
+}
+
+/* Bottom Section */
+.bottom-section {
+  width: 100%;
+  justify-content: baseline;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-top: 20px;
+}
+
+.help-desk {
+  text-align: left;
+}
+
+.help-desk h3 {
+  font-size: 1rem;
+  color: #2b93ff;
+}
+
+.home-button img {
+  width: 40px;
+  height: auto;
+  cursor: pointer;
+}
+
+/* Forgot Password */
+.lf--forgot {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #0099cc;
+  text-align: center;
+  cursor: pointer;
+  display: block;
+}
+
+.lf--forgot:hover {
+  text-decoration: underline;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #333;
+  margin-top: 20px;
+}
+
+.legal-disclaimer {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ✅ Responsive Design Fixes */
+
+/* Tablets */
+@media (max-width: 768px) {
+  .login-container {
+    width: 80%;
+    max-width: 400px;
+    padding: 15px;
+  }
+
+  .header-logos {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .bottom-section {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .login-form {
+    max-width: 250px;
+  }
+}
+
+/* Mobile Devices */
+@media (max-width: 480px) {
+  .login-container {
+    width: 90%;
+    max-width: 320px;
+    padding: 15px;
+  }
+
+  .logo-img {
+    height: 40px;
+    width: 40px;
+  }
+
+  .navbar-title {
+    font-size: 1rem;
+  }
+
+  .lf--submit {
+    font-size: 0.9rem;
+  }
+
+  .lf--forgot {
+    font-size: 0.8rem;
+  }
+
+  .login-form {
+    max-width: 100%;
+  }
+}
