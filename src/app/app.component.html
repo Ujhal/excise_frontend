@@ -1,11 +1,13 @@
 <div class="content-wrapper" >
-    <app-navbar ></app-navbar>
+    <app-navbar *ngIf="showHeaderFooter"></app-navbar>
 
-    <app-carousel></app-carousel>
+    <app-carousel *ngIf="showHeaderFooter"></app-carousel>
     
     <div class="main-content" style="min-height: 80dvh;">
       <router-outlet></router-outlet>
     </div>
     
-    <app-footer></app-footer>
+    <app-footer *ngIf="showHeaderFooter"></app-footer>
   </div>
+
+  <!--*ngIf="!isLoginPage"-->
