@@ -173,14 +173,20 @@
   
       <section class="card eservices">
         <div class="header">E-Services</div>
-        <div class="services-container">
-          <a class="service" href="https://www.example.com/" target="_blank">
-            <img id = "eabkari" src="assets/images/main/e-services/eabkari.png" alt="Service Icon">
-          </a>
-          <a class="service" href="https://www.example.com/" target="_blank">
-            <img src="assets/images/main/e-services/apply.png" width = "100px" height = "100px" alt="Service Icon">
-            <span class="service-name">Apply for New <br>Excise License</span>
-          </a>
+<div class="services-container">
+  <!-- Login button -->
+  <a class="service" (click)="login()">
+    <img id="eabkari" src="assets/images/main/e-services/eabkari.png" alt="Service Icon">
+    Login
+  </a>
+  
+  <!-- Another service link -->
+  <a class="service" href="https://www.example.com/" target="_blank">
+    <img src="assets/images/main/e-services/apply.png" width="100px" height="100px" alt="Service Icon">
+    <span class="service-name">Apply for New <br>Excise License</span>
+  </a>
+
+
           <a class="service" href="https://www.example.com/" target="_blank">
             <img src="assets/images/main/e-services/print.png" alt="Service Icon">
             <span class="service-name">PRINT LICENSE <br>(New License)</span>

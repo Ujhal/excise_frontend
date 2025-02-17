@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-
+import { Router } from '@angular/router'; // Import the Router from Angular
 
 @Component({
   selector: 'app-main',
-  imports: [MatButtonModule],
   templateUrl: './main.component.html',
-  styleUrl: './main.component.scss'
+  styleUrls: ['./main.component.scss'] // Corrected styleUrls
 })
 export class MainComponent {
+  constructor(private router: Router) {} // Inject Router into the constructor
 
+  login(): void {
+    this.router.navigate(['/login']); // Navigate to the login route
+  }
 }
