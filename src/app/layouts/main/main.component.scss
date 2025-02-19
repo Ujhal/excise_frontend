@@ -5,10 +5,8 @@
     font-family: 'Poppins', sans-serif;
     background-color: #EDF7FE;
     display: flex;      
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    padding: 20px;
+    justify-content: center;    
+    padding: 20px
 }
 
 .main-content-container {
@@ -22,12 +20,12 @@
 
 .card {
     gap: 6px;
-    overflow: hidden;
+    border: 0;
+    background-color: 0;
 }
 
 .header {
     background-color: #ef9562;
-        
     padding: 15px;
     color: #000000;
     font-weight: 600;
