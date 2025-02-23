@@ -26,6 +26,11 @@ export class LoginComponent extends BaseComponent {
     });
   }
 
+  toggleMode(isPassword: boolean): void {
+    this.isPasswordMode = isPassword;
+    this.loginForm.reset(); // Reset form when switching modes
+  }
+
   onLogin(): void {
     if (this.loginForm.invalid) {
       alert("Please fill in all fields correctly.");
@@ -51,7 +56,7 @@ export class LoginComponent extends BaseComponent {
               if (user) {
                 console.log(user, 'user2');
                 console.log('LOGIN SUCCESS');
-                this.toastrService.success('Login Successful');
+                this.router.navigate(['/']); 
                 this.redirectBasedOnRole(user.role); // Redirect to role-based dashboard
               } else {
                 console.error('User identity is null');
@@ -84,4 +89,10 @@ export class LoginComponent extends BaseComponent {
         break;
     }
   }
+
+  goToHome(): void {
+    this.router.navigate(['/']); // Implemented goToHome method
+  }
+
+
 }

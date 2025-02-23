@@ -1,88 +1,70 @@
-<!-- Background Container -->
-<div class="background-container"></div>
+<div class="container-fluid">
+  <div class="d-flex justify-content-center">
+    <div class="col-xl-6 col-lg-8 col-md-10 col-sm-12">
+      <mat-card>
+        <mat-card-header class="page-card-header">
+          <div class="icon-header ml-2"><i class="icofont icofont-ssl-security float-left"></i></div>
+          <span class="page-title">Login</span>
+        </mat-card-header>
+        <mat-card-content class="page-card-content">
+          <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+            
+            <!-- Login Mode Toggle -->
+            <div class="login-toggle">
+              <button mat-button [class.active]="isPasswordMode" (click)="toggleMode(true)">
+                Password-based
+              </button>
+              <button mat-button [class.active]="!isPasswordMode" (click)="toggleMode(false)">
+                OTP-based
+              </button>
+            </div>
 
-<!-- Main Container -->
-<div class="main-container">
-  <div class="login-container">
-    
-    <!-- Header Logos -->
-    <div class="header-logos">
-      <div class="header-logo">
-        <span class="logo-img"></span>
-        <div class="header-text">
-          <span class="navbar-title">EXCISE DEPARTMENT</span><br>
-          <span class="navbar-version">Government of Sikkim</span>
-        </div>
-      </div>
-      <div class="eabkari-logo-container">
-        <img src="assets/images/login/eakbari_logo.jpg" alt="Eabkari Logo" class="eabkari-logo">
-        <div class="eabkari-text">A Digital Workspace Solution</div>
-      </div>
+            <ng-container *ngIf="isPasswordMode">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Username</mat-label>
+                <input matInput formControlName="username" placeholder="Enter your Username" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Password</mat-label>
+                <input matInput type="password" formControlName="password" placeholder="Enter your password" />
+              </mat-form-field>
+
+              <!-- Captcha Section -->
+              <app-captcha [formGroup]="loginForm"></app-captcha>
+            </ng-container>
+
+            <ng-container *ngIf="!isPasswordMode">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Phone Number</mat-label>
+                <input matInput formControlName="username" placeholder="Enter your Phone Number" type="tel" />
+              </mat-form-field>
+            </ng-container>
+
+            <div class="row mt-3">
+              <div class="col-lg-3">
+                <button mat-raised-button color="primary" type="submit" class="sign-in-btn" [disabled]="loginForm.invalid">
+                  LOGIN
+                </button>
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+
+        <!-- Bottom Section (Help Desk & Home Button) -->
+        <mat-card-footer>
+          <a class="lf--forgot" href="#">Forgot password?</a>
+
+          <div class="help-desk">
+            <h3>HELP DESK</h3>
+            <p>Phone: 03592-203963</p>
+            <p>Email: <a href="mailto:helpdesk.excise&#64;sikkim.gov.in">helpdesk.excise&#64;sikkim.gov.in</a></p>
+          </div>
+          <div class="home-button">
+            <img src="assets/images/login/bck_home.png" alt="Home" (click)="goToHome()">
+          </div>
+        </mat-card-footer>
+      </mat-card>
     </div>
-
-    <!-- Login Mode Toggle -->
-    <div class="login-toggle">
-      <button type="button" [class.active]="isPasswordMode" (click)="toggleMode(true)">
-        Password-based
-      </button>
-      <button type="button" [class.active]="!isPasswordMode" (click)="toggleMode(false)">
-        OTP-based
-      </button>
-    </div>
-
-    <!-- Login Form -->
-    <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="login-form">
-      
-      <div *ngIf="isPasswordMode">
-        <div class="flex-row">
-          <input id="username" class="lf--input" placeholder="Username" formControlName="username" type="text">
-        </div>
-
-        <div class="flex-row">
-          <input id="password" class="lf--input" placeholder="Password" formControlName="password" type="password">
-        </div>
-
-        <div class="captcha-container">
-          <img [src]="captchaImageUrl" alt="Captcha" class="captcha-image">
-          <img src="assets/images/login/RELOAD.png" alt="Refresh" class="refresh-captcha" (click)="reloadCaptcha()">
-        </div>
-        <input type="text" formControlName="captcha" placeholder="Enter Captcha">
-      </div>
-
-      <div *ngIf="!isPasswordMode">
-        <div class="flex-row">
-          <input id="phone-number" class="lf--input" placeholder="Phone Number" formControlName="username" type="tel">
-        </div>
-      </div>
-
-      <button 
-        class="lf--submit" 
-        type="submit" 
-        [disabled]="loginForm.invalid || isLoading"
-      >
-        LOGIN
-      </button>
-      
-    </form>
-
-    <!-- Bottom Section (Help Desk & Home Button) -->
-    <div class="bottom-section">
-      <a class="lf--forgot" href="#">Forgot password?</a>
-
-      <div class="help-desk">
-        <h3>HELP DESK</h3>
-        <p>Phone: 03592-203963</p>
-        <p>Email: <a href="mailto:helpdesk.excise&#64;sikkim.gov.in">helpdesk.excise&#64;sikkim.gov.in</a></p>
-      </div>
-      <div class="home-button">
-        <img src="assets/images/login/bck_home.png" alt="Home" (click)="goToHome()">
-      </div>
-    </div>
-
   </div>
-</div>
-
-<div class="footer">
-  <p>Site Designed, Hosted, and Maintained by <strong>National Informatics Centre</strong></p>
-  <p>Best viewed with <strong>Internet Explorer 10.0 / 11.0 or later</strong>. <span class="legal-disclaimer">Legal Disclaimer</span></p>
 </div>
