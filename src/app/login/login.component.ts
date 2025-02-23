@@ -1,113 +1,87 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { ApiService } from '../services/api.service';
-import { environment } from '../../environments/environment';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { Component } from '@angular/core';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { MaterialModule } from '../material.module';
-import { CommonModule } from '@angular/common';
+import { CaptchaComponent } from '../shared/components/captcha/captcha.component';
+import { BaseComponent } from '../base/base.components';
+import { BaseDependency } from '../base/dependency/base.dependendency';
 
 @Component({
   selector: 'app-login',
-  standalone: true,
-  imports: [MaterialModule, CommonModule],
+  imports: [MaterialModule, ReactiveFormsModule, FormsModule, CaptchaComponent],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrl: './login.component.scss'
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent extends BaseComponent {
   loginForm: FormGroup;
-  captchaImageUrl: SafeUrl = '';
-  captchaKey: string = '';
-  isPasswordMode: boolean = true; // Toggle between Password & OTP login
-  isLoading: boolean = false; // Shows loading state when submitting
-  errorMessage: string = ''; // Stores API error messages
+  isPasswordMode: boolean = true;
 
-  constructor(
-    private fb: FormBuilder,
-    private apiService: ApiService,
-    private sanitizer: DomSanitizer,
-    private router: Router // Added Router for navigation
-  ) {
+  constructor(protected baseDependancy: BaseDependency, private fb: FormBuilder) {
+    super(baseDependancy);
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
-      password: ['', Validators.required], // Ensure password is required in password mode
-      captcha: ['', Validators.required]
+      username: ['', Validators.required],
+      password: ['', Validators.required],
+      response: ['', Validators.required], // Captcha response
+      hashkey: ['', Validators.required], // Captcha hashkey
     });
-  }
-
-  ngOnInit(): void {
-    this.loadCaptcha();
-  }
-
-  loadCaptcha(): void {
-    this.apiService.getCaptcha().subscribe(
-      (response) => {
-        this.captchaKey = response.key;
-        const newUrl = `${environment.baseUrl}${response.image_url}?t=${new Date().getTime()}`;
-        this.captchaImageUrl = this.sanitizer.bypassSecurityTrustUrl(newUrl);
-      },
-      (error) => {
-        console.error('Error loading CAPTCHA:', error);
-      }
-    );
-  }
-
-  reloadCaptcha(): void {
-    this.loadCaptcha();
-  }
-
-  toggleMode(mode: string): void {
-    this.isPasswordMode = mode === 'password';
-    this.loginForm.reset(); // Reset form values when switching modes
-
-    // Remove password validation for OTP mode
-    if (!this.isPasswordMode) {
-      this.loginForm.get('password')?.clearValidators();
-      this.loginForm.get('password')?.updateValueAndValidity();
-    } else {
-      this.loginForm.get('password')?.setValidators(Validators.required);
-      this.loginForm.get('password')?.updateValueAndValidity();
-    }
   }
 
   onLogin(): void {
     if (this.loginForm.invalid) {
-      this.errorMessage = "Please fill out all required fields correctly.";
+      alert("Please fill in all fields correctly.");
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    const loginData = {
-      username: this.loginForm.value.username,
-      password: this.isPasswordMode ? this.loginForm.value.password : null,
-      captcha: this.loginForm.value.captcha,
-      captcha_key: this.captchaKey
-    };
-
-    this.apiService.login(loginData).subscribe(
-      (response) => {
-        console.log("Login successful:", response);
-        this.isLoading = false;
-        this.router.navigate(['/site-admin']); // Navigate to dashboard after successful login
+    // Post request to backend routes
+    this.apiService.login(this.loginForm.value).subscribe({
+      next: (res: any) => {
+        const authenticatedUser = res.authenticated_user;
+        
+        if (authenticatedUser && authenticatedUser.access && authenticatedUser.refresh) {
+          console.log(authenticatedUser, 'user');
+          const access = authenticatedUser.access;
+          const refresh = authenticatedUser.refresh;
+  
+          localStorage.setItem('access', access);
+          localStorage.setItem('refresh', refresh);
+  
+          // Fetch user identity after login
+          this.accountService.identity(true).subscribe({
+            next: (user) => {
+              if (user) {
+                console.log(user, 'user2');
+                console.log('LOGIN SUCCESS');
+                this.toastrService.success('Login Successful');
+                this.redirectBasedOnRole(user.role); // Redirect to role-based dashboard
+              } else {
+                console.error('User identity is null');
+                alert('Failed to fetch user details. Please log in again.');
+              }
+            },
+            error: (error) => {
+              console.error('Error fetching identity:', error);
+              alert("An error occurred while fetching user details. Please try again.");
+            },
+          });
+        } else {
+          alert("Check Username or Password");
+        }
       },
-      (error) => {
-        console.error("Login failed:", error);
-        this.errorMessage = "Invalid credentials or CAPTCHA. Please try again.";
-        this.isLoading = false;
-        this.reloadCaptcha();
-      }
-    );
+      error: (error) => {
+        console.error('Error:', error);
+        alert("An error occurred. Please try again.");
+      },
+    });
   }
-
-  // ✅ Added method for Home Button navigation
-  goToHome(): void {
-    this.router.navigate(['/']);
-  }
-
-  // ✅ Disable login button while loading
-  isFormDisabled(): boolean {
-    return this.isLoading || this.loginForm.invalid;
+  
+  private redirectBasedOnRole(role: string): void {
+    switch (role) {
+      case 'site_admin':
+        this.router.navigate(['site-admin/dashboard']);
+        break;
+      case '2':
+        this.router.navigate(['licensee/dashboard']);
+        break;
+    }
   }
 }

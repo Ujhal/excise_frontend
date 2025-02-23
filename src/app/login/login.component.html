@@ -22,10 +22,10 @@
 
     <!-- Login Mode Toggle -->
     <div class="login-toggle">
-      <button type="button" [class.active]="isPasswordMode" (click)="toggleMode('password')">
+      <button type="button" [class.active]="isPasswordMode" (click)="toggleMode(true)">
         Password-based
       </button>
-      <button type="button" [class.active]="!isPasswordMode" (click)="toggleMode('otp')">
+      <button type="button" [class.active]="!isPasswordMode" (click)="toggleMode(false)">
         OTP-based
       </button>
     </div>
@@ -54,8 +54,14 @@
           <input id="phone-number" class="lf--input" placeholder="Phone Number" formControlName="username" type="tel">
         </div>
       </div>
-      <button class="lf--submit" type="submit" [disabled]="loginForm.invalid || isLoading">LOGIN</button>
 
+      <button 
+        class="lf--submit" 
+        type="submit" 
+        [disabled]="loginForm.invalid || isLoading"
+      >
+        LOGIN
+      </button>
       
     </form>
 
@@ -73,7 +79,6 @@
       </div>
     </div>
 
-    
   </div>
 </div>
 
@@ -81,4 +86,3 @@
   <p>Site Designed, Hosted, and Maintained by <strong>National Informatics Centre</strong></p>
   <p>Best viewed with <strong>Internet Explorer 10.0 / 11.0 or later</strong>. <span class="legal-disclaimer">Legal Disclaimer</span></p>
 </div>
-

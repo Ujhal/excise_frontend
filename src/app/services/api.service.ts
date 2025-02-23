@@ -17,7 +17,7 @@ export class ApiService {
   getCaptcha(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/get_captcha/`).pipe(
       catchError((error) => {
-        console.error(' Error fetching CAPTCHA:', error);
+        console.error('Error fetching CAPTCHA:', error);
         return throwError(() => error);
       })
     );
@@ -25,11 +25,10 @@ export class ApiService {
 
   // Login API
   login(data: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login/`, data, {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-    }).pipe(
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post<any>(`${this.apiUrl}/login/`, data, { headers }).pipe(
       catchError((error) => {
-        console.error(' Login failed:', error);
+        console.error('Login failed:', error);
         return throwError(() => error);
       })
     );
@@ -39,7 +38,7 @@ export class ApiService {
   logout(): Observable<any> {
     return this.http.post(`${this.apiUrl}/logout/`, {}).pipe(
       catchError((error) => {
-        console.error(' Logout failed:', error);
+        console.error('Logout failed:', error);
         return throwError(() => error);
       })
     );
@@ -54,7 +53,8 @@ export class ApiService {
       return throwError(() => new Error('Refresh token missing'));
     }
 
-    return this.http.post(`${this.apiUrl}/token/refresh/`, { refresh: refreshToken }).pipe(
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post(`${this.apiUrl}/token/refresh/`, { refresh: refreshToken }, { headers }).pipe(
       catchError((error) => {
         console.error('Token refresh failed:', error);
         return throwError(() => error);
@@ -66,7 +66,7 @@ export class ApiService {
   getChart(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/count/`).pipe(
       catchError((error) => {
-        console.error(' Error fetching chart data:', error);
+        console.error('Error fetching chart data:', error);
         return throwError(() => error);
       })
     );

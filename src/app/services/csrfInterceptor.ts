@@ -16,19 +16,20 @@ export class CsrfInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     if (isPlatformBrowser(this.platformId)) {
-      const token = localStorage.getItem('access');
-      
+      let token = localStorage.getItem('access');
+
       if (token) {
-        const cloned = this.addToken(req, token);
-        return next.handle(cloned).pipe(
-          catchError(error => {
-            if (error instanceof HttpErrorResponse && error.status === 401) {
-              return this.handle401Error(req, next);
-            }
-            return throwError(() => error);
-          })
-        );
+        req = this.addToken(req, token);
       }
+
+      return next.handle(req).pipe(
+        catchError(error => {
+          if (error instanceof HttpErrorResponse && error.status === 401) {
+            return this.handle401Error(req, next);
+          }
+          return throwError(() => error);
+        })
+      );
     }
     return next.handle(req);
   }
@@ -46,20 +47,34 @@ export class CsrfInterceptor implements HttpInterceptor {
       this.isRefreshing = true;
       this.refreshTokenSubject.next(null);
 
+      const refreshToken = localStorage.getItem('refresh');
+      if (!refreshToken) {
+        console.error('No refresh token found, logging out.');
+        this.logoutAndRedirect();
+        return throwError(() => new Error('No refresh token available'));
+      }
+
       return this.apiService.refreshToken().pipe(
         switchMap((token: any) => {
           this.isRefreshing = false;
           const newAccessToken = token.access;
-          const newRefreshToken = token.refresh;
+
+          if (!newAccessToken) {
+            console.error('No new access token received, logging out.');
+            this.logoutAndRedirect();
+            return throwError(() => new Error('No new access token received'));
+          }
+
+          // Store new access token (but keep the existing refresh token)
           localStorage.setItem('access', newAccessToken);
-          localStorage.setItem('refresh', newRefreshToken);
           this.refreshTokenSubject.next(newAccessToken);
 
           return next.handle(this.addToken(req, newAccessToken));
         }),
         catchError((err) => {
           this.isRefreshing = false;
-          this.apiService.logout(); // Clear tokens and redirect to login
+          console.error("Refresh token expired or invalid. Logging out.");
+          this.logoutAndRedirect();
           return throwError(() => err);
         })
       );
@@ -73,4 +88,10 @@ export class CsrfInterceptor implements HttpInterceptor {
       );
     }
   }
-};
+
+  private logoutAndRedirect() {
+    localStorage.removeItem('access');
+    localStorage.removeItem('refresh');
+    this.apiService.logout(); // Call logout API if necessary
+  }
+}
