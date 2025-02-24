@@ -5,52 +5,46 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Poppins', sans-serif;
+.custom-container {
+  max-width: 90vw; /* 90% of the viewport width */
+  width: 100%;
+}
+
+/* Centering Container */
+.container-fluid {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  background: url('../../content/images/mainbg.png') no-repeat center / cover;
   justify-content: center;
+  width: 100%;
+  padding: 20px;
   min-height: 100vh;
 }
 
-/* Background Container */
-.background-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url('../../content/images/mainbg.png') no-repeat center / cover;
-  z-index: -1;
-}
-
-/* Main Container */
-.main-container {
+mat-card {
   display: flex;
   align-items: center;
   justify-content: center;
+  
   width: 100%;
+  max-width: 70%; /* Keep size consistent */
   padding: 20px;
-  min-height: 100vh; /* Ensures content is vertically centered */
+  max-height: 100vh; /* Ensures vertical centering */
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  background: url('../../content/images/bck.jpg') no-repeat center / cover;
 }
 
-/* Login Container */
-.login-container {
-  width: 100%;
-  max-width: 1200px; /* Limits the width on larger screens */
-  background: url('../../content/images//bck.jpg') no-repeat center center / cover;
+.content-card {
+  width: 100%;  /* Adjust width as needed */
+  max-width: 1000px; /* Prevents it from being too wide */
   padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  background: rgba(255, 255, 255, 0.9); /* Optional background for contrast */
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Header Logos */
 .header-logos {
-  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -79,10 +73,6 @@ body {
   color: #555;
 }
 
-.eabkari-logo-container {
-  text-align: center;
-}
-
 .eabkari-logo {
   width: 80px;
   height: auto;
@@ -97,8 +87,6 @@ body {
 .login-toggle {
   display: flex;
   justify-content: center;
-  width: 100%;
-  max-width: 300px;
   margin-bottom: 15px;
 }
 
@@ -117,77 +105,36 @@ body {
   font-weight: bold;
 }
 
-/* Login Form */
-.login-form {
+/* Form Styling */
+mat-form-field {
   width: 100%;
-  max-width: 300px; /* Prevents full-width stretching */
+  margin-bottom: 15px;
 }
 
-input[type="text"],
-input[type="password"],
-input[type="tel"] {
-  width: 100%;
+input[matInput] {
   padding: 12px;
-  border: 1px solid #3c4145;
   border-radius: 5px;
-  background: #fff;
-  color: #333;
-  font-size: 1rem;
-  margin-bottom: 10px;
 }
 
-.lf--submit {
+.sign-in-btn {
   width: 100%;
   padding: 12px;
   background: #2b93ff;
   color: white;
   font-size: 1rem;
-  border: none;
   border-radius: 5px;
-  cursor: pointer;
   transition: background 0.3s;
 }
 
-.lf--submit:hover {
-  background: #67c3ff;
+.sign-in-btn:disabled {
+  background: #aaa;
+  cursor: not-allowed;
 }
 
-/* Captcha */
-.captcha-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.captcha-image {
-  height: 40px;
-  border-radius: 5px;
-}
-
-.refresh-captcha {
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  transition: opacity 0.3s;
-}
-
-.refresh-captcha:hover {
-  opacity: 0.8;
-}
-
-/* Bottom Section */
-.bottom-section {
-  width: 100%;
-  justify-content: baseline;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  font-size: 0.9rem;
-  margin-top: 20px;
-}
-
-.help-desk {
-  text-align: left;
+/* Help Desk & Footer */
+mat-card-footer {
+  text-align: right;
+  margin-top: 15px;
 }
 
 .help-desk h3 {
@@ -201,86 +148,43 @@ input[type="tel"] {
   cursor: pointer;
 }
 
-/* Forgot Password */
 .lf--forgot {
-  margin-top: 10px;
   font-size: 0.9rem;
   color: #0099cc;
   text-align: center;
   cursor: pointer;
-  display: block;
 }
 
 .lf--forgot:hover {
   text-decoration: underline;
 }
 
-/* Footer */
-.footer {
-  text-align: center;
-  font-size: 0.8rem;
-  color: #333;
-  margin-top: 20px;
-}
-
-.legal-disclaimer {
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-/* ✅ Responsive Design Fixes */
-
-/* Tablets */
+/* Responsive Adjustments */
 @media (max-width: 768px) {
-  .login-container {
-    width: 80%;
-    max-width: 400px;
+  .container-fluid {
+    padding: 10px;
+  }
+
+  mat-card {
     padding: 15px;
   }
 
   .header-logos {
     flex-direction: column;
-    align-items: center;
     text-align: center;
-  }
-
-  .bottom-section {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .login-form {
-    max-width: 250px;
   }
 }
 
-/* Mobile Devices */
 @media (max-width: 480px) {
-  .login-container {
-    width: 90%;
-    max-width: 320px;
-    padding: 15px;
-  }
-
-  .logo-img {
-    height: 40px;
-    width: 40px;
-  }
-
   .navbar-title {
     font-size: 1rem;
   }
 
-  .lf--submit {
+  .sign-in-btn {
     font-size: 0.9rem;
   }
 
   .lf--forgot {
     font-size: 0.8rem;
-  }
-
-  .login-form {
-    max-width: 100%;
   }
 }

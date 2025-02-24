@@ -1,0 +1,32 @@
+<div class="step-container">
+    <div class="heading">
+      Unit Details
+    </div>
+  
+    <div class="info">
+      <div class="section">
+        <div class="section1">
+          Non-Special Section License
+        </div>
+        <div class="section2">
+          Special Section License
+        </div>
+      </div>
+      <div class="validation">
+        * Marked Fields Are Mandatory
+      </div>
+    </div>
+  
+    <form [formGroup]="unitDetailsForm"> 
+  
+    </form>
+  
+    <div class="button-container">
+      <button mat-stroked-button (click)="goBack()">Back</button>
+      <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!unitDetailsForm.valid">
+        Next
+      </button>
+      <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
+    </div>
+  </div>
+  

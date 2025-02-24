@@ -1,0 +1,26 @@
+<mat-horizontal-stepper [linear]="true" #stepper>
+    <mat-step label="Select License">
+      <app-select-license (next)="stepper.next()"></app-select-license>
+    </mat-step>
+  
+    <mat-step label="Key Info">
+      <app-key-info (back)="stepper.previous()" (next)="stepper.next()"></app-key-info>
+    </mat-step>
+  
+    <mat-step label="Address">
+      <app-address (back)="stepper.previous()" (next)="stepper.next()"></app-address>
+    </mat-step>
+  
+    <mat-step label="Unit Details">
+      <app-unit-details (back)="stepper.previous()" (next)="stepper.next()"></app-unit-details>
+    </mat-step>
+  
+    <mat-step label="Member Details">
+      <app-member-details (back)="stepper.previous()" (next)="stepper.next()"></app-member-details>
+    </mat-step>
+  
+    <mat-step label="License">
+      <app-license (back)="stepper.previous()"></app-license>
+    </mat-step>
+  </mat-horizontal-stepper>
+  

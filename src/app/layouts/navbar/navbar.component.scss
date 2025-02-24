@@ -5,6 +5,7 @@ nav{
     display: flex;
     flex-direction: column;
     font-family: 'Poppins', sans-serif;
+
 }
 
 .navbar-container{
@@ -12,6 +13,7 @@ nav{
     padding: 0.5rem 2rem;
     background-color: #85BE00 !important;
     color: #ffffff;
+    width: 100%;
 
     .container-fluid {
         padding: 0 !important;

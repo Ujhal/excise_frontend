@@ -37,6 +37,11 @@ export class LoginComponent extends BaseComponent {
       return;
     }
 
+    const toggleMode = (isPassword: boolean): void => {
+      this.isPasswordMode = isPassword;
+      this.loginForm.reset(); // Reset form when switching modes
+    };
+
     // Post request to backend routes
     this.apiService.login(this.loginForm.value).subscribe({
       next: (res: any) => {

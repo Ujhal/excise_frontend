@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 // Angular Material Modules
-import { MatCardModule } from '@angular/material/card';
+import { MatCard, MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
@@ -26,21 +26,32 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatStepperModule } from '@angular/material/stepper';
-
-// FontAwesome
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+//import { FormsModule, ReactiveFormsModule, FormBuilder, Validators} from '@angular/forms';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {  MatTableDataSource } from '@angular/material/table';
+import {MatStep, MatStepLabel, MatStepper, MatStepperModule} from "@angular/material/stepper";
+import { MatIcon } from '@angular/material/icon'; 
+import { MatPaginator } from '@angular/material/paginator';
+import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-
-    // Material Modules
+    MatStepperModule,
+    MatStepper,
+    MatCard,
+    MatStepLabel,
+    MatStep,
+    FormsModule,
+    CommonModule,
+    CdkTextareaAutosize,
     MatButtonModule,
-    MatCardModule,
+    MatIcon,
+    MatPaginator,
+    FontAwesomeModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,

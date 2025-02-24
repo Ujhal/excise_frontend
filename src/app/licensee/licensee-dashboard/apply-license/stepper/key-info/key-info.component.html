@@ -1,0 +1,157 @@
+<div class="step-container">
+    <div class="heading">Key Info</div>
+  
+    <div class="info">
+      <div class="section">
+        <div class="section1">Non-Special Section License</div>
+        <div class="section2">Special Section License</div>
+      </div>
+      <div class="validation">* Marked Fields Are Mandatory</div>
+    </div>
+  
+    <form [formGroup]="keyInfoForm">
+  
+      <div class="form-row">
+        <mat-form-field>
+          <mat-label>License Type</mat-label>
+          <mat-select [formControl]="licenseType" required>
+            <mat-option>None</mat-option>
+            @for (type of licenseTypes; track type) {
+              <mat-option [value]="type">{{type}}</mat-option>
+            }
+          </mat-select>
+          @if (licenseType.invalid) {
+            <mat-error>{{ getErrorMessage('licenseType') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+  
+      <div class="form-row">
+        <mat-form-field>
+          <mat-label>Establishment Name</mat-label>
+          <textarea matInput
+                    placeholder="Enter Establishment Name (max 150 characters)"
+                    [formControl]="establishmentName"
+                    cdkTextareaAutosize
+                    #autosize="cdkTextareaAutosize"
+                    cdkAutosizeMinRows="1"
+                    cdkAutosizeMaxRows="5"
+                    required>
+          </textarea>
+          @if (establishmentName.invalid) {
+            <mat-error>{{ getErrorMessage('establishmentName') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+  
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Contact Mobile Number</mat-label>
+          <input matInput placeholder="Enter Contact Number" type="tel" [formControl]="mobileNumber" (blur)="updateErrorMessage('mobileNumber')" required />
+          @if (mobileNumber.invalid) {
+            <mat-error>{{ getErrorMessage('mobileNumber') }}</mat-error>
+          }
+        </mat-form-field>
+        <small class="info-text">**User Credentials / Notifications will be sent through system-generated SMS at this number.</small>
+      </div>
+  
+      <div class="form-row">
+        <mat-form-field>
+          <mat-label>License Number (Manual System)</mat-label>
+          <textarea matInput
+                    placeholder="Enter License Number if any (max 50 characters)"
+                    [formControl]="licenseNo"
+                    cdkTextareaAutosize
+                    #autosize="cdkTextareaAutosize"
+                    cdkAutosizeMinRows="1"
+                    cdkAutosizeMaxRows="5">
+          </textarea>
+        </mat-form-field>
+      </div>
+  
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Initial Grant Date</mat-label>
+            <input matInput type="date" [formControl]="initialGrantDate" />
+          </mat-form-field>
+        </div>
+  
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Renewed From</mat-label>
+            <input matInput type="date" [formControl]="renewedFrom" />
+          </mat-form-field>
+        </div>
+  
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Valid Up to Date</mat-label>
+            <input matInput type="date" [formControl]="validUpTo" />
+          </mat-form-field>
+        </div>
+
+      <div class="form-row">
+        <mat-form-field floatLabel="always">
+          <mat-label>Yearly License Fee (Rs.)</mat-label>
+          <input matInput type="number" class="example-right-align" [formControl]="yearlyFee" placeholder="0" />
+          <span matTextPrefix>₹&nbsp;</span>
+          @if (yearlyFee.invalid) {
+            <mat-error>{{ getErrorMessage('yearlyFee') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+  
+      <div class="form-row">
+        <mat-form-field>
+          <mat-label>License Nature</mat-label>
+          <mat-select [formControl]="licenseNature" required>
+            <mat-option>None</mat-option>
+            @for (nature of licenseNatures; track nature) {
+              <mat-option [value]="nature">{{nature}}</mat-option>
+            }
+          </mat-select>
+          @if (licenseNature.invalid) {
+            <mat-error>{{ getErrorMessage('licenseNature') }}</mat-error>
+          }
+        </mat-form-field>
+  
+      </div>
+          <div class="form-row">
+        <mat-form-field>
+          <mat-label>Functioning Status</mat-label>
+          <mat-select [formControl]="functioningStatus" required>
+            <mat-option>None</mat-option>
+            @for (status of functioningStatuses; track status) {
+              <mat-option [value]="status">{{status}}</mat-option>
+            }
+          </mat-select>
+          @if (functioningStatus.invalid) {
+            <mat-error>{{ getErrorMessage('functioningStatus') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+  
+      <div class="form-row">
+        <mat-form-field>
+          <mat-label>Mode Of Operation</mat-label>
+          <mat-select [formControl]="modeofOperation" required>
+            <mat-option>None</mat-option>
+            @for (mode of modeofOperations; track mode) {
+              <mat-option [value]="mode">{{mode}}</mat-option>
+            }
+          </mat-select>
+          @if (modeofOperation.invalid) {
+            <mat-error>{{ getErrorMessage('modeofOperation') }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+  
+    </form>
+  
+    <div class="button-container">
+      <button mat-stroked-button (click)="goBack()">Back</button>
+      <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!keyInfoForm.valid">Next</button>
+      <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
+    </div>
+  </div>
+  
