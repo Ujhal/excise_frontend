@@ -1,38 +1,79 @@
-<div class="container-fluid">
-    <div class="d-flex justify-content-center">
-      <div class="col-xl-6 col-lg-8 col-md-10 col-sm-12">
-        <mat-card>
-          <mat-card-header class="page-card-header">
-            <div class="icon-header ml-2"><i class="icofont icofont-ssl-security float-left"></i></div>
-            <span class="page-title">Login</span>
-          </mat-card-header>
-          <mat-card-content class="page-card-content">
-            <form  [formGroup]="loginForm" (ngSubmit)="onLogin()">
-              <mat-form-field appearance="outline">
-                <mat-label>Username</mat-label>
-                <input matInput formControlName="username" placeholder="Enter your Username" />
-              </mat-form-field>
-  
-              <mat-form-field appearance="outline">
-                <mat-label>Password</mat-label>
-                <input matInput type="password" formControlName="password" placeholder="Enter your password" />
-              </mat-form-field>
-  
-              <!-- Captcha Section -->
-              <app-captcha [formGroup]="loginForm"></app-captcha>
-              
-  
-              <div class="row">
-                <div class="col-lg-3">
-                  <button mat-raised-button color="primary" type="submit" class="sign-in-btn">
-                    SIGN IN
-                  </button>
-                </div>
-              </div>
-            </form>
-          </mat-card-content>
-        </mat-card>
+<div class="container-fluid d-flex justify-content-center align-items-center" style="width: 120vw;">
+  <div class="col-xl-6 col-lg-8 col-md-10 col-sm-12">
+    
+    <mat-card class="login-card">
+      <!-- Header Logos -->
+      <div class="header-logos d-flex justify-content-between align-items-center">
+        <div class="header-logo d-flex align-items-center">
+          <span class="logo-img"></span>
+          <div class="header-text">
+            <span class="navbar-title">EXCISE DEPARTMENT</span><br>
+            <span class="navbar-version">Government of Sikkim</span>
+          </div>
+        </div>
+        <div class="eabkari-logo-container text-center">
+          <img src="assets/images/login/eakbari_logo.jpg" alt="Eabkari Logo" class="eabkari-logo">
+          <div class="eabkari-text">A Digital Workspace Solution</div>
+        </div>
       </div>
-    </div>
+
+      <mat-card-content class="page-card-content">
+        <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+          
+          <!-- Login Mode Toggle -->
+          <div class="login-toggle d-flex">
+            <button mat-button type="button" [class.active]="isPasswordMode" (click)="toggleMode(true)">
+              Password-based
+            </button>
+            <button mat-button type="button" [class.active]="!isPasswordMode" (click)="toggleMode(false)">
+              OTP-based
+            </button>
+          </div>
+
+          <ng-container *ngIf="isPasswordMode">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Username</mat-label>
+              <input matInput formControlName="username" placeholder="Enter your Username" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Password</mat-label>
+              <input matInput type="password" formControlName="password" placeholder="Enter your password" />
+            </mat-form-field>
+
+            <!-- Captcha Section -->
+            <app-captcha [formGroup]="loginForm"></app-captcha>
+          </ng-container>
+
+          <ng-container *ngIf="!isPasswordMode">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Phone Number</mat-label>
+              <input matInput formControlName="username" placeholder="Enter your Phone Number" type="tel" />
+            </mat-form-field>
+          </ng-container>
+
+          <div class="text-center mt-3">
+            <button mat-raised-button color="primary" type="submit" class="sign-in-btn" [disabled]="loginForm.invalid">
+              LOGIN
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+
+      <!-- Bottom Section (Help Desk & Home Button) -->
+      <mat-card-footer class="text-center">
+        <a class="lf--forgot" href="#">Forgot password?</a>
+
+        <div class="help-desk mt-3">
+          <h3>HELP DESK</h3>
+          <p>Phone: 03592-203963</p>
+          <p>Email: <a href="mailto:helpdesk.excise&#64;sikkim.gov.in">helpdesk.excise&#64;sikkim.gov.in</a></p>
+        </div>
+        <div class="home-button mt-3">
+          <img src="assets/images/login/bck_home.png" alt="Home" (click)="goToHome()">
+        </div>
+      </mat-card-footer>
+      
+    </mat-card>
   </div>
-  
+</div>

@@ -1,18 +1,20 @@
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators,FormBuilder } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { MaterialModule } from '../material.module';
 import { CaptchaComponent } from '../shared/components/captcha/captcha.component';
 import { BaseComponent } from '../base/base.components';
 import { BaseDependency } from '../base/dependency/base.dependendency';
+
 @Component({
   selector: 'app-login',
-  imports: [MaterialModule,ReactiveFormsModule,FormsModule,CaptchaComponent],
+  imports: [MaterialModule, ReactiveFormsModule, FormsModule, CaptchaComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
 export class LoginComponent extends BaseComponent {
   loginForm: FormGroup;
+  isPasswordMode: boolean = true;
 
   constructor(protected baseDependancy: BaseDependency, private fb: FormBuilder) {
     super(baseDependancy);
@@ -24,18 +26,29 @@ export class LoginComponent extends BaseComponent {
     });
   }
 
+  toggleMode(isPassword: boolean): void {
+    this.isPasswordMode = isPassword;
+    this.loginForm.reset(); // Reset form when switching modes
+  }
+
   onLogin(): void {
     if (this.loginForm.invalid) {
       alert("Please fill in all fields correctly.");
       return;
     }
+
+    const toggleMode = (isPassword: boolean): void => {
+      this.isPasswordMode = isPassword;
+      this.loginForm.reset(); // Reset form when switching modes
+    };
+
+    // Post request to backend routes
     this.apiService.login(this.loginForm.value).subscribe({
       next: (res: any) => {
         const authenticatedUser = res.authenticated_user;
         
         if (authenticatedUser && authenticatedUser.access && authenticatedUser.refresh) {
-
-          console.log(authenticatedUser,'user')
+          console.log(authenticatedUser, 'user');
           const access = authenticatedUser.access;
           const refresh = authenticatedUser.refresh;
   
@@ -46,8 +59,9 @@ export class LoginComponent extends BaseComponent {
           this.accountService.identity(true).subscribe({
             next: (user) => {
               if (user) {
-                console.log(user,'user2')
-                this.toastrService.success('Login Successful');
+                console.log(user, 'user2');
+                console.log('LOGIN SUCCESS');
+                this.router.navigate(['/site-admin/dashboard']); 
                 this.redirectBasedOnRole(user.role); // Redirect to role-based dashboard
               } else {
                 console.error('User identity is null');
@@ -76,8 +90,14 @@ export class LoginComponent extends BaseComponent {
         this.router.navigate(['site-admin/dashboard']);
         break;
       case '2':
-          this.router.navigate(['licensee/dashboard']);
-          break;
+        this.router.navigate(['licensee/dashboard']);
+        break;
+    }
   }
-}
+
+  goToHome(): void {
+    this.router.navigate(['/']); // Implemented goToHome method
+  }
+
+
 }
