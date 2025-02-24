@@ -61,7 +61,7 @@ export class LoginComponent extends BaseComponent {
               if (user) {
                 console.log(user, 'user2');
                 console.log('LOGIN SUCCESS');
-                this.router.navigate(['/']); 
+                this.router.navigate(['/site-admin/dashboard']); 
                 this.redirectBasedOnRole(user.role); // Redirect to role-based dashboard
               } else {
                 console.error('User identity is null');
