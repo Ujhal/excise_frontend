@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { FormGroup, FormsModule, ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
 import { MaterialModule } from '../material.module';
 import { CaptchaComponent } from '../shared/components/captcha/captcha.component';
 import { BaseComponent } from '../base/base.components';
@@ -15,6 +14,7 @@ import { BaseDependency } from '../base/dependency/base.dependendency';
 export class LoginComponent extends BaseComponent {
   loginForm: FormGroup;
   isPasswordMode: boolean = true;
+  
 
   constructor(protected baseDependancy: BaseDependency, private fb: FormBuilder) {
     super(baseDependancy);
@@ -25,6 +25,7 @@ export class LoginComponent extends BaseComponent {
       hashkey: ['', Validators.required], // Captcha hashkey
     });
   }
+  
 
   toggleMode(isPassword: boolean): void {
     this.isPasswordMode = isPassword;
