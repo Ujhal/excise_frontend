@@ -1,68 +1,6 @@
 <div class="grid-container">
-  <c-card class = "quick-links grid-card">
-    <c-card-header>Quick Links</c-card-header>
-    <c-card-body class = "links-container card-container">
 
-      <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-        <c-card-body>
-          <img src = "assets/images/main/quick-links/about-us.png">
-        </c-card-body>
-        <c-card-footer>
-          <small class="text-medium-emphasis">About Us</small>
-        </c-card-footer>
-      </c-card>
-
-      <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-        <c-card-body>
-          <img src = "assets/images/main/quick-links/factsnfigs.png">
-        </c-card-body>
-        <c-card-footer>
-          <small class="text-medium-emphasis">Facts & Figures</small>
-        </c-card-footer>
-      </c-card>
-
-      <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-        <c-card-body>
-          <img src = "assets/images/main/quick-links/acts.png">
-        </c-card-body>
-        <c-card-footer>
-          <small class="text-medium-emphasis">Acts, Rules & Orders</small>
-        </c-card-footer>
-      </c-card>
-
-      <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-        <c-card-body>
-          <img src = "assets/images/main/quick-links/rti.png">
-        </c-card-body>
-        <c-card-footer>
-          <small class="text-medium-emphasis">Right to Information</small>
-        </c-card-footer>
-      </c-card>
-
-      <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-        <c-card-body>
-          <img src = "assets/images/main/quick-links/feedback.png">
-        </c-card-body>
-        <c-card-footer>
-          <small class="text-medium-emphasis">Feedback</small>
-        </c-card-footer>
-      </c-card>
-
-      <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-        <c-card-body>
-          <img src = "assets/images/main/quick-links/contact.png">
-        </c-card-body>
-        <c-card-footer>
-          <small class="text-medium-emphasis">Contact Us</small>
-        </c-card-footer>
-      </c-card>
-
-      
-
-    </c-card-body>
-  </c-card>
-
-  <c-card class = "about-us grid-card">
+  <c-card class = "about-us grid-card" id = "about-us">
     <c-card-header>About Us</c-card-header>
     <c-card-body class = "card-container">
       <p cCardText>The  Excise Department, under the Government of Sikkim 
@@ -98,7 +36,6 @@
         The Department also runs a Laboratory at Chanatar, Rangpo. The sole 
         responsibility of the Laboratory is to examine, test and analyze all 
         liquors produced in Sikkim.</p>
-      <a mat-flat-button href="https://example.com" target="_blank">Read More</a>
     </c-card-body>
   </c-card>
 
@@ -122,7 +59,7 @@
           Excise Raids on illicit dens in Remote Villages.
         </p>
       </div>
-      <a mat-flat-button href="https://example.com" target="_blank">Read More</a>
+      <a mat-flat-button class = "button" href="https://example.com" target="_blank">Read More</a>
     </c-card-body>
   </c-card>
 
@@ -192,120 +129,7 @@
 
         </div>
       </div>
-      <a mat-flat-button href="https://example.com" target="_blank">View All</a>
-    </c-card-body>
-  </c-card>
-
-  <c-card class = "e-services grid-card">
-    <c-card-header>E-Services </c-card-header>
-    <c-card-body class = "card-container">
-      <div class="services-container">
-
-        <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-          <c-card-body id = "eabkari">
-              <img src = "assets/images/main/e-services/eabkari.png">
-          </c-card-body>
-        </c-card>
-
-        <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-          <c-card-body>
-            <img src = "assets/images/main/e-services/apply.png">
-            <div class="title">
-              Apply for New Excise License
-            </div>
-          </c-card-body>
-        </c-card>
-
-        <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-          <c-card-body>
-            <img src = "assets/images/main/e-services/print.png">
-            <div class="title">
-              PRINT LICENSE<br>(New License)
-            </div>
-          </c-card-body>
-        </c-card>
-
-        <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-          <c-card-body>
-            <img src = "assets/images/main/e-services/renew.png">
-            <div class="title">
-              License Renewal
-            </div>
-          </c-card-body>
-        </c-card>
-
-        <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-          <c-card-body>
-            <img src = "assets/images/main/e-services/registration.png">
-            <div class="title">
-              Company Registration
-            </div>
-          </c-card-body>
-        </c-card>
-
-        <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-          <c-card-body>
-            <img src = "assets/images/main/e-services/collaboration.png">
-            <div class="title">
-              Company Collaboration
-            </div>
-          </c-card-body>
-        </c-card>
-
-        <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-          <c-card-body>
-            <img src = "assets/images/main/e-services/label.png">
-            <div class="title">
-              Label Registration
-            </div>
-          </c-card-body>
-        </c-card>
-
-        <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-          <c-card-body>
-            <img src = "assets/images/main/e-services/bulk-spirit.png">
-            <div class="title">
-              Import of Bulk Spirit
-            </div>
-          </c-card-body>
-        </c-card>
-
-        <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-          <c-card-body>
-            <img src = "assets/images/main/e-services/packaged-liquor.png">
-            <div class="title">
-              Import of Packaged Liquor
-            </div>
-          </c-card-body>
-        </c-card>
-
-        <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-          <c-card-body>
-            <img src = "assets/images/main/e-services/evc.png">
-            <div class="title">
-              EVC (IPFL)
-            </div>
-          </c-card-body>
-        </c-card>
-
-        <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-          <c-card-body>
-            <div class="title">
-              Import Permit Revalidation, Cancellation & Surrender
-            </div>
-          </c-card-body>
-        </c-card>
-
-        <c-card button (click)="navigateToExternal('https://example.com')" class="styled-link">
-          <c-card-body>
-            <img src = "assets/images/main/e-services/gps.png">
-            <div class="title">
-              GPS Mapping of State Excise
-            </div>
-          </c-card-body>
-        </c-card>
-
-      </div>
+      <a mat-flat-button class = "button" href="https://example.com" target="_blank">View All</a>
     </c-card-body>
   </c-card>
   

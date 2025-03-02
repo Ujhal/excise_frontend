@@ -2,7 +2,6 @@ import { Component, inject } from '@angular/core';
 import { Router, NavigationEnd, RouterOutlet, ActivatedRoute } from '@angular/router';
 import { NavbarComponent } from './layouts/navbar/navbar.component';
 import { FooterComponent } from './layouts/footer/footer.component';
-import { MainComponent } from './layouts/main/main.component';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { fontAwesomeIcons } from './config/font-awesome-icons';
 import { CarouselComponent } from "./layouts/carousel/carousel.component";
@@ -17,7 +16,6 @@ import { filter } from 'rxjs'
     RouterOutlet,
     NavbarComponent,
     FooterComponent,
-    MainComponent,
     FontAwesomeModule,
     CarouselComponent
   ],
@@ -26,7 +24,7 @@ import { filter } from 'rxjs'
 })
 export class AppComponent {
   title = 'excise_frontend';
-  showHeaderFooter = true; // Default to showing header/footer
+  //showHeaderFooter = true; // Default to showing header/footer
   showCarousel = false;
 
   private router = inject(Router);
@@ -50,7 +48,7 @@ export class AppComponent {
     }
 
     // Fallback to default values if data is not defined
-    this.showHeaderFooter = currentRoute?.snapshot.data?.['showHeaderFooter'] ?? true;
+    //this.showHeaderFooter = currentRoute?.snapshot.data?.['showHeaderFooter'] ?? true;
     this.showCarousel = currentRoute?.snapshot.data?.['showCarousel'] ?? false;
   }
 }

@@ -1,17 +1,13 @@
-@import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,900');
-
 nav{
     padding: 0;
     display: flex;
     flex-direction: column;
-    font-family: 'Poppins', sans-serif;
-
 }
 
 .navbar-container{
     width: 100%;
     padding: 0.5rem 2rem;
-    background-color: #85BE00 !important;
+    background-color: #1C2B78 !important;
     color: #ffffff;
     width: 100%;
 
@@ -24,8 +20,8 @@ nav{
     }
 
     .logo-img {
-        height: 72px;
-        width: 72px;
+        height: 80px;
+        width: 80px;
         display: inline-block;
         padding-block: 8px;        
         background-size: contain;
@@ -55,6 +51,13 @@ nav{
     .navbar-brand{
         display:flex;
         flex-wrap: wrap
+    }
+    .nav-links-container{  
+        display: flex;
+        button{
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+        }
     }
 
 }

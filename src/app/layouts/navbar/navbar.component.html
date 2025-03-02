@@ -4,7 +4,7 @@
         
             <a class="navbar-brand logo" >
                 <div class="header-logo">
-                    <img class="logo-img" src = "assets/images/header/Seal_of_Sikkim_greyscale.png">
+                    <img class="logo-img" src = "assets/images/header/Seal_of_Sikkim_greyscale_white.png" (click)="home()">
                 </div>
                 <div class="header-text">
                     <span class="navbar-title">EXCISE DEPARTMENT</span><br  >
@@ -12,10 +12,12 @@
                 </div>
             </a>
 
-            <span>
-                <fa-icon icon="sign-in-alt" button (click)="login()"></fa-icon>
-                <span> Sign in</span>
-              </span>
+            <div class="nav-links-container">
+                <button mat-button (click)="login()">
+                    <mat-icon class ="login">login</mat-icon>
+                    <span class="text">Sign In</span>
+                </button>   
+            </div>
         </div>
     </div>  
 </nav>
