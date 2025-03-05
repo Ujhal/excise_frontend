@@ -16,7 +16,7 @@ import {
   templateUrl: './carousel.component.html',
   styleUrl: './carousel.component.scss',
   standalone: true,
-  imports: [ThemeDirective, CarouselModule, CarouselComponent, CarouselIndicatorsComponent, CarouselInnerComponent, NgFor, CarouselItemComponent, CarouselCaptionComponent, CarouselControlComponent, RouterLink]
+  imports: [ThemeDirective, CarouselModule, CarouselIndicatorsComponent, CarouselInnerComponent, NgFor, CarouselItemComponent, CarouselCaptionComponent, CarouselControlComponent, RouterLink]
 })
 
 export class CarouselComponent implements OnInit{

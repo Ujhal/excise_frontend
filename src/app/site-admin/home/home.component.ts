@@ -12,7 +12,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 @Component({
   selector: 'app-home',
   standalone: true, // Mark as standalone
-  imports: [CommonModule, RouterModule, MaterialModule, DashboardComponent,MatSidenavModule], // Import necessary modules
+  imports: [CommonModule, RouterModule, MaterialModule, MatSidenavModule], // Import necessary modules
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })

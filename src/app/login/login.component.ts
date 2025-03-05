@@ -73,6 +73,7 @@ export class LoginComponent extends BaseComponent {
   private redirectBasedOnRole(role: string): void {
     switch (role) {
       case 'site_admin':
+        console.log("I'm here")
         this.router.navigate(['site-admin/dashboard']);
         break;
       case '2':

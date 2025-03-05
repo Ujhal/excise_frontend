@@ -17,10 +17,9 @@ import { filter } from 'rxjs'
     RouterOutlet,
     NavbarComponent,
     FooterComponent,
-    MainComponent,
     FontAwesomeModule,
     CarouselComponent
-  ],
+],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

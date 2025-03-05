@@ -11,6 +11,7 @@ import { Account } from '../shared/models/accounts';
 export class SiteAdminService {
   private baseUrl = environment.baseUrl;
   private apiUrl = `${this.baseUrl}/api`
+  private masterUrl = `${this.baseUrl}/masters`
   constructor(private http: HttpClient) {}
 
 
@@ -42,7 +43,7 @@ export class SiteAdminService {
     return this.http.post(`${this.apiUrl}/register/`, user);
   }
   getUsers(): Observable<any> {
-    return this.http.get<Account[]>(`${this.apiUrl}/register/`);
+    return this.http.get<Account[]>(`${this.apiUrl}/users/`);
   }
 
   getAdminDashboard(): Observable<Dashboard> {
