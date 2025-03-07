@@ -1,59 +1,59 @@
-@import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,900');
+.navbar {
+    padding: 0.5rem 2rem;
+    background-color: #85be00 !important;
+}
 
-nav{
-    padding: 0;
+.container-fluid {
+    padding: 0 !important;
+    max-width: 100%;
+    display:flex;
+    justify-content: space-between;
+}
+
+.logo-img {
+    height: 72px;
+    width: 72px;
+    display: inline-block;
+    padding-block: 8px;
+    background: url('../../../content/images/sikkimlogoexc.png') no-repeat center center;
+    background-size: contain;
+}
+
+.header-logo {
+    padding-right: 15px;
     display: flex;
-    flex-direction: column;
-    font-family: 'Poppins', sans-serif;
+    align-items: center;
+}
+
+.header-text {
+    padding-top:8px;
+    border-left: 1px solid black;
+    
 
 }
 
-.navbar-container{
-    padding: 0.5rem 2rem;
-    background-color: #85BE00 !important;
-    color: #ffffff;
-    width: 100%;
+.navbar-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: white;
+    line-height: 1.2;
+    padding-left: 10px;
+    text-shadow: 1px 1px #292727;
 
-    .container-fluid {
-        padding: 0 !important;
-        max-width: 100%;
-        display:flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+}
 
-    .logo-img {
-        height: 72px;
-        width: 72px;
-        display: inline-block;
-        padding-block: 8px;        
-        background-size: contain;
-    }
+.navbar-version {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+   
+    padding-left: 10px;
 
-    .header-logo {
-        padding-right: 15px;
-        display: flex;
-        align-items: center;
-    }
+}
+.navbar-brand{
+    display:flex;
+    flex-wrap: wrap
 
-    .header-text {
-        padding-top:17px;
-        color: #ffffff;
-    }
 
-    .navbar-title {
-        font-size: 1.4rem;
-        font-weight: 500;
-        line-height: 1.2;
-        padding-left: 10px;
-    }
-
-    .navbar-version {
-        padding-left: 10px;
-    }
-    .navbar-brand{
-        display:flex;
-        flex-wrap: wrap
-    }
 
 }

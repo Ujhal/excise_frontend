@@ -1,21 +1,12 @@
 import { Component } from '@angular/core';
-import { MaterialModule } from '../../material.module';
-import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-licensee-dashboard',
-  standalone: true,
-  imports: [ MaterialModule,
-    RouterModule
-  ],
+  imports: [CommonModule],
   templateUrl: './licensee-dashboard.component.html',
   styleUrl: './licensee-dashboard.component.scss'
 })
 export class LicenseeDashboardComponent {
 
-  constructor(private router: Router) {}
-
-  navigateToApplyLicense() {
-    this.router.navigate(['licensee-dashboard/apply-license']);
-  }
 }

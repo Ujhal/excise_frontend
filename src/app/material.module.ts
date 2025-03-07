@@ -24,14 +24,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { FormsModule, ReactiveFormsModule, FormBuilder, Validators} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {  MatTableDataSource } from '@angular/material/table';
-import {MatStep, MatStepLabel, MatStepper, MatStepperModule} from "@angular/material/stepper";
+import {MatStep, MatStepLabel, MatStepper} from "@angular/material/stepper";
+import {FormBuilder, Validators} from '@angular/forms';
+import { MatStepperModule } from '@angular/material/stepper';
 import { MatIcon } from '@angular/material/icon'; 
 import { MatPaginator } from '@angular/material/paginator';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 
 @NgModule({
   imports: [
@@ -44,11 +45,11 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
     MatStep,
     FormsModule,
     CommonModule,
-    CdkTextareaAutosize,
     MatButtonModule,
     MatIcon,
     MatPaginator,
-    FontAwesomeModule,
+ 
+     FontAwesomeModule,
     MatFormFieldModule,
     MatDividerModule,
     MatSelectModule,
