@@ -23,5 +23,7 @@ import { SelectLicenseComponent } from './stepper/select-license/select-license.
   styleUrl: './apply-license.component.scss'
 })
 export class ApplyLicenseComponent {
-  
+  get licenseType() {
+    return sessionStorage.getItem('licenseType');
+  }
 }

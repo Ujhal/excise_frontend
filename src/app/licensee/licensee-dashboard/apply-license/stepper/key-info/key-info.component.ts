@@ -21,21 +21,21 @@ export class KeyInfoComponent {
   @Output() next = new EventEmitter<void>();
   @Output() back = new EventEmitter<void>();
 
-  licenseType = new FormControl(this.getFromLocalStorage('licenseType'), [Validators.required]);
-  establishmentName = new FormControl(this.getFromLocalStorage('establishmentName'), [
+  licenseType = new FormControl(this.getFromSessionStorage('licenseType'), [Validators.required]);
+  establishmentName = new FormControl(this.getFromSessionStorage('establishmentName'), [
     Validators.required,
     Validators.maxLength(150),
     Validators.pattern(PatternConstants.ORGANISATION_NAME),
   ]);
-  mobileNumber = new FormControl(this.getFromLocalStorage('mobileNumber'), [Validators.required, Validators.pattern(PatternConstants.MOBILE)]);
-  licenseNo = new FormControl(this.getFromLocalStorage('licenseNo'), [Validators.pattern(PatternConstants.CODE), Validators.maxLength(50)]);
-  initialGrantDate = new FormControl(this.getFromLocalStorage('initialGrantDate'));
-  renewedFrom = new FormControl(this.getFromLocalStorage('renewedFrom'));
-  validUpTo = new FormControl(this.getFromLocalStorage('validUpTo'));
-  yearlyFee = new FormControl(this.getFromLocalStorage('yearlyFee'), [Validators.pattern(PatternConstants.NUMBER)]);
-  licenseNature = new FormControl(this.getFromLocalStorage('licenseNature'), [Validators.required]);
-  functioningStatus = new FormControl(this.getFromLocalStorage('functioningStatus'), [Validators.required]);
-  modeofOperation = new FormControl(this.getFromLocalStorage('modeofOperation'), [Validators.required]);
+  mobileNumber = new FormControl(this.getFromSessionStorage('mobileNumber'), [Validators.required, Validators.pattern(PatternConstants.MOBILE)]);
+  licenseNo = new FormControl(this.getFromSessionStorage('licenseNo'), [Validators.pattern(PatternConstants.CODE), Validators.maxLength(50)]);
+  initialGrantDate = new FormControl(this.getFromSessionStorage('initialGrantDate'));
+  renewedFrom = new FormControl(this.getFromSessionStorage('renewedFrom'));
+  validUpTo = new FormControl(this.getFromSessionStorage('validUpTo'));
+  yearlyFee = new FormControl(this.getFromSessionStorage('yearlyFee'), [Validators.pattern(PatternConstants.NUMBER)]);
+  licenseNature = new FormControl(this.getFromSessionStorage('licenseNature'), [Validators.required]);
+  functioningStatus = new FormControl(this.getFromSessionStorage('functioningStatus'), [Validators.required]);
+  modeofOperation = new FormControl(this.getFromSessionStorage('modeofOperation'), [Validators.required]);
 
   errorMessages = {
     licenseType: signal(''),
@@ -48,10 +48,10 @@ export class KeyInfoComponent {
     modeofOperation: signal('')
   };
 
-  licenseTypes: string[] = ['Type 1', 'Type 2', 'Type 3', 'Type 4'];
-  licenseNatures: string[] = ['Nature 1', 'Nature 2', 'Nature 3', 'Nature 4'];
+  licenseTypes: string[] = ['Individual', 'Company'];
+  licenseNatures: string[] = ['Regular', 'Temporary', 'Seasonal', 'Special Event'];
   functioningStatuses: string[] = ['Yes', 'No'];
-  modeofOperations: string[] = ['Mode 1', 'Mode 2', 'Mode 3', 'Mode 4'];
+  modeofOperations: string[] = ['Self', 'Salesman', 'Barman'];
 
   constructor(private fb: FormBuilder) {
     this.keyInfoForm = this.fb.group({
@@ -80,27 +80,27 @@ export class KeyInfoComponent {
     )
       .pipe(takeUntilDestroyed())
       .subscribe(() => {
-        this.saveToLocalStorage();
+        this.saveToSessionStorage();
         this.updateAllErrorMessages();
       });
   }
 
-  getFromLocalStorage(key: string): string {
-    return localStorage.getItem(key) || '';
+  getFromSessionStorage(key: string): string {
+    return sessionStorage.getItem(key) || '';
   }
 
-  saveToLocalStorage() {
-    localStorage.setItem('licenseType', this.licenseType.value || '');
-    localStorage.setItem('establishmentName', this.establishmentName.value || '');
-    localStorage.setItem('mobileNumber', this.mobileNumber.value || '');
-    localStorage.setItem('licenseNo', this.licenseNo.value || '');
-    localStorage.setItem('initialGrantDate', this.initialGrantDate.value || '');
-    localStorage.setItem('renewedFrom', this.renewedFrom.value || '');
-    localStorage.setItem('validUpTo', this.validUpTo.value || '');
-    localStorage.setItem('yearlyFee', this.yearlyFee.value || '');
-    localStorage.setItem('licenseNature', this.licenseNature.value || '');
-    localStorage.setItem('functioningStatus', this.functioningStatus.value || '');
-    localStorage.setItem('modeofOperation', this.modeofOperation.value || '');
+  saveToSessionStorage() {
+    sessionStorage.setItem('licenseType', this.licenseType.value || '');
+    sessionStorage.setItem('establishmentName', this.establishmentName.value || '');
+    sessionStorage.setItem('mobileNumber', this.mobileNumber.value || '');
+    sessionStorage.setItem('licenseNo', this.licenseNo.value || '');
+    sessionStorage.setItem('initialGrantDate', this.initialGrantDate.value || '');
+    sessionStorage.setItem('renewedFrom', this.renewedFrom.value || '');
+    sessionStorage.setItem('validUpTo', this.validUpTo.value || '');
+    sessionStorage.setItem('yearlyFee', this.yearlyFee.value || '');
+    sessionStorage.setItem('licenseNature', this.licenseNature.value || '');
+    sessionStorage.setItem('functioningStatus', this.functioningStatus.value || '');
+    sessionStorage.setItem('modeofOperation', this.modeofOperation.value || '');
   }
 
   updateErrorMessage(field: keyof typeof this.errorMessages) {
@@ -136,16 +136,6 @@ export class KeyInfoComponent {
 
   resetForm() {
     this.keyInfoForm.reset();
-    localStorage.removeItem('licenseType');
-    localStorage.removeItem('establishmentName');
-    localStorage.removeItem('mobileNumber');
-    localStorage.removeItem('licenseNo');
-    localStorage.removeItem('initialGrantDate');
-    localStorage.removeItem('renewedFrom');
-    localStorage.removeItem('validUpTo');
-    localStorage.removeItem('yearlyFee');
-    localStorage.removeItem('licenseNature');
-    localStorage.removeItem('functioningStatus');
-    localStorage.removeItem('modeofOperation');
+    sessionStorage.clear();
   }
 }

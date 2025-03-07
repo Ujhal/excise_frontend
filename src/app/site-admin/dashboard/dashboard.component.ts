@@ -1,35 +1,35 @@
-import { Component,OnInit} from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BaseComponent } from '../../base/base.components';
-import { BaseDependency } from '../../base/dependency/base.dependendency';
-import { Account } from '../../shared/models/accounts';
 import { MaterialModule } from '../../material.module';
-import { SiteAdminService } from '../site-admin-service';
-import { Dashboard } from '../../shared/models/dashboard.model';
-import { RouterModule } from '@angular/router';
+
+export interface LicenseStatistics {
+  slNo: number;
+  serviceName: string;
+  applied: string;
+  rejected: number;
+  approved: number;
+  executed: string;
+  pending: number;
+  pendingWithMe: number;
+}
+
+const LICENSE_DATA: LicenseStatistics[] = [
+  {slNo: 1, serviceName: 'New License Application', applied: '102', rejected: 0, approved: 14, executed: '9', pending: 88, pendingWithMe: 0},
+  {slNo: 2, serviceName: 'Renewal of Excise License', applied: '3,372', rejected: 0, approved: 0, executed: '3,352', pending: 20, pendingWithMe: 0},
+  {slNo: 3, serviceName: 'Label Registration of Packaged Liquor', applied: '0', rejected: 0, approved: 0, executed: '0', pending: 0, pendingWithMe: 0},
+  {slNo: 4, serviceName: 'Import of Bulk Spirit', applied: '0', rejected: 0, approved: 0, executed: '0', pending: 88, pendingWithMe: 0},
+  {slNo: 5, serviceName: 'Import of Packaged Foreign Liquor', applied: '0', rejected: 0, approved: 0, executed: '0', pending: 0, pendingWithMe: 0},
+  {slNo: 6, serviceName: 'Import Packaged Foreign Liquor from Custom Station', applied: '0', rejected: 0, approved: 0, executed: '0', pending: 0, pendingWithMe: 0},
+];
 
 @Component({
   selector: 'app-dashboard',
-  standalone: true, // Mark as standalone
-  imports: [CommonModule,MaterialModule,RouterModule], // Import necessary modules
+  standalone: true,
+  imports: [CommonModule,MaterialModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
-export class DashboardComponent extends BaseComponent implements OnInit {
-  siteAdminDashboard!: Dashboard;
-
-  constructor(
-    private base: BaseDependency,
-    private siteAdminService: SiteAdminService,
-  ) {
-    super(base);
-  }
-
-  ngOnInit(): void {
-    console.log('dashboard component called ')
-    this.siteAdminDashboard = new Dashboard();
-    this.siteAdminService.getAdminDashboard().subscribe(res => {
-      this.siteAdminDashboard = res;
-    });
-  }
+export class DashboardComponent{
+  displayedColumns: string[] = ['slNo', 'serviceName', 'rejected', 'approved', 'executed', 'pending', 'pendingWithMe'];
+  dataSource = LICENSE_DATA;
 }

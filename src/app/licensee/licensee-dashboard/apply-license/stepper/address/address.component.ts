@@ -21,15 +21,15 @@ export class AddressComponent {
   @Output() next = new EventEmitter<void>();
   @Output() back = new EventEmitter<void>();
 
-  siteSubDivision = new FormControl(this.getFromLocalStorage('siteSubDivision'), [Validators.required]);
-  policeStation = new FormControl(this.getFromLocalStorage('policeStation'), [Validators.required]);
-  locationCategory = new FormControl(this.getFromLocalStorage('locationCategory'), [Validators.required]);
-  wardName = new FormControl(this.getFromLocalStorage('wardName'), [Validators.required]);
-  businessAddress = new FormControl(this.getFromLocalStorage('businessAddress'), [Validators.required, Validators.maxLength(500)]);
-  roadName = new FormControl(this.getFromLocalStorage('roadName'), [Validators.required]);
-  pinCode = new FormControl(this.getFromLocalStorage('pinCode'), [Validators.required, Validators.pattern(PatternConstants.PINCODE)]);
-  latitude = new FormControl(this.getFromLocalStorage('latitude'));
-  longitude = new FormControl(this.getFromLocalStorage('longitude'));
+  siteSubDivision = new FormControl(this.getFromStorage('siteSubDivision'), [Validators.required]);
+  policeStation = new FormControl(this.getFromStorage('policeStation'), [Validators.required]);
+  locationCategory = new FormControl(this.getFromStorage('locationCategory'), [Validators.required]);
+  wardName = new FormControl(this.getFromStorage('wardName'), [Validators.required]);
+  businessAddress = new FormControl(this.getFromStorage('businessAddress'), [Validators.required, Validators.maxLength(500)]);
+  roadName = new FormControl(this.getFromStorage('roadName'), [Validators.required]);
+  pinCode = new FormControl(this.getFromStorage('pinCode'), [Validators.required, Validators.pattern(PatternConstants.PINCODE)]);
+  latitude = new FormControl(this.getFromStorage('latitude'));
+  longitude = new FormControl(this.getFromStorage('longitude'));
 
   errorMessages = {
     siteSubDivision: signal(''),
@@ -75,37 +75,38 @@ export class AddressComponent {
     )
       .pipe(takeUntilDestroyed())
       .subscribe(() => {
-        this.saveToLocalStorage();
+        this.saveToStorage();
         this.updateAllErrorMessages();
       });
   }
 
-  getFromLocalStorage(key: string): string {
-    return localStorage.getItem(key) || '';
+  getFromStorage(key: string): string {
+    return sessionStorage.getItem(key) || '';
   }
 
-  saveToLocalStorage() {
-    localStorage.setItem('siteSubDivision', this.siteSubDivision.value || '');
-    localStorage.setItem('policeStation', this.policeStation.value || '');
-    localStorage.setItem('locationCategory', this.locationCategory.value || '');
-    localStorage.setItem('wardName', this.wardName.value || '');
-    localStorage.setItem('businessAddress', this.businessAddress.value || '');
-    localStorage.setItem('roadName', this.roadName.value || '');
-    localStorage.setItem('pinCode', this.pinCode.value || '');
-    localStorage.setItem('latitude', this.latitude.value || '');
-    localStorage.setItem('longitude', this.longitude.value || '');
+  saveToStorage() {
+    sessionStorage.setItem('siteSubDivision', this.siteSubDivision.value || '');
+    sessionStorage.setItem('policeStation', this.policeStation.value || '');
+    sessionStorage.setItem('locationCategory', this.locationCategory.value || '');
+    sessionStorage.setItem('wardName', this.wardName.value || '');
+    sessionStorage.setItem('businessAddress', this.businessAddress.value || '');
+    sessionStorage.setItem('roadName', this.roadName.value || '');
+    sessionStorage.setItem('pinCode', this.pinCode.value || '');
+    sessionStorage.setItem('latitude', this.latitude.value || '');
+    sessionStorage.setItem('longitude', this.longitude.value || '');
   }
 
   updateErrorMessage(field: keyof typeof this.errorMessages) {
-    const control = this[field];
-    if (control.hasError('required')) {
+    const control = this.addressForm.get(field);
+    if (control?.hasError('required')) {
       this.errorMessages[field].set('This field is required');
-    } else if (control.hasError('pattern')) {
+    } else if (control?.hasError('pattern')) {
       this.errorMessages[field].set('Invalid format');
     } else {
       this.errorMessages[field].set('');
     }
   }
+  
 
   updateAllErrorMessages() {
     Object.keys(this.errorMessages).forEach((field) => {
@@ -129,14 +130,6 @@ export class AddressComponent {
 
   resetForm() {
     this.addressForm.reset();
-    localStorage.removeItem('siteSubDivision');
-    localStorage.removeItem('policeStation');
-    localStorage.removeItem('locationCategory');
-    localStorage.removeItem('wardName');
-    localStorage.removeItem('businessAddress');
-    localStorage.removeItem('roadName');
-    localStorage.removeItem('pinCode');
-    localStorage.removeItem('latitude');
-    localStorage.removeItem('longitude');
+    sessionStorage.clear();
   }
 }

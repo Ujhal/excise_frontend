@@ -3,20 +3,9 @@
     font-weight: 600;
 }
 
-.info{
-    display: flex;
-    justify-content: space-between;
-
-    .section{
-        display: flex;
-        width: 50%;
-        gap: 5%;
-    }
-
-    .validation{
-        color: #ff0000;
-        font-style: italic;
-    }
+.validation{
+    color: #ff0000;
+    font-style: italic;
 }
 
 .step-container{
@@ -29,17 +18,18 @@
 form{
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    row-gap: 20px;
-    align-items: start;
+    gap: 20px 40px;
+    justify-items: center;
+    .form-row{
+        width: 100%;
+        mat-form-field{
+            width: 100%;
+        }
+    }
 }
 
 mat-label{
     font-size: 14px;
-}
-
-.form-row{
-    display: grid;
-    grid-template-columns: 60%;
 }
 
 small{

@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+
+
 // Angular Material Modules
 import { MatCard, MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -26,12 +28,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
-//import { FormsModule, ReactiveFormsModule, FormBuilder, Validators} from '@angular/forms';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-import {  MatTableDataSource } from '@angular/material/table';
 import {MatStep, MatStepLabel, MatStepper, MatStepperModule} from "@angular/material/stepper";
 import { MatIcon } from '@angular/material/icon'; 
 import { MatPaginator } from '@angular/material/paginator';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {  MatTableDataSource } from '@angular/material/table';
+//import { FormsModule, ReactiveFormsModule, FormBuilder, Validators} from '@angular/forms';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 

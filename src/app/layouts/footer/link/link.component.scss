@@ -1,0 +1,78 @@
+.page-container{
+    padding: 20px;
+    font-size: 13.8px;
+}
+
+.grid-card{
+    box-shadow: 0px 4px 6px rgba(0, 14, 31, 0.18);
+    mat-card-header{
+        padding: 15px;
+        border-radius: 8px 8px 0 0;
+        background-color: #1C2B78;
+        color: #ffffff;
+        font-size: 24px;
+        font-weight: 600;   
+    }
+    mat-card-content{
+        padding: 15px;
+    }
+}
+
+.web-nodal-officer{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    .heading{
+        font-weight: 500;
+    }
+    img{
+        width: 30px;
+    }
+    .contact{
+        gap: 5px;
+        .phone, .email{
+            display: flex;
+            gap: 7px;
+            .text{
+                font-size: 14px;
+                align-content: center;
+            }
+        }
+    }
+}
+
+.organisational-structure{
+    mat-card-content{
+        background-color: #ffffff;
+        border-radius: 0 0 8px 8px;
+        display: flex;
+        justify-content: center;
+    }
+}
+
+.hods{
+    .card-container{
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+        mat-card-content{
+            display: flex;
+            gap: 10px;
+            img{
+                width: 180px;
+            }
+        }
+    }
+}
+
+table{
+    background-color: #F4F3F6;
+}
+
+@media(max-width: 785px){
+    .public-info-officers, .directorate-officials, .grievance-redressal-officer{
+        mat-card-content{
+            overflow-x: scroll; 
+        }
+    }
+}

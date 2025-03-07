@@ -12,17 +12,24 @@ import { MemberDetailsComponent } from './licensee/licensee-dashboard/apply-lice
 import { LicenseComponent } from './licensee/licensee-dashboard/apply-license/stepper/license/license.component';
 import { ApplyLicenseComponent } from './licensee/licensee-dashboard/apply-license/apply-license.component';
 
+import { LinkComponent } from './layouts/footer/link/link.component';
+import { MainLinksComponent } from './layouts/main/main-links/main-links.component';
+
 export const routes: Routes = [
   {
     path: '',
     component: MainComponent,
-    data: { showCarousel: true, showHeaderFooter: true },
+    data: { showCarousel: true },
   },
+
   {
     path: 'login',
     component: LoginComponent,
-    data: { showHeaderFooter: false },
   },
+
+  { path: 'footer/:page', component: LinkComponent },
+  { path: 'main/:page', component: MainLinksComponent },
+  
   {
     path: 'site-admin',
     data: {
@@ -58,5 +65,7 @@ export const routes: Routes = [
   },
   { path: '**', redirectTo: 'licensee-dashboard', pathMatch: 'full' }
 ];
+
+
 
 export default routes;

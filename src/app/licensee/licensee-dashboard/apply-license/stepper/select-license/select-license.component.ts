@@ -3,13 +3,12 @@ import { MaterialModule } from '../../../../../material.module';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { merge } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CardModule } from '@coreui/angular';
 
 @Component({
   selector: 'app-select-license',
   standalone: true,
-  imports: [
-    MaterialModule,
-  ],
+  imports: [MaterialModule, CardModule],
   templateUrl: './select-license.component.html',
   styleUrl: './select-license.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -20,23 +19,35 @@ export class SelectLicenseComponent {
   @Output() next = new EventEmitter<void>();
   @Output() back = new EventEmitter<void>();
 
-  exciseDistrict = new FormControl(this.getFromLocalStorage('exciseDistrict'), [Validators.required]);
-  licenseCategory = new FormControl(this.getFromLocalStorage('licenseCategory'), [Validators.required]);
-  exciseSubDivision = new FormControl(this.getFromLocalStorage('exciseSubDivision'), [Validators.required]);
-  licenseSelection = new FormControl(this.getFromLocalStorage('licenseSelection'), [Validators.required]);
+  exciseDistrict = new FormControl(this.getFromSessionStorage('exciseDistrict'), [Validators.required]);
+  licenseCategory = new FormControl(this.getFromSessionStorage('licenseCategory'), [Validators.required]);
+  exciseSubDivision = new FormControl(this.getFromSessionStorage('exciseSubDivision'), [Validators.required]);
+  licenseSelection = new FormControl(this.getFromSessionStorage('licenseSelection'), [Validators.required]);
 
   errorMessages = {
     exciseDistrict: signal(''),
     licenseCategory: signal(''),
     exciseSubDivision: signal(''),
-    licenseSelection: signal(''),
+    licenseSelection: signal('')
   };
 
-   // Initial dropdown options
-   exciseDistricts: string[] = ['District A', 'District B'];
-   licenseCategories: string[] = ['Category A', 'Category B'];
-   exciseSubDivisions: string[] = ['Sub Division A', 'Sub Division B'];
-   licenseSelections: string[] = ['Selections A', 'Selections B'];
+  // Initial dropdown options
+  exciseDistricts: string[] = ['Gangtok', 'Gyalshing', 'Mangan', 'Namchi'];
+  licenseCategories: string[] = [
+    'Bar License exclusively for Homemade Wine',
+    'Brewery',
+    'Bar-cum-Hotel & Lodge',
+    'Casino with Bar',
+    'Departmental Store'
+  ];
+  licenseSelections: string[] = ['License A', 'License B', 'License C'];
+
+  districtSubdivisions: { [key: string]: string[] } = {
+    Gangtok: ['Ranka', 'Ranipool', 'Rumtek'],
+    Namchi: ['Sadam', 'Namthang', 'Damthang'],
+    Gyalshing: ['Yuksom', 'Dentam'],
+    Mangan: ['Chungthang', 'Dzongu']
+  };
 
   constructor(private fb: FormBuilder) {
     this.selectLicenseForm = this.fb.group({
@@ -54,20 +65,29 @@ export class SelectLicenseComponent {
     )
       .pipe(takeUntilDestroyed())
       .subscribe(() => {
-        this.saveToLocalStorage();
+        this.saveToSessionStorage();
         this.updateAllErrorMessages();
       });
+
+    // Reset subdivision when district changes
+    this.exciseDistrict.valueChanges.subscribe(() => {
+      this.exciseSubDivision.setValue('');
+    });
   }
 
-  getFromLocalStorage(key: string): string {
-    return localStorage.getItem(key) || '';
+  get exciseSubDivisions(): string[] {
+    return this.districtSubdivisions[this.exciseDistrict.value || ''] || [];
   }
 
-  saveToLocalStorage() {
-    localStorage.setItem('exciseDistrict', this.exciseDistrict.value || '');
-    localStorage.setItem('licenseCategory', this.licenseCategory.value || '');
-    localStorage.setItem('exciseSubDivision', this.exciseSubDivision.value || '');
-    localStorage.setItem('licenseSelection', this.licenseSelection.value || '');
+  getFromSessionStorage(key: string): string {
+    return sessionStorage.getItem(key) || '';
+  }
+
+  saveToSessionStorage() {
+    sessionStorage.setItem('exciseDistrict', this.exciseDistrict.value || '');
+    sessionStorage.setItem('licenseCategory', this.licenseCategory.value || '');
+    sessionStorage.setItem('exciseSubDivision', this.exciseSubDivision.value || '');
+    sessionStorage.setItem('licenseSelection', this.licenseSelection.value || '');
   }
 
   updateErrorMessage(field: keyof typeof this.errorMessages) {
@@ -101,9 +121,6 @@ export class SelectLicenseComponent {
 
   resetForm() {
     this.selectLicenseForm.reset();
-    localStorage.removeItem('exciseDistrict');
-    localStorage.removeItem('licenseCategory');
-    localStorage.removeItem('exciseSubDivision');
-    localStorage.removeItem('licenseSelection');
+    sessionStorage.clear();
   }
 }

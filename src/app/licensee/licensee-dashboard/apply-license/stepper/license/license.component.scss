@@ -3,33 +3,20 @@
     font-weight: 600;
 }
 
-.info{
-    display: flex;
-    justify-content: space-between;
-
-    .section{
-        display: flex;
-        width: 50%;
-        gap: 5%;
-    }
-
-    .validation{
-        color: #ff0000;
-        font-style: italic;
-    }
-}
-
 .step-container{
     font-size: 13px;
     display: flex;
     flex-direction: column;
     gap: 40px;
-}
-
-.form-row{
-    display: grid;
-    grid-template-columns: 15% 20%;
-    align-items: center;
+    .sessionStorageEntries{
+        display: grid;
+        grid-template-columns: 250px 200px;
+        padding: 5px;
+        .key{
+            font-weight: 500;
+            color: #002d95
+        }
+    }
 }
 
 .button-container{

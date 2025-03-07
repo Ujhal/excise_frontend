@@ -1,151 +1,146 @@
 <div class="step-container">
-    <div class="heading">Address</div>
-  
-    <div class="info">
-      <div class="section">
-        <div class="section1">Non-Special Section License</div>
-        <div class="section2">Special Section License</div>
-      </div>
-      <div class="validation">* Marked Fields Are Mandatory</div>
+  <div class="heading">Address</div>
+
+    <div class="validation">
+      * Marked Fields Are Mandatory
     </div>
-  
-    <form [formGroup]="addressForm">
-  
-      <div class="form-row">
-        <mat-form-field>
-          <mat-label>Site Sub Division</mat-label>
-          <mat-select [formControl]="siteSubDivision" required>
-            <mat-option>None</mat-option>
-            @for (subDivision of siteSubDivisions; track subDivision) {
-              <mat-option [value]="subDivision">{{subDivision}}</mat-option>
-            }
-          </mat-select>
-          @if (siteSubDivision.invalid) {
-            <mat-error>{{ getErrorMessage('siteSubDivision') }}</mat-error>
+
+  <form [formGroup]="addressForm">
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Site Sub Division</mat-label>
+        <mat-select [formControl]="siteSubDivision" required>
+          <mat-option>None</mat-option>
+          @for (subDivision of siteSubDivisions; track subDivision) {
+            <mat-option [value]="subDivision">{{subDivision}}</mat-option>
           }
-        </mat-form-field>
-      </div>
-  
-      <div class="form-row">
-        <mat-form-field>
-          <mat-label>Police Station</mat-label>
-          <mat-select [formControl]="policeStation" required>
-            <mat-option>None</mat-option>
-            @for (station of policeStations; track station) {
-              <mat-option [value]="station">{{station}}</mat-option>
-            }
-          </mat-select>
-          @if (policeStation.invalid) {
-            <mat-error>{{ getErrorMessage('policeStation') }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-  
-      <div class="form-row">
-        <mat-form-field>
-          <mat-label>Location Category</mat-label>
-          <mat-select [formControl]="locationCategory" required>
-            <mat-option>None</mat-option>
-            @for (category of locationCategories; track category) {
-              <mat-option [value]="category">{{category}}</mat-option>
-            }
-          </mat-select>
-          @if (locationCategory.invalid) {
-            <mat-error>{{ getErrorMessage('locationCategory') }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-  
-      <div class="form-row">
-        <mat-form-field>
-          <mat-label>Ward Name</mat-label>
-          <mat-select [formControl]="wardName" required>
-            <mat-option>None</mat-option>
-            @for (ward of wardNames; track ward) {
-              <mat-option [value]="ward">{{ward}}</mat-option>
-            }
-          </mat-select>
-          @if (wardName.invalid) {
-            <mat-error>{{ getErrorMessage('wardName') }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-  
-      <div class="form-row">
-        <mat-form-field>
-          <mat-label>Business Address</mat-label>
-          <textarea matInput
-                    placeholder="Enter Establishment Name (max 500 characters)"
-                    [formControl]="businessAddress"
-                    cdkTextareaAutosize
-                    #autosize="cdkTextareaAutosize"
-                    cdkAutosizeMinRows="1"
-                    cdkAutosizeMaxRows="5"
-                    required>
-          </textarea>
-          @if (businessAddress.invalid) {
-            <mat-error>{{ getErrorMessage('businessAddress') }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-  
-      <div class="form-row">
-        <mat-form-field>
-          <mat-label>Road Name</mat-label>
-          <mat-select [formControl]="roadName" required>
-            <mat-option>None</mat-option>
-            @for (road of roadNames; track road) {
-              <mat-option [value]="road">{{road}}</mat-option>
-            }
-          </mat-select>
-          @if (roadName.invalid) {
-            <mat-error>{{ getErrorMessage('roadName') }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-  
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>PIN Code</mat-label>
-          <input matInput placeholder="Enter PIN" type="number" [formControl]="pinCode"/>
-          @if (pinCode.invalid) {
-            <mat-error>{{ getErrorMessage('pinCode') }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-  
-    </form>
-  
-    <h5>Site Map (Optional)</h5>
-    
-    <form>
-  
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Latitude</mat-label>
-          <input matInput placeholder="Enter Latitude" type="text" [formControl]="latitude"/>
-          @if (latitude.invalid) {
-            <mat-error>{{ getErrorMessage('latitude') }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-  
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Longitude</mat-label>
-          <input matInput placeholder="Enter Longitude" type="text" [formControl]="longitude"/>
-          @if (longitude.invalid) {
-            <mat-error>{{ getErrorMessage('longitude') }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-  
-    </form>
-  
-    <div class="button-container">
-      <button mat-stroked-button (click)="goBack()">Back</button>
-      <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!addressForm.valid">Next</button>
-      <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
+        </mat-select>
+        @if (siteSubDivision.invalid) {
+          <mat-error>{{ getErrorMessage('siteSubDivision') }}</mat-error>
+        }
+      </mat-form-field>
     </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Police Station</mat-label>
+        <mat-select [formControl]="policeStation" required>
+          <mat-option>None</mat-option>
+          @for (station of policeStations; track station) {
+            <mat-option [value]="station">{{station}}</mat-option>
+          }
+        </mat-select>
+        @if (policeStation.invalid) {
+          <mat-error>{{ getErrorMessage('policeStation') }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Location Category</mat-label>
+        <mat-select [formControl]="locationCategory" required>
+          <mat-option>None</mat-option>
+          @for (category of locationCategories; track category) {
+            <mat-option [value]="category">{{category}}</mat-option>
+          }
+        </mat-select>
+        @if (locationCategory.invalid) {
+          <mat-error>{{ getErrorMessage('locationCategory') }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Ward Name</mat-label>
+        <mat-select [formControl]="wardName" required>
+          <mat-option>None</mat-option>
+          @for (ward of wardNames; track ward) {
+            <mat-option [value]="ward">{{ward}}</mat-option>
+          }
+        </mat-select>
+        @if (wardName.invalid) {
+          <mat-error>{{ getErrorMessage('wardName') }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Business Address</mat-label>
+        <textarea matInput
+                  placeholder="Enter Establishment Name (max 500 characters)"
+                  [formControl]="businessAddress"
+                  cdkTextareaAutosize
+                  #autosize="cdkTextareaAutosize"
+                  cdkAutosizeMinRows="1"
+                  cdkAutosizeMaxRows="5"
+                  required>
+        </textarea>
+        @if (businessAddress.invalid) {
+          <mat-error>{{ getErrorMessage('businessAddress') }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Road Name</mat-label>
+        <mat-select [formControl]="roadName" required>
+          <mat-option>None</mat-option>
+          @for (road of roadNames; track road) {
+            <mat-option [value]="road">{{road}}</mat-option>
+          }
+        </mat-select>
+        @if (roadName.invalid) {
+          <mat-error>{{ getErrorMessage('roadName') }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>PIN Code</mat-label>
+        <input matInput placeholder="Enter PIN" type="number" [formControl]="pinCode"/>
+        @if (pinCode.invalid) {
+          <mat-error>{{ getErrorMessage('pinCode') }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+  </form>
+
+  <h5>Site Map (Optional)</h5>
+  
+  <form>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Latitude</mat-label>
+        <input matInput placeholder="Enter Latitude" type="text" [formControl]="latitude"/>
+        @if (latitude.invalid) {
+          <mat-error>{{ getErrorMessage('latitude') }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Longitude</mat-label>
+        <input matInput placeholder="Enter Longitude" type="text" [formControl]="longitude"/>
+        @if (longitude.invalid) {
+          <mat-error>{{ getErrorMessage('longitude') }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+  </form>
+
+  <div class="button-container">
+    <button mat-stroked-button (click)="goBack()">Back</button>
+    <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!addressForm.valid">Next</button>
+    <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
   </div>
-  
+</div>

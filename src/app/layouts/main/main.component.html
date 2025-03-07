@@ -1,8 +1,8 @@
 <div class="grid-container">
 
-  <c-card class = "about-us grid-card" id = "about-us">
-    <c-card-header>About Us</c-card-header>
-    <c-card-body class = "card-container">
+  <mat-card class = "about-us grid-card" id = "about-us">
+    <mat-card-header>About Us</mat-card-header>
+    <mat-card-content class = "card-container">
       <p cCardText>The  Excise Department, under the Government of Sikkim 
         enforces regulations and administers the Sikkim Excise Act, 
         1992. The said Act provides for manufacturing, possession, sale, 
@@ -36,20 +36,20 @@
         The Department also runs a Laboratory at Chanatar, Rangpo. The sole 
         responsibility of the Laboratory is to examine, test and analyze all 
         liquors produced in Sikkim.</p>
-    </c-card-body>
-  </c-card>
+    </mat-card-content>
+  </mat-card>
 
-  <c-card class = "revenue-receipts grid-card">
-    <c-card-header>Revenue Receipts</c-card-header>
-    <c-card-body class = "card-container">
+  <mat-card class = "revenue-receipts grid-card">
+    <mat-card-header>Revenue Receipts</mat-card-header>
+    <mat-card-content class = "card-container">
       <img src = "assets/images/main/revenue-receipts/revenue-receipt-fig.png">
-    </c-card-body>
-  </c-card>
+    </mat-card-content>
+  </mat-card>
 
-  <c-card class = "preventive-raids grid-card">
-    <c-card-header>Preventive Raids</c-card-header>
+  <mat-card class = "preventive-raids grid-card">
+    <mat-card-header>Preventive Raids</mat-card-header>
     <img src="assets/images/main/preventive-raids/preventive-raids.jpg">
-    <c-card-body class = "card-container">
+    <mat-card-content class = "card-container">
       <h6 cCardTitle>Total Raids From 1st January, 2020</h6>
       <div class="description">
         <p>
@@ -59,13 +59,13 @@
           Excise Raids on illicit dens in Remote Villages.
         </p>
       </div>
-      <a mat-flat-button class = "button" href="https://example.com" target="_blank">Read More</a>
-    </c-card-body>
-  </c-card>
+      <button mat-flat-button (click)="navigateTo('preventive-raids')">Read More</button>
+    </mat-card-content>
+  </mat-card>
 
-  <c-card class = "whats-current grid-card">
-    <c-card-header>What's Current</c-card-header>
-    <c-card-body class = "card-container">
+  <mat-card class = "whats-current grid-card">
+    <mat-card-header>What's Current</mat-card-header>
+    <mat-card-content class = "card-container">
       <div button (click)="navigateToExternal('https://example.com')" class="calculator-link styled-link">
         Duty Fees MRP Calculator
       </div>
@@ -129,13 +129,13 @@
 
         </div>
       </div>
-      <a mat-flat-button class = "button" href="https://example.com" target="_blank">View All</a>
-    </c-card-body>
-  </c-card>
+      <button mat-flat-button (click)="navigateTo('notifications')">View All</button>
+    </mat-card-content>
+  </mat-card>
   
-  <c-card class = "connect-with-us grid-card">
-    <c-card-header>Connect With Us</c-card-header>
-    <c-card-body class = "card-container">
+  <mat-card class = "connect-with-us grid-card">
+    <mat-card-header>Connect With Us</mat-card-header>
+    <mat-card-content class = "card-container">
       <div class="contact">
         <div class="dept">
           <p>EXCISE DEPARTMENT<br>GOVERNMENT OF SIKKIM</p>
@@ -155,15 +155,15 @@
           referrerpolicy="no-referrer-when-downgrade">
         </iframe>
       </div>
-    </c-card-body>
-  </c-card>
+    </mat-card-content>
+  </mat-card>
 
-  <c-card class = "videos grid-card">
-    <c-card-header>Videos</c-card-header>
-    <c-card-body class = "card-container">
+  <mat-card class = "videos grid-card">
+    <mat-card-header>Videos</mat-card-header>
+    <mat-card-content class = "card-container">
       <iframe
         src="https://www.youtube.com/embed/yQF2wpLHcjg?si=ZOliGnG5WNkRamQ7" do-not-allow="autoplay">
       </iframe>
-    </c-card-body>
-  </c-card>
+    </mat-card-content>
+  </mat-card>
 </div>

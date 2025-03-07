@@ -89,9 +89,8 @@ footer{
     }
 }
 
-.link a {
-    text-decoration: none; /* Remove underline */
-    color: inherit; /* Use the parent element's color */
+.link{
+    cursor: pointer;
 }
 
 .footer2 {

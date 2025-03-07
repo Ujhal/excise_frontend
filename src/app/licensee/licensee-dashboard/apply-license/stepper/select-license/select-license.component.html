@@ -1,82 +1,74 @@
 <div class="step-container">
-    <div class="heading">Select License</div>
-  
-    <div class="info">
-      <div class="section">
-        <div class="section1">Non-Special Section License</div>
-        <div class="section2">Special Section License</div>
-      </div>
-      <div class="validation">* Marked Fields Are Mandatory</div>
-    </div>
-  
-    <form [formGroup]="selectLicenseForm">
-  
-      <div class="form-row">
-        <mat-form-field>
-          <mat-label>Excise District</mat-label>
-          <mat-select [formControl]="exciseDistrict" required>
-            <mat-option>None</mat-option>
-            @for (district of exciseDistricts; track district) {
-              <mat-option [value]="district">{{district}}</mat-option>
-            }
-          </mat-select>
-          @if (exciseDistrict.invalid) {
-            <mat-error>{{ getErrorMessage('exciseDistrict') }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-  
-      <div class="form-row">
-        <mat-form-field>
-          <mat-label>License Category</mat-label>
-          <mat-select [formControl]="licenseCategory" required>
-            <mat-option>None</mat-option>
-            @for (category of licenseCategories; track category) {
-              <mat-option [value]="category">{{category}}</mat-option>
-            }
-          </mat-select>
-          @if (licenseCategory.invalid) {
-            <mat-error>{{ getErrorMessage('licenseCategory') }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-  
-      <div class="form-row">
-        <mat-form-field>
-          <mat-label>Excise Sub Division</mat-label>
-          <mat-select [formControl]="exciseSubDivision" required>
-            <mat-option>None</mat-option>
-            @for (subdivision of exciseSubDivisions; track subdivision) {
-              <mat-option [value]="subdivision">{{subdivision}}</mat-option>
-            }
-          </mat-select>
-          @if (exciseSubDivision.invalid) {
-            <mat-error>{{ getErrorMessage('exciseSubDivision') }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-  
-      <div class="form-row">
-        <mat-form-field>
-          <mat-label>Enter / Select License</mat-label>
-          <mat-select [formControl]="licenseSelection" required>
-            <mat-option>None</mat-option>
-            @for (select of licenseSelections; track select) {
-              <mat-option [value]="select">{{select}}</mat-option>
-            }
-          </mat-select>
-          @if (licenseSelection.invalid) {
-            <mat-error>{{ getErrorMessage('licenseSelection') }}</mat-error>
-          }
-        </mat-form-field>
-      </div>
-  
-    </form>
-  
-    <div class="button-container">
-      <button mat-stroked-button (click)="goBack()">Back</button>
-      <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!selectLicenseForm.valid">Next</button>
-      <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
-    </div>
+  <div class="heading">Select License</div>
+
+  <div class="validation">
+    * Marked Fields Are Mandatory
   </div>
-  
+
+  <form [formGroup]="selectLicenseForm">
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Excise District</mat-label>
+        <mat-select [formControl]="exciseDistrict" required>
+          <mat-option>None</mat-option>
+          @for (district of exciseDistricts; track district) {
+            <mat-option [value]="district">{{district}}</mat-option>
+          }
+        </mat-select>
+        @if (exciseDistrict.invalid) {
+          <mat-error>{{ getErrorMessage('exciseDistrict') }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>License Category</mat-label>
+        <mat-select [formControl]="licenseCategory" required>
+          <mat-option>None</mat-option>
+          @for (category of licenseCategories; track category) {
+            <mat-option [value]="category">{{category}}</mat-option>
+          }
+        </mat-select>
+        @if (licenseCategory.invalid) {
+          <mat-error>{{ getErrorMessage('licenseCategory') }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Excise Sub Division</mat-label>
+        <mat-select [formControl]="exciseSubDivision" required>
+          <mat-option>None</mat-option>
+          <mat-option *ngFor="let subdivision of exciseSubDivisions" [value]="subdivision">
+            {{ subdivision }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Enter / Select License</mat-label>
+        <mat-select [formControl]="licenseSelection" required>
+          <mat-option>None</mat-option>
+          @for (select of licenseSelections; track select) {
+            <mat-option [value]="select">{{select}}</mat-option>
+          }
+        </mat-select>
+        @if (licenseSelection.invalid) {
+          <mat-error>{{ getErrorMessage('licenseSelection') }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+  </form>
+
+  <div class="button-container">
+    <button mat-stroked-button (click)="goBack()">Back</button>
+    <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!selectLicenseForm.valid">Next</button>
+    <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
+  </div>
+</div>

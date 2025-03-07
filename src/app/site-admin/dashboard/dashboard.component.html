@@ -1,43 +1,90 @@
-<div class="container-fluid">
-    <mat-card>
-      <mat-card-header class="page-card-header">
-        <div class="icon-header ml-2"><i class="icofont icofont-dashboard-web float-left"></i></div>
-        <span class="page-title">Dashboard </span>
-      </mat-card-header>
-      <mat-card-content class="page-card-content">
-        <form ngForm #inputFieldForm="ngForm">
-          <div class="row mb-3">
+<div class="dashboard-container">
+  <div class="stats-container">
 
-            <div class="col clo-sm-6 mb-3">
-              <div class="d-card text-white bg-success o-hidden h-75">
-                <div class="card-body rounded">
-                  <div class="fs-d-card"><i class="icofont icofont-university float-left"></i>{{ siteAdminDashboard.district_count }}</div>
-                </div>
-                <a class="card-footer fs-d-card-footer" routerLink="">
-                  <span class="float-left" >Districts</span>
-                  <span class="float-right">
-                    <i class="fa fa-angle-right"></i>
-                  </span>
-                </a>
-              </div>
-            </div>
-            <div class="col clo-sm-6 mb-3">
-              <div class="d-card text-white bg-danger o-hidden h-75">
-                <div class="card-body rounded">
-                  <div class="fs-d-card"><i class="icofont icofont-university float-left"></i>{{ siteAdminDashboard.subdivision_count }}</div>
-                </div>
-                <a class="card-footer fs-d-card-footer" routerLink="">
-                  <span class="float-left" >Sub-Divisions</span>
-                  <span class="float-right">
-                    <i class="fa fa-angle-right"></i>
-                  </span>
-                </a>
-              </div>
-            </div>
-          </div>
-         
-        </form>
+    <mat-card class = "applied">
+      <mat-card-header>
+        APPLIED
+      </mat-card-header>
+      <mat-card-content>
+        <img src = "assets/images/admin/dashboard/applied.png">
+        <div class="count">
+          3,474
+        </div>
       </mat-card-content>
     </mat-card>
+
+    <mat-card class = "approved">
+      <mat-card-header>
+        APPROVED
+      </mat-card-header>
+      <mat-card-content>
+        <img src = "assets/images/admin/dashboard/approved.png">
+        <div class="count">
+          14
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class = "pending">
+      <mat-card-header>
+        PENDING
+      </mat-card-header>
+      <mat-card-content>
+        <img src = "assets/images/admin/dashboard/pending.png">
+        <div class="count">
+          108
+        </div>
+      </mat-card-content>
+    </mat-card>
+
   </div>
+
+  <mat-card class = "table-container">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+      <ng-container matColumnDef="slNo">
+        <th mat-header-cell *matHeaderCellDef> Sl No. </th>
+        <td mat-cell *matCellDef="let stats"> {{stats.slNo}} </td>
+      </ng-container>
+    
+      <ng-container matColumnDef="serviceName">
+        <th mat-header-cell *matHeaderCellDef> Service Name </th>
+        <td mat-cell *matCellDef="let stats"> {{stats.serviceName}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="applied">
+        <th mat-header-cell *matHeaderCellDef> Applied </th>
+        <td mat-cell *matCellDef="let stats"> {{stats.applied}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="rejected">
+        <th mat-header-cell *matHeaderCellDef> Rejected </th>
+        <td mat-cell *matCellDef="let stats"> {{stats.rejected}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="approved">
+        <th mat-header-cell *matHeaderCellDef> Approved </th>
+        <td mat-cell *matCellDef="let stats"> {{stats.approved}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="executed">
+        <th mat-header-cell *matHeaderCellDef> Executed </th>
+        <td mat-cell *matCellDef="let stats"> {{stats.executed}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="pending">
+        <th mat-header-cell *matHeaderCellDef> Pending </th>
+        <td mat-cell *matCellDef="let stats"> {{stats.pending}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="pendingWithMe">
+        <th mat-header-cell *matHeaderCellDef> Pending With Me </th>
+        <td mat-cell *matCellDef="let stats"> {{stats.pendingWithMe}} </td>
+      </ng-container>
+    
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </mat-card>
   
+</div>

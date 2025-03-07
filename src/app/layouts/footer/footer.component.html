@@ -18,34 +18,29 @@
               </div>
           </div>
           <div class="links-container">
-                <div class="link">
-                    <a href="https://example.com" target="_blank">Home</a>
-                </div>
-                <div class="link">
-                    <a href="https://example.com/about" target="_blank">About Us</a>
-                </div>
-                <div class="link">
-                    <a href="https://example.com/contact" target="_blank">Contact Us</a>
-                </div>
-                <div class="link">
-                    <a href="https://example.com/services" target="_blank">Copyright Policy</a>
-                </div>
-                <div class="link">
-                    <a href="https://example.com/resources" target="_blank">Privacy Policy</a>
-                </div>
-                <div class="link">
-                    <a href="https://example.com/blog" target="_blank">Terms of Use</a>
-                </div>
-                <div class="link">
-                    <a href="https://example.com/terms" target="_blank">Linking Policy</a>
-                </div>
-                <div class="link">
-                    <a href="https://example.com/privacy" target="_blank">Legal Disclaimer</a>
-                </div>
-                <div class="link">
-                    <a href="https://example.com/help" target="_blank">Help</a>
-                </div>
-          </div>
+           <!-- <div class="link" (click)="scrollToTop()">
+                About Us
+            </div> -->
+            <div mat-button [matMenuTriggerFor]="menu" class="link">About Us</div>
+            <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="navigateTo('department')">Department</button>
+                <button mat-menu-item (click)="navigateTo('organisational-structure')">Organisational Structure</button>
+                <button mat-menu-item (click)="navigateTo('objectives')">Objectives</button>
+                <button mat-menu-item (click)="navigateTo('hods')">Heads of Organisations</button>
+                <button mat-menu-item (click)="navigateTo('secretaries')">Excise Secretaries / Principal Secretaries</button>
+            </mat-menu>
+
+            <div class="link" (click)="navigateTo('contact-us')">Contact Us</div>
+            <div class="link" (click)="navigateTo('copyright-policy')">Copyright Policy</div>
+            <div class="link" (click)="navigateTo('privacy-policy')">Privacy Policy</div>
+            <div class="link" (click)="navigateTo('terms-of-use')">Terms of Use</div>
+            <div class="link" (click)="navigateTo('linking-policy')">Linking Policy</div>
+            <div class="link" (click)="navigateTo('legal-disclaimer')">Legal Disclaimer</div>
+            <div class="link" (click)="navigateTo('right-to-information')">Right to Information</div>
+        </div>
+        
+        
+        
       </div>
     </div>
   <div class = "footer2">

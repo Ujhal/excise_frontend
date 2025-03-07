@@ -3,20 +3,9 @@
     font-weight: 600;
 }
 
-.info{
-    display: flex;
-    justify-content: space-between;
-
-    .section{
-        display: flex;
-        width: 50%;
-        gap: 5%;
-    }
-
-    .validation{
-        color: #ff0000;
-        font-style: italic;
-    }
+.validation{
+    color: #ff0000;
+    font-style: italic;
 }
 
 .step-container{
@@ -71,5 +60,3 @@ mat-form-field textarea::placeholder {
     justify-content: center;
     gap: 8px;
 }
-
-  

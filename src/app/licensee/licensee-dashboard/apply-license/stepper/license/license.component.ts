@@ -1,23 +1,16 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatButtonModule } from '@angular/material/button';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { MaterialModule } from '../../../../../material.module';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-license',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatInputModule,
-    MatRadioModule,
-    MatButtonModule
+    MaterialModule,
+    RouterModule
   ],
   templateUrl: './license.component.html',
   styleUrl: './license.component.scss'
@@ -28,22 +21,28 @@ export class LicenseComponent {
   @Output() next = new EventEmitter<void>();
   @Output() back = new EventEmitter<void>();
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private router: Router) {
     this.licenseForm = this.fb.group({
     });
   }
 
-  proceedToNext() {
-    if (this.licenseForm.valid) {
-      this.next.emit();
+  get sessionStorageEntries() {
+    let data: { key: string; value: string }[] = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key) {
+        data.push({ key, value: sessionStorage.getItem(key) || '' });
+      }
     }
+    return data;
   }
 
   goBack() {
     this.back.emit();
   }
 
-  resetForm() {
-    this.licenseForm.reset();
+  home(): void {
+    this.router.navigate(['/']);
   }
+
 }

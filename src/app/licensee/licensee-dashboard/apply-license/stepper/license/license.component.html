@@ -2,28 +2,21 @@
     <div class="heading">
       License
     </div>
-  
-    <div class="info">
-      <div class="section">
-        <div class="section1">
-          Non-Special Section License
-        </div>
-        <div class="section2">
-          Special Section License
-        </div>
-      </div>
-      <div class="validation">
-        * Marked Fields Are Mandatory
-      </div>
-    </div>
 
+    <mat-list>
+      <div class = "sessionStorageEntries" *ngFor="let item of sessionStorageEntries">
+        <div class="key">
+          {{ item.key }}:
+        </div>
+        <div class="value">
+          {{ item.value }}
+        </div>
+      </div>
+    </mat-list>    
   
     <div class="button-container">
       <button mat-stroked-button (click)="goBack()">Back</button>
-      <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!licenseForm.valid">
-        Next
-      </button>
-      <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
+      <button mat-flat-button (click)="home()">Submit</button>
     </div>
   </div>
   

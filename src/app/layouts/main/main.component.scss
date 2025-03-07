@@ -29,58 +29,43 @@
 
 .grid-card{
     box-shadow: 0px 4px 6px rgba(0, 14, 31, 0.18);
-    c-card-header{
+    mat-card-header{
         background-color: #1C2B78;
+        border-radius: 8px 8px 0 0;
         color: #ffffff;
         font-size: 24px;
-        font-weight: 600;   
+        font-weight: 600;
+        padding: 10px; 
     }
-}
-
-header{
-    background-color: #ef9562;
-    font-weight: 600;
-    font-size: 24px;
-    color: #ffffff;
+    mat-card-content{
+        padding: 10px;
+    }
 }
 
 .styled-link:hover{
     cursor: pointer;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-    transform: translateY(-1px);
-    transition: box-shadow 0.3s ease-in-out, transform 0.2s ease-in-out;
+    color: #1400c6;
 }
 
-.button{
+button{
     background-color: #1C2B78 !important;
 }
-  
 
 .about-us{
-    c-card-body{
-        height: 100%;
-    }
     p{ 
-        max-height: 400px;
+        max-height: 412px;
         overflow-y: scroll; /* Enable scroll bar */
         line-height: 1.6;
     }
 }
 
-.revenue-receipts{
-    c-card-body{
-        display: flex;
-        align-content: center;
-        justify-content: center;
-    }
-    img{
-        width: 100%;
-    }
+.revenue-receipts img{
+    width: 100%;
 }
 
 .preventive-raids{
     .description{
-        padding-top: 6px;
+        padding-top: 9px;
         p:nth-child(1){
             margin-bottom: 4px;
         }
@@ -135,6 +120,9 @@ header{
 }
 
 .videos{
+    mat-card-content{
+        height: 100%;
+    }
     iframe{
         height: 100%;
         width: 100%;

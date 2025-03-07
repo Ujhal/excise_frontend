@@ -6,13 +6,12 @@ import { BaseComponent } from '../../base/base.components';
 import { BaseDependency } from '../../base/dependency/base.dependendency';
 import { Account } from '../../shared/models/accounts';
 import { MaterialModule } from '../../material.module';
-import { DashboardComponent } from "../dashboard/dashboard.component";
 import { MatSidenavModule } from '@angular/material/sidenav';
 
 @Component({
   selector: 'app-home',
   standalone: true, // Mark as standalone
-  imports: [CommonModule, RouterModule, MaterialModule, DashboardComponent,MatSidenavModule], // Import necessary modules
+  imports: [CommonModule, RouterModule, MaterialModule, MatSidenavModule], // Import necessary modules
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
