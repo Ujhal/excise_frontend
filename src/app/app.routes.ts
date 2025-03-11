@@ -63,7 +63,7 @@ export const routes: Routes = [
       { path: '**', redirectTo: 'select-license', pathMatch: 'full' },
     ]
   },
-  { path: '**', redirectTo: 'licensee-dashboard', pathMatch: 'full' }
+  { path: '**', redirectTo: '/', pathMatch: 'full' }
 ];
 
 

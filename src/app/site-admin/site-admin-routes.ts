@@ -37,6 +37,30 @@ const routes: Routes = [
         path: 'list-user',
         loadComponent: () => import('./list-user/list-user.component').then(m => m.ListUserComponent),
       },
+      {
+        path: 'add-policestation',
+        loadComponent: () => import('./add-policestation/add-policestation.component').then(m => m.AddPolicestationComponent)
+      },
+      {
+        path: 'list-policestation',
+        loadComponent: () => import('./list-policestation/list-policestation.component').then(m => m.ListPolicestationComponent),
+      },
+      {
+        path: 'add-licensetype',
+        loadComponent: () => import('./add-licensetype/add-licensetype.component').then(m => m.AddLicensetypeComponent),
+      },
+      {
+        path: 'list-licensetype',
+        loadComponent: () => import('./list-licensetype/list-licensetype.component').then(m => m.ListLicensetypeComponent),
+      },
+      {
+        path: 'add-licensecategory',
+        loadComponent: () => import('./add-licensecategory/add-licensecategory.component').then(m => m.AddLicensecategoryComponent),
+      },
+      {
+        path: 'list-licensecategory',
+        loadComponent: () => import('./list-licensecategory/list-licensecategory.component').then(m => m.ListLicensecategoryComponent),
+      },
     ],
   },
 ];

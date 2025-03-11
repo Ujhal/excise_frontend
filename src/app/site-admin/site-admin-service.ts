@@ -3,6 +3,9 @@ import { Injectable } from '@angular/core';
 import { District } from '../shared/models/district.model';
 import { Dashboard } from '../shared/models/dashboard.model';
 import { SubDivision } from '../shared/models/subdivision.model';
+import { PoliceStation } from '../shared/models/policestation.model';
+import { LicenseType } from '../shared/models/license-type.model';
+import { LicenseCategory } from '../shared/models/license-category.model';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 import { Account } from '../shared/models/accounts';
@@ -11,6 +14,7 @@ import { Account } from '../shared/models/accounts';
 export class SiteAdminService {
   private baseUrl = environment.baseUrl;
   private apiUrl = `${this.baseUrl}/api`
+
   constructor(private http: HttpClient) {}
 
 
@@ -44,6 +48,42 @@ export class SiteAdminService {
   getUsers(): Observable<any> {
     return this.http.get<Account[]>(`${this.apiUrl}/register/`);
   }
+
+  addPoliceStation(policeStation: PoliceStation) {
+    return this.http.post(`${this.apiUrl}/policestations/`, policeStation);
+  }
+
+  getPoliceStations() {
+    return this.http.get<PoliceStation[]>(`${this.apiUrl}/policestations`);
+  }
+  
+  deletePoliceStation(id: number) {
+    return this.http.delete(`${this.apiUrl}/policestations/${id}/`);
+  }
+  
+  addLicenseType(licenseType: LicenseType): Observable<any> {
+    return this.http.post(`${this.apiUrl}/licensetype/`, licenseType);
+  }
+  getLicenseTypes(): Observable<LicenseType[]> {
+    return this.http.get<LicenseType[]>(`${this.apiUrl}/licensetype/view/`);
+  }
+
+  // Delete a license type by ID
+  deleteLicenseType(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/licensetype/${id}/`);
+  }
+
+  addLicenseCategory(category: LicenseCategory): Observable<any> {
+    return this.http.post(`${this.apiUrl}/licensecategory/`, category);
+  }
+  
+  getLicenseCategories(): Observable<LicenseCategory[]> {
+    return this.http.get<LicenseCategory[]>(`${this.apiUrl}/licensecategory/`);
+  }
+  
+  deleteLicenseCategory(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/licensecategory/${id}/`);
+  }  
 
   getAdminDashboard(): Observable<Dashboard> {
     return this.http.get<Dashboard>(`${this.apiUrl}/dashboard/`,{});

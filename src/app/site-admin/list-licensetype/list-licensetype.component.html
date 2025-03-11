@@ -1,0 +1,35 @@
+<div class="container-fluid">
+  <mat-card class="mat-card">
+    <mat-card-header class="page-card-header">
+      <div class="page-title">License Type List</div>
+      <button mat-flat-button [routerLink]="'../add-licensetype'">
+        <mat-icon>add</mat-icon> Add License Type
+      </button> 
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="licenseTypeDataSource" class="mat-elevation-z8">
+        <ng-container matColumnDef="slNo">
+          <th mat-header-cell *matHeaderCellDef> Sl. No. </th>
+          <td mat-cell *matCellDef="let element"> {{ element.slNo }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="licenseType">
+          <th mat-header-cell *matHeaderCellDef> License Type </th>
+          <td mat-cell *matCellDef="let element"> {{ element.licenseType }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef> Actions </th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button color="warn" (click)="onDelete(element)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+</div>

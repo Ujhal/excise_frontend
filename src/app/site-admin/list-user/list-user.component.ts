@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { SiteAdminService } from '../site-admin-service';
 import { Account } from '../../shared/models/accounts';
 import { MaterialModule } from '../../material.module';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-list-user',
-  imports: [MaterialModule],
+  imports: [MaterialModule, RouterModule],
   templateUrl: './list-user.component.html',
   styleUrl: './list-user.component.scss'
 })

@@ -1,0 +1,55 @@
+<div class="container-fluid">
+  <mat-card class="mat-card">
+    <mat-card-header class="page-card-header">
+      <div class="page-title">Police Station List</div>
+      <button mat-flat-button [routerLink]="'../add-policestation'">
+        <mat-icon>add</mat-icon> Add Police Station
+      </button>
+    </mat-card-header>
+    
+    <mat-card-content class="page-card-content">
+      <div class="row">
+        <div class="col-xl-4 col-lg-4 col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Select Subdivision</mat-label>
+            <mat-select [(ngModel)]="selectedSubDivisionCode" (selectionChange)="onSubdivisionSelect()">
+              <mat-option [value]="null">All Subdivisions</mat-option>
+              <mat-option *ngFor="let sub of subdivisions" [value]="sub.SubDivisionCode">
+                {{ sub.SubDivisionName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+      
+      <table mat-table [dataSource]="policeStationDataSource">
+        <ng-container matColumnDef="slNo">
+          <mat-header-cell *matHeaderCellDef> Sl. No. </mat-header-cell>
+          <mat-cell *matCellDef="let element"> {{ element.slNo }} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="policeStationName">
+          <mat-header-cell *matHeaderCellDef> Police Station Name </mat-header-cell>
+          <mat-cell *matCellDef="let element"> {{ element.policeStationName }} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="policeStationCode">
+          <mat-header-cell *matHeaderCellDef> Police Station Code </mat-header-cell>
+          <mat-cell *matCellDef="let element"> {{ element.policeStationCode }} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef> Actions </mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <button mat-icon-button color="warn" (click)="onDelete(element)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </table>
+    </mat-card-content>
+  </mat-card>
+</div>

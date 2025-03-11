@@ -46,7 +46,10 @@ export class HomeComponent extends BaseComponent implements OnInit {
     });
   }
   
+  isSidenavOpen = false;
+
   snavToggle(sidenav: any) {
+    this.isSidenavOpen = !this.isSidenavOpen;
     sidenav.toggle();
   }
 

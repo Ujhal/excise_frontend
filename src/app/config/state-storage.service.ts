@@ -4,9 +4,12 @@ import { Injectable } from '@angular/core';
 export class StateStorageService {
   private previousUrlKey = 'previousUrl';
  
-
   storeUrl(url: string): void {
-    sessionStorage.setItem(this.previousUrlKey, JSON.stringify(url));
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem(this.previousUrlKey, JSON.stringify(url));
+    } else {
+      console.warn('sessionStorage is not available');
+    }
   }
 
   getUrl(): string | null {

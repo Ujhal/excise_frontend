@@ -1,8 +1,8 @@
 <div class="container-fluid">
     <mat-card>
       <mat-card-header class="page-card-header">
-        <div class="icon-header ml-2">
-          <i class="icofont icofont-dashboard-web float-left"></i>
+        <div class="heading">
+          Add User
         </div>
         
       </mat-card-header>
@@ -66,25 +66,23 @@
                 </mat-select>
               </mat-form-field>
             </div>
-
-            <div class="col-xl-4 col-lg-4 col-md-4">
-                <mat-form-field class="my-form-full-width" appearance="outline">
-                  <mat-label>Subdivision</mat-label>
-                  <mat-select matInput placeholder="Enter Subdivision" [(ngModel)]="user.subDivision"
-                    name="subdivision" required>
-                    <mat-option 
-                      *ngFor="let subDivision of subdivisons" 
-                      [value]="subDivision.SubDivisionCode">
-                      {{subDivision.SubDivisionName}}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
           </div>
 
-          
-  
           <div class="row mb-3">
+            <div class="col-xl-4 col-lg-4 col-md-4">
+              <mat-form-field class="my-form-full-width" appearance="outline">
+                <mat-label>Subdivision</mat-label>
+                <mat-select matInput placeholder="Enter Subdivision" [(ngModel)]="user.subDivision"
+                  name="subdivision" required>
+                  <mat-option 
+                    *ngFor="let subDivision of subdivisons" 
+                    [value]="subDivision.SubDivisionCode">
+                    {{subDivision.SubDivisionName}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
             <!-- Password -->
             <div class="col-xl-4 col-lg-4 col-md-4">
               <mat-form-field class="my-form-full-width" appearance="outline">
