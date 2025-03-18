@@ -18,7 +18,7 @@ import Swal from 'sweetalert2';
   styleUrl: './list-subdivision.component.scss'
 })
 export class ListSubdivisionComponent extends BaseComponent implements OnInit {
-  displayedColumns: string[] = ['srno','SubdivisionName', 'SubdivisionCode', 'District', 'Active'];
+  displayedColumns: string[] = ['slNo', 'id', 'subdivisionName', 'subdivisionNameLL', 'subdivisionCode', 'district', 'districtCode', 'actions'];
   subdivisionDataSource = new MatTableDataSource<SubDivision>();
   districts: District[] = [];
   allSubdivisions: SubDivision[] = [];
@@ -54,53 +54,32 @@ export class ListSubdivisionComponent extends BaseComponent implements OnInit {
     }
   }
 
-  onToggleActive(event: MatSlideToggleChange, element: SubDivision): void {
-    const initialStatus = element.IsActive; // Store the initial status
-    const newStatus = event.checked;
-  
-    if (!newStatus) { // Show confirmation only if deactivating
-      Swal.fire({
-        title: 'Are you sure?',
-        text: 'Are you sure you want to deactivate this item?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, deactivate it!',
-        cancelButtonText: 'Cancel',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          // Confirm the new status and update in the backend
-          this.updateActiveStatus(element, newStatus);
-        } else {
-          // Revert the toggle in the UI if canceled
-          event.source.checked = initialStatus;
-        }
-      });
-    } else {
-      // Activate without confirmation
-      this.updateActiveStatus(element, newStatus);
-    }
-  }
-  
-  // Separate method to handle the update logic
-  updateActiveStatus(element: SubDivision, newStatus: boolean): void {
-    element.IsActive = newStatus;
-  
-    this.siteAdminService.updateSubDivision(element.id, { IsActive: newStatus }).subscribe(
-      response => {
-        console.log('Updated subdivision:', response);
-      },
-      error => {
-        console.error('Error updating subdivision:', error);
-        // Optionally, revert toggle if there's an error
-        element.IsActive = !newStatus;
-      }
-    );
+  onEdit(element: SubDivision): void {
+    this.router.navigate([`../edit-subdivision/${element.id}`]);
   }
 
-  applyFilter(filterValue: string): void {
-    filterValue = filterValue.trim(); // Remove whitespace
-    filterValue = filterValue.toLowerCase(); // MatTableDataSource defaults to lowercase matches
-    this.subdivisionDataSource.filter = filterValue;
+  onDelete(element: SubDivision): void {
+      Swal.fire({
+          title: 'Are you sure?',
+          text: 'You will not be able to recover this subdivision!',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, delete it!',
+          cancelButtonText: 'Cancel'
+      }).then((result) => {
+          if (result.isConfirmed) {
+              this.siteAdminService.deleteSubdivision(element.id).subscribe(
+                  () => {
+                      Swal.fire('Deleted!', 'Subdivision has been deleted.', 'success');
+                      this.loadSubDiv(); // Reload data
+                  },
+                  error => {
+                      console.error('Error deleting subdivision:', error);
+                      Swal.fire('Error!', 'Subdivision could not be deleted.', 'error');
+                  }
+              );
+          }
+      });
   }
 
 }

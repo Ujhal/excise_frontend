@@ -1,0 +1,81 @@
+<form [formGroup]="memberDetailsForm">
+    <mat-card>
+      <mat-card-header>
+        <div class = "heading">
+          Company Details
+        </div>
+        <div class="validation">
+          * Marked Fields Are Mandatory
+        </div>
+      </mat-card-header>
+  
+      <mat-card-content>
+        <div class="form-field-container">
+
+          <mat-form-field appearance="outline">
+            <mat-label>Member Name</mat-label>
+            <input matInput placeholder="Enter Company Name" type="text" formControlName="memberName"/>
+            @if (memberDetailsForm.get('memberName ')?.invalid) {
+                <mat-error>{{ getErrorMessage('memberName') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Member Designation</mat-label>
+            <textarea matInput
+                      placeholder="Enter Member Designation (max 100 characters)"
+                      formControlName="memberDesignation"
+                      cdkTextareaAutosize
+                      #autosize="cdkTextareaAutosize"
+                      cdkAutosizeMinRows="1"
+                      cdkAutosizeMaxRows="5"
+                      required>
+            </textarea>
+            @if (memberDetailsForm.get('memberDesignation')?.invalid) {
+              <mat-error>{{ getErrorMessage('memberDesignation') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Mobile Number</mat-label>
+            <input matInput placeholder="Enter Mobile Number" type="number" formControlName="mobileNumber"/>
+            @if (memberDetailsForm.get('mobileNumber')?.invalid) {
+            <mat-error>{{ getErrorMessage('mobileNumber') }}</mat-error>
+            }
+          </mat-form-field>
+      
+          <mat-form-field appearance="outline">
+            <mat-label>Email Id</mat-label>
+            <input matInput placeholder="Enter Email" type="email" formControlName="emailId"/>
+            @if (memberDetailsForm.get('emailId')?.invalid) {
+              <mat-error>{{ getErrorMessage('emailId') }}</mat-error>
+            }
+          </mat-form-field>
+    
+          <mat-form-field appearance="outline">
+            <mat-label>Member Address</mat-label>
+            <textarea matInput
+                      placeholder="Enter Member Address (max 500 characters)"
+                      formControlName="memberAddress"
+                      cdkTextareaAutosize
+                      #autosize="cdkTextareaAutosize"
+                      cdkAutosizeMinRows="1"
+                      cdkAutosizeMaxRows="5"
+                      required>
+            </textarea>
+            @if (memberDetailsForm.get('memberAddress')?.invalid) {
+              <mat-error>{{ getErrorMessage('memberAddress') }}</mat-error>
+            }
+          </mat-form-field>
+
+        </div>
+      </mat-card-content>
+  
+      <mat-card-actions>
+        <button mat-stroked-button (click)="goBack()">Back</button>
+        <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!memberDetailsForm.valid">Next</button>
+        <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
+      </mat-card-actions>
+    </mat-card>
+</form>
+  

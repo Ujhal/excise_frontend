@@ -1,0 +1,172 @@
+<form [formGroup]="companyDetailsForm">
+    <mat-card>
+      <mat-card-header>
+        <div class = "heading">
+          Company Details
+        </div>
+        <div class="validation">
+          * Marked Fields Are Mandatory
+        </div>
+      </mat-card-header>
+  
+      <mat-card-content>
+        
+        <mat-radio-group aria-label="Brand Type" formControlName="brandType" required>
+          <mat-radio-button value="Manufactured in Sikkim">Manufactured in Sikkim</mat-radio-button>
+          <mat-radio-button value="Imported from other States/Country">Imported from other States/Country</mat-radio-button>
+          <mat-radio-button value="Bottled in Sikkim (Collaboration)">Bottled in Sikkim (Collaboration)</mat-radio-button>
+          @if (companyDetailsForm.get('brandType')?.invalid) {
+            <mat-error>{{ getErrorMessage('brandType') }}</mat-error>
+          }
+        </mat-radio-group>
+  
+        <div class="form-field-container">
+    
+          <mat-form-field appearance="outline">
+            <mat-label>Select License</mat-label>
+            <mat-select [formControl]="license" required>
+                <mat-option>None</mat-option>
+                @for (license of licenses; track license) {
+                    <mat-option [value]="license">{{license}}</mat-option>
+                }
+            </mat-select>
+            @if (license.invalid) {
+                <mat-error>{{ getErrorMessage('license') }}</mat-error>
+            }
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Select Application Year</mat-label>
+            <mat-select [formControl]="applicationYear" required>
+                <mat-option>None</mat-option>
+                @for (applicationYear of applicationYears; track applicationYear) {
+                <mat-option [value]="applicationYear">{{applicationYear}}</mat-option>
+                }
+            </mat-select>
+            @if (applicationYear.invalid) {
+                <mat-error>{{ getErrorMessage('applicationYear') }}</mat-error>
+            }
+          </mat-form-field>
+    
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput placeholder="Enter Company Name" type="text" formControlName="companyName"/>
+            @if (companyDetailsForm.get('companyName')?.invalid) {
+                <mat-error>{{ getErrorMessage('companyName') }}</mat-error>
+            }
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>PAN</mat-label>
+            <input matInput placeholder="Enter PAN" type="text" formControlName="pan" required/>
+            @if (companyDetailsForm.get('pan')?.invalid) {
+              <mat-error>{{ getErrorMessage('pan') }}</mat-error>
+            }
+          </mat-form-field>
+    
+          <mat-form-field appearance="outline">
+            <mat-label>Registered Office Address</mat-label>
+            <textarea matInput
+                      placeholder="Enter Registered Office Address (max 1000 characters)"
+                      formControlName="officeAddress"
+                      cdkTextareaAutosize
+                      #autosize="cdkTextareaAutosize"
+                      cdkAutosizeMinRows="1"
+                      cdkAutosizeMaxRows="5"
+                      required>
+            </textarea>
+            @if (companyDetailsForm.get('officeAddress')?.invalid) {
+              <mat-error>{{ getErrorMessage('officeAddress') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+  
+        <div class="section">
+          <div class="heading">
+            Factory Address
+          </div>
+          <div class="form-field-container">
+            <mat-form-field appearance="outline">
+              <mat-label>Country</mat-label>
+              <mat-select [formControl]="country" required>
+                  <mat-option>None</mat-option>
+                  @for (country of countries; track country) {
+                      <mat-option [value]="country">{{country}}</mat-option>
+                  }
+              </mat-select>
+              @if (country.invalid) {
+                  <mat-error>{{ getErrorMessage('country') }}</mat-error>
+              }
+            </mat-form-field>
+    
+            <mat-form-field appearance="outline">
+              <mat-label>State</mat-label>
+              <mat-select [formControl]="state" required>
+                  <mat-option>None</mat-option>
+                  @for (state of states; track state) {
+                      <mat-option [value]="state">{{state}}</mat-option>
+                  }
+              </mat-select>
+              @if (state.invalid) {
+                  <mat-error>{{ getErrorMessage('state') }}</mat-error>
+              }
+            </mat-form-field>
+    
+            <mat-form-field appearance="outline">
+              <mat-label>Address</mat-label>
+              <textarea matInput
+                        placeholder="Enter Address (max 500 characters)"
+                        formControlName="factoryAddress"
+                        cdkTextareaAutosize
+                        #autosize="cdkTextareaAutosize"
+                        cdkAutosizeMinRows="1"
+                        cdkAutosizeMaxRows="5"
+                        required>
+              </textarea>
+              @if (companyDetailsForm.get('factoryAddress')?.invalid) {
+                <mat-error>{{ getErrorMessage('factoryAddress') }}</mat-error>
+              }
+            </mat-form-field>
+      
+            <mat-form-field appearance="outline">
+                <mat-label>Pin Code</mat-label>
+                <input matInput placeholder="Enter Pin Code" type="number" formControlName="pinCode"/>
+                @if (companyDetailsForm.get('pinCode')?.invalid) {
+                <mat-error>{{ getErrorMessage('pinCode') }}</mat-error>
+                }
+            </mat-form-field>
+          </div>
+        </div>
+  
+        <div class="section">
+          <div class="heading">
+            Contact Details
+          </div>
+          <div class="form-field-container">
+            <mat-form-field appearance="outline">
+              <mat-label>Mobile Number</mat-label>
+              <input matInput placeholder="Enter Mobile Number" type="number" formControlName="mobileNumber"/>
+              @if (companyDetailsForm.get('mobileNumber')?.invalid) {
+              <mat-error>{{ getErrorMessage('mobileNumber') }}</mat-error>
+              }
+            </mat-form-field>
+      
+            <mat-form-field appearance="outline">
+              <mat-label>Email Id</mat-label>
+              <input matInput placeholder="Enter Email" type="email" formControlName="emailId"/>
+              @if (companyDetailsForm.get('emailId')?.invalid) {
+                <mat-error>{{ getErrorMessage('emailId') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-card-content>
+  
+      <mat-card-actions>
+        <button mat-stroked-button (click)="goBack()">Back</button>
+        <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!companyDetailsForm.valid">Next</button>
+        <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
+      </mat-card-actions>
+    </mat-card>
+  </form>
+  

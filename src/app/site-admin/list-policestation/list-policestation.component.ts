@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { MaterialModule } from '../../material.module';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { BaseComponent } from '../../base/base.components';
+import { BaseDependency } from '../../base/dependency/base.dependendency';
 import { MatTableDataSource } from '@angular/material/table';
 import { SiteAdminService } from '../site-admin-service';
 import Swal from 'sweetalert2';
@@ -13,14 +15,16 @@ import { SubDivision } from '../../shared/models/subdivision.model';
   templateUrl: './list-policestation.component.html',
   styleUrl: './list-policestation.component.scss'
 })
-export class ListPolicestationComponent implements OnInit{
-  displayedColumns: string[] = ['slNo', 'policeStationName', 'policeStationCode', 'actions'];
+export class ListPolicestationComponent extends BaseComponent implements OnInit{
+  displayedColumns: string[] = ['slNo', 'id', 'policeStationName', 'policeStationCode', 'subDivisionCode', 'actions'];
   policeStationDataSource = new MatTableDataSource<PoliceStation>();
   subdivisions: SubDivision[] = [];
   allPoliceStations: PoliceStation[] = [];
   selectedSubDivisionCode: number | null = null;
 
-  constructor(private siteAdminService: SiteAdminService) {}
+  constructor(base: BaseDependency, private siteAdminService: SiteAdminService) {
+    super(base);
+  }
 
   ngOnInit(): void {
     this.loadSubdivisions();
@@ -46,6 +50,10 @@ export class ListPolicestationComponent implements OnInit{
     } else {
       this.policeStationDataSource.data = this.allPoliceStations.filter(ps => ps.SubDivisionCode === this.selectedSubDivisionCode);
     }
+  }
+
+  onEdit(element: PoliceStation): void {
+    this.router.navigate([`..//${element.id}`]);
   }
 
   onDelete(element: PoliceStation): void {

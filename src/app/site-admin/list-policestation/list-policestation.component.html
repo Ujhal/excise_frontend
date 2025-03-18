@@ -23,29 +23,43 @@
       </div>
       
       <table mat-table [dataSource]="policeStationDataSource">
+        
         <ng-container matColumnDef="slNo">
           <mat-header-cell *matHeaderCellDef> Sl. No. </mat-header-cell>
-          <mat-cell *matCellDef="let element"> {{ element.slNo }} </mat-cell>
+          <mat-cell *matCellDef="let user; let i=index"> {{i+1}} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="id">
+          <mat-header-cell *matHeaderCellDef> Id </mat-header-cell>
+          <mat-cell *matCellDef="let element"> {{ element.id }} </mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="policeStationName">
           <mat-header-cell *matHeaderCellDef> Police Station Name </mat-header-cell>
-          <mat-cell *matCellDef="let element"> {{ element.policeStationName }} </mat-cell>
+          <mat-cell *matCellDef="let element"> {{ element.PoliceStationName }} </mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="policeStationCode">
           <mat-header-cell *matHeaderCellDef> Police Station Code </mat-header-cell>
-          <mat-cell *matCellDef="let element"> {{ element.policeStationCode }} </mat-cell>
+          <mat-cell *matCellDef="let element"> {{ element.PoliceStationCode }} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="subDivisionCode">
+          <mat-header-cell *matHeaderCellDef> Sub Division Code </mat-header-cell>
+          <mat-cell *matCellDef="let element"> {{ element.SubDivisionCode }} </mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="actions">
           <mat-header-cell *matHeaderCellDef> Actions </mat-header-cell>
           <mat-cell *matCellDef="let element">
-            <button mat-icon-button color="warn" (click)="onDelete(element)">
-              <mat-icon>delete</mat-icon>
-            </button>
+              <button mat-icon-button color="primary" (click)="onEdit(element)">
+                  <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="onDelete(element)">
+                  <mat-icon>delete</mat-icon>
+              </button>
           </mat-cell>
-        </ng-container>
+      </ng-container>
 
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>

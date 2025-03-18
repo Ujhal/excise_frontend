@@ -1,0 +1,18 @@
+<mat-horizontal-stepper [linear]="true" #stepper>
+    <mat-step label="License">
+        <app-license (next)="stepper.next()"></app-license>
+    </mat-step>
+  
+    <mat-step [label]="modeofOperation === 'Barman' ? 'Barman Details' : (modeofOperation === 'Salesman' ? 'Salesman Details' : 'Details')">
+        <app-details (back)="stepper.previous()" (next)="stepper.next()"></app-details>
+    </mat-step>    
+  
+    <mat-step label="Make Payment">
+        <app-make-payment (back)="stepper.previous()" (next)="stepper.next()"></app-make-payment>
+    </mat-step>
+
+    <mat-step label="Submit Application">
+        <app-submit-application (back)="stepper.previous()" (next)="stepper.next()"></app-submit-application>
+    </mat-step>
+</mat-horizontal-stepper>
+  

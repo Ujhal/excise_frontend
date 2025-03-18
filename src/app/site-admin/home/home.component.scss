@@ -11,13 +11,28 @@ mat-sidenav{
         }
     }
 }
+
 mat-nav-list{
     padding: 0;
+    mat-expansion-panel{
+        border-bottom: 2px solid #e7e7e7;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        mat-expansion-panel-header{
+            padding: 24px;
+            font-weight: normal;
+        }
+        ::ng-deep .mat-expansion-panel-body{
+            button{
+                color: rgb(0, 0, 144);
+            }     
+        }
+    }
     mat-list-item{
         padding: 25px;
         border-radius: 0 !important;
         border-bottom: 2px solid #e7e7e7;
-     }
+    }
 }
 .active-link {
     background-color: #f4feff !important;

@@ -49,7 +49,7 @@ export class AddPolicestationComponent extends BaseComponent implements OnInit {
         if (submit.isConfirmed) {
           this.siteAdminService.addPoliceStation(this.policeStation).subscribe((res: any) => {
             this.toastrService.success(res.message);
-            this.router.navigate(['./list-policestation']);
+            this.router.navigate(['/site-admin/list-policestation']);
           });
         }
       });
@@ -58,5 +58,7 @@ export class AddPolicestationComponent extends BaseComponent implements OnInit {
 
   cancel(): void {
     history.back();
+    
+    this.router.navigate(['/site-admin/list-policestation']);
   }
 }

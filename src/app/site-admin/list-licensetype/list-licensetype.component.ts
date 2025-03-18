@@ -1,6 +1,8 @@
 import { Component, OnInit  } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { RouterModule } from '@angular/router';
+import { BaseComponent } from '../../base/base.components';
+import { BaseDependency } from '../../base/dependency/base.dependendency';
 import Swal from 'sweetalert2';
 import { MatTableDataSource } from '@angular/material/table';
 import { LicenseType } from '../../shared/models/license-type.model';
@@ -12,11 +14,13 @@ import { SiteAdminService } from '../site-admin-service';
   templateUrl: './list-licensetype.component.html',
   styleUrl: './list-licensetype.component.scss'
 })
-export class ListLicensetypeComponent implements OnInit{
-  displayedColumns: string[] = ['slNo', 'licenseType', 'actions'];
+export class ListLicensetypeComponent extends BaseComponent implements OnInit{
+  displayedColumns: string[] = ['slNo', 'id', 'licenseType', 'actions'];
   licenseTypeDataSource = new MatTableDataSource<LicenseType>();
 
-  constructor(private siteAdminService: SiteAdminService) {}
+  constructor(base: BaseDependency, private siteAdminService: SiteAdminService) {
+    super(base);
+  }
 
   ngOnInit(): void {
     this.loadLicenseTypes();
@@ -28,6 +32,10 @@ export class ListLicensetypeComponent implements OnInit{
     });
   }
 
+  onEdit(element: LicenseType): void {
+    this.router.navigate([`..//${element.id}`]);
+  }
+  
   onDelete(element: LicenseType): void {
     Swal.fire({
       title: 'Are you sure?',

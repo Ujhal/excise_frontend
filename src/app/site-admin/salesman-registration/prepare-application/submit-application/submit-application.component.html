@@ -1,0 +1,46 @@
+<form [formGroup]="submitForm">
+    <mat-card>
+        <mat-card-header>
+            <div class="heading">Submit Application</div>
+          </mat-card-header>
+  
+      <mat-card-content>
+        <mat-list>
+            <!-- LICENSE DETAILS Section -->
+             <div class="section">
+                <h4>License Details</h4>
+                <div class="sessionStorageEntries" *ngFor="let item of licenseDetails">
+                    <div class="key">
+                      {{ item.key }}:
+                    </div>
+                    <div class="value">
+                      {{ item.value }}
+                    </div>
+                </div>
+             </div>
+             
+            <!-- DETAILS Section -->
+            <div class="section">
+                <h4>{{ modeofOperation === 'Salesman' ? 'Salesman Details' : (modeofOperation === 'Barman' ? 'Barman Details' : 'Details') }}</h4>
+                <div class="sessionStorageEntries" *ngFor="let item of details">
+                    <div class="key">
+                    {{ item.key }}:
+                    </div>
+                    <div class="value">
+                    {{ item.value }}
+                    </div>
+                </div>
+            </div>
+            
+          </mat-list>
+           
+      </mat-card-content>
+  
+      <mat-card-actions>
+        <button mat-stroked-button (click)="goBack()">Back</button>
+        <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!submitForm.valid">Submit</button>
+        <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
+      </mat-card-actions>
+    </mat-card>
+</form>
+  

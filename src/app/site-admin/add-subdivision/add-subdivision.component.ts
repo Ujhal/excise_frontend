@@ -59,13 +59,13 @@ export class AddSubdivisionComponent  extends BaseComponent implements OnInit{
         if (submit.isConfirmed) {
           this.siteAdminService.saveSubDivision(this.subdivision).subscribe(res => {
           this.toastrService.success(res.message);
-          this.router.navigate(['']);
+          this.router.navigate(['/site-admin/list-subdivision']);
           });
         }
       });
   }
   cancel(): void {
-    this.router.navigate(['/previous-route']);  // Redirect to a specified route
+    this.router.navigate(['/site-admin/list-subdivision']);  // Redirect to a specified route
   }
 }
 

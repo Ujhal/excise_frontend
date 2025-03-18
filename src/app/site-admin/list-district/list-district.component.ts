@@ -16,7 +16,7 @@ import Swal from 'sweetalert2';
   styleUrl: './list-district.component.scss'
 })
 export class ListDistrictComponent extends BaseComponent implements OnInit{
-  displayedColumns: string[] = ['srno','District', 'DistrictCode', 'State', 'Active'];
+  displayedColumns: string[] = ['slNo', 'id', 'district', 'districtCode', 'state', 'stateCode', 'actions'];
   districtDataSource = new MatTableDataSource<District>();
 
   constructor(base: BaseDependency, private siteAdminService: SiteAdminService) { super(base) }
@@ -31,47 +31,32 @@ export class ListDistrictComponent extends BaseComponent implements OnInit{
     });
   }
 
-  // Handle the slider toggle for IsActive
-  onToggleActive(event: MatSlideToggleChange, element: District): void {
-    const initialStatus = element.IsActive; // Store the initial status
-    const newStatus = event.checked;
-  
-    if (!newStatus) { // Show confirmation only if deactivating
-      Swal.fire({
-        title: 'Are you sure?',
-        text: 'Are you sure you want to deactivate this item?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, deactivate it!',
-        cancelButtonText: 'Cancel',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          // Confirm the new status and update in the backend
-          this.updateActiveStatus(element, newStatus);
-        } else {
-          // Revert the toggle in the UI if canceled
-          event.source.checked = initialStatus;
-        }
-      });
-    } else {
-      // Activate without confirmation
-      this.updateActiveStatus(element, newStatus);
-    }
+  onEdit(district: District): void {
+    this.router.navigate(['/edit-district', district.id]);
   }
   
-  // Separate method to handle the update logic
-  updateActiveStatus(element: District, newStatus: boolean): void {
-    element.IsActive = newStatus;
-  
-    this.siteAdminService.updateDistrict(element.id, { IsActive: newStatus }).subscribe(
-      response => {
-        console.log('Updated District:', response);
-      },
-      error => {
-        console.error('Error updating District:', error);
-        // Optionally, revert toggle if there's an error
-        element.IsActive = !newStatus;
+  onDelete(district: District): void {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `Do you really want to delete ${district.District}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.siteAdminService.deleteDistrict(district.id).subscribe(
+          () => {
+            Swal.fire('Deleted!', 'The district has been deleted.', 'success');
+            this.loadDistricts(); // Refresh table
+          },
+          error => {
+            Swal.fire('Error!', 'Failed to delete the district.', 'error');
+            console.error('Error deleting district:', error);
+          }
+        );
       }
-    );
+    });
   }
+
 }

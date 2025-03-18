@@ -61,6 +61,23 @@ const routes: Routes = [
         path: 'list-licensecategory',
         loadComponent: () => import('./list-licensecategory/list-licensecategory.component').then(m => m.ListLicensecategoryComponent),
       },
+      {
+        path: 'company-registration',
+        children: [
+          { path: 'prepare-company-application', loadComponent: () => import('./company-registration/prepare-application/prepare-application.component').then(m => m.PrepareApplicationComponent) },
+          { path: 'act-on-application', loadComponent: () => import('./company-registration/act-on-application/act-on-application.component').then(m => m.ActOnApplicationComponent) },
+          { path: 'print-company-certificate', loadComponent: () => import('./company-registration/print-certificate/print-certificate.component').then(m => m.PrintCertificateComponent) },
+        ]
+      }, 
+      {
+        path: 'salesman-registration',
+        children: [
+          { path: 'prepare-salesman-application', loadComponent: () => import('./salesman-registration/prepare-application/prepare-application.component').then(m => m.PrepareApplicationComponent) },
+          { path: 'act-on-draft-application', loadComponent: () => import('./salesman-registration/act-on-draft-application/act-on-draft-application.component').then(m => m.ActOnDraftApplicationComponent) },
+          { path: 'print-salesman-certificate', loadComponent: () => import('./salesman-registration/print-certificate/print-certificate.component').then(m => m.PrintCertificateComponent) },
+          { path: 'application-status', loadComponent: () => import('./salesman-registration/application-status/application-status.component').then(m => m.ApplicationStatusComponent) }
+        ]
+      },   
     ],
   },
 ];

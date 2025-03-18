@@ -1,6 +1,6 @@
 export class Dashboard {
-    district_count!: number;
-    subdivision_count!: number;
+    districtCount!: number;
+    subdivisionCount!: number;
 
   }
   

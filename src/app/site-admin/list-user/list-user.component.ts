@@ -1,6 +1,8 @@
 import { Component, OnInit, ViewChild, } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { SiteAdminService } from '../site-admin-service';
+import { BaseComponent } from '../../base/base.components';
+import { BaseDependency } from '../../base/dependency/base.dependendency';
 import { Account } from '../../shared/models/accounts';
 import { MaterialModule } from '../../material.module';
 import { RouterModule } from '@angular/router';
@@ -11,10 +13,13 @@ import { RouterModule } from '@angular/router';
   templateUrl: './list-user.component.html',
   styleUrl: './list-user.component.scss'
 })
-export class ListUserComponent implements OnInit {
-  displayedColumns: string[] = ['srno','firstName', 'lastName', 'username', 'contactNumber','emailId', 'role', 'created_by', 'actions'];
+export class ListUserComponent extends BaseComponent implements OnInit {
+  displayedColumns: string[] = ['slNo','firstName', 'middleName', 'lastName', 'username', 'contactNumber','emailId', 'role', 'createdBy', 'actions'];
   users: MatTableDataSource<Account> = new MatTableDataSource<Account>();
-  constructor(private siteAdminService: SiteAdminService) {}
+
+  constructor(base: BaseDependency, private siteAdminService: SiteAdminService) {
+    super(base);
+  }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -29,6 +34,40 @@ export class ListUserComponent implements OnInit {
     error => console.error('Error loading users', error)
     );
   }
+
+  onEdit(element: Account): void {
+    this.router.navigate([`..//${element.first_name}`]);
+  }
+
+  onView(element: Account): void {
+      this.router.navigate([`..//${element.first_name}`]);
+  }
+
+  /*
+  onDelete(element: Account): void {
+      Swal.fire({
+          title: 'Are you sure?',
+          text: 'You will not be able to recover this subdivision!',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, delete it!',
+          cancelButtonText: 'Cancel'
+      }).then((result) => {
+          if (result.isConfirmed) {
+              this.siteAdminService.deleteUser(element.id).subscribe(
+                  () => {
+                      Swal.fire('Deleted!', 'Subdivision has been deleted.', 'success');
+                      this.loadUsers(); // Reload data
+                  },
+                  error => {
+                      console.error('Error deleting user:', error);
+                      Swal.fire('Error!', 'User could not be deleted.', 'error');
+                  }
+              );
+          }
+      });
+  }
+  */
 
   sortUsersByRole(users: Account[]): Account[] {
     const roleOrder = ['site_admin', '1', '2', '3', '4', '5', '6'];

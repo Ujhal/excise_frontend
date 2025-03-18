@@ -7,11 +7,12 @@ import { BaseDependency } from '../../base/dependency/base.dependendency';
 import { Account } from '../../shared/models/accounts';
 import { MaterialModule } from '../../material.module';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import {MatMenuModule} from '@angular/material/menu';
 
 @Component({
   selector: 'app-home',
   standalone: true, // Mark as standalone
-  imports: [CommonModule, RouterModule, MaterialModule, MatSidenavModule], // Import necessary modules
+  imports: [CommonModule, RouterModule, MaterialModule, MatSidenavModule, MatMenuModule], // Import necessary modules
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
@@ -37,6 +38,7 @@ export class HomeComponent extends BaseComponent implements OnInit {
           this.userName = this.userName + ' ' + this.user.middleName;
         } */
         if (this.user.last_name !== null) {
+          console.log('home called 456')
           this.userName = this.userName + ' ' + this.user.last_name;
         }
       } else {

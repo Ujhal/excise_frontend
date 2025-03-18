@@ -1,0 +1,14 @@
+<mat-horizontal-stepper [linear]="true" #stepper>
+    <mat-step label="Company Details">
+        <app-company-details (next)="stepper.next()"></app-company-details>
+    </mat-step>
+  
+    <mat-step label="Member Details">
+        <app-member-details (back)="stepper.previous()" (next)="stepper.next()"></app-member-details>
+    </mat-step>
+  
+    <mat-step label="Upload Documents">
+        <app-upload-documents (back)="stepper.previous()" (next)="stepper.next()"></app-upload-documents>
+    </mat-step>
+</mat-horizontal-stepper>
+  

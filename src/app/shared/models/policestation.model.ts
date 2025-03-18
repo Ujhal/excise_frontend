@@ -3,5 +3,6 @@ export class PoliceStation {
     PoliceStationName!: string;
     PoliceStationCode!: number;
     SubDivisionCode!: number;
+    isActive!: boolean;
 }
   

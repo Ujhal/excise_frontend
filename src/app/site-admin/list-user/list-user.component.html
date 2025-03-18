@@ -24,46 +24,50 @@
         
           <table mat-table [dataSource]="users" >
     
-            <!-- Username Column -->
-            <ng-container matColumnDef="srno">
-              <th mat-header-cell *matHeaderCellDef> Sr. No. </th>
+            <ng-container matColumnDef="slNo">
+              <th mat-header-cell *matHeaderCellDef> Sl. No. </th>
               <td mat-cell *matCellDef="let user; let i=index"> {{i+1}} </td>
             </ng-container>
             <ng-container matColumnDef="firstName">
               <th mat-header-cell *matHeaderCellDef> First Name </th>
               <td mat-cell *matCellDef="let user"> {{user.first_name}} </td>
             </ng-container>
+
+            <ng-container matColumnDef="middleName">
+              <th mat-header-cell *matHeaderCellDef> Middle Name </th>
+              <td mat-cell *matCellDef="let user"> {{user.middle}} </td>
+            </ng-container>
+
             <ng-container matColumnDef="lastName">
               <th mat-header-cell *matHeaderCellDef> Last Name </th>
               <td mat-cell *matCellDef="let user"> {{user.last_name}} </td>
             </ng-container>
+
             <ng-container matColumnDef="username">
               <th mat-header-cell *matHeaderCellDef> Username </th>
               <td mat-cell *matCellDef="let user"> {{user.username}} </td>
             </ng-container>
     
-            <!-- Designation Column -->
             <ng-container matColumnDef="contactNumber">
               <th mat-header-cell *matHeaderCellDef> Phone Number </th>
               <td mat-cell *matCellDef="let user"> {{user.phonenumber}} </td>
             </ng-container>
-            <!-- Designation Column -->
+
             <ng-container matColumnDef="emailId">
               <th mat-header-cell *matHeaderCellDef> Email </th>
               <td mat-cell *matCellDef="let user"> {{user.email}} </td>
             </ng-container>
-            <!-- Designation Column -->
+
             <ng-container matColumnDef="role">
               <th mat-header-cell *matHeaderCellDef> Role </th>
               <td mat-cell *matCellDef="let user"> {{ getRoleName(user.role) }} </td>
             </ng-container>
   
-            <ng-container matColumnDef="created_by">
+            <ng-container matColumnDef="createdBy">
               <th mat-header-cell *matHeaderCellDef> Created By </th>
               <td mat-cell *matCellDef="let user"> {{ user.created_by }} </td>
             </ng-container>
-    
-            <!-- Show Button Column -->
+    >
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef> Actions </th>
               <td mat-cell *matCellDef="let user">
@@ -73,7 +77,6 @@
               </td>
             </ng-container>
     
-            <!-- Table Header and Row Definitions -->
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     

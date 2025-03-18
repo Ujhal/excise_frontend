@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { RouterModule } from '@angular/router';
+import { BaseComponent } from '../../base/base.components';
+import { BaseDependency } from '../../base/dependency/base.dependendency';
 import Swal from 'sweetalert2';
 import { MatTableDataSource } from '@angular/material/table';
 import { LicenseCategory } from '../../shared/models/license-category.model';
@@ -12,11 +14,13 @@ import { SiteAdminService } from '../site-admin-service';
   templateUrl: './list-licensecategory.component.html',
   styleUrl: './list-licensecategory.component.scss'
 })
-export class ListLicensecategoryComponent implements OnInit {
-  displayedColumns: string[] = ['slNo', 'licenseCategory', 'actions'];
+export class ListLicensecategoryComponent extends BaseComponent implements OnInit {
+  displayedColumns: string[] = ['slNo', 'id', 'licenseCategory', 'actions'];
   licenseCategoryDataSource = new MatTableDataSource<LicenseCategory>();
 
-  constructor(private siteAdminService: SiteAdminService) {}
+  constructor(base: BaseDependency, private siteAdminService: SiteAdminService) {
+    super(base);
+  }
 
   ngOnInit(): void {
     this.loadLicenseCategories();
@@ -27,7 +31,11 @@ export class ListLicensecategoryComponent implements OnInit {
       this.licenseCategoryDataSource.data = data;
     });
   }
-  
+
+  onEdit(element: LicenseCategory): void {
+    this.router.navigate([`..//${element.id}`]);
+  }
+
   onDelete(element: LicenseCategory): void {
     Swal.fire({
       title: 'Are you sure?',

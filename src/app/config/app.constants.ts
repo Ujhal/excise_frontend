@@ -9,7 +9,7 @@ export enum PatternConstants {
     STRING_SIMPLE_STRING_WITH_ENTER = '[a-zA-Z,& :\\.0-9\\n]+$',
     ORGANISATION_NAME = '^[a-z A-Z 0-9,&]*$',
     NAME_WITHOUT_SPACE = '[a-zA-Z]*$',
-    AADHAR_NUMBER = '^[2-9]{1}[0-9]{11}$',
+    AADHAAR_NUMBER = '^[2-9]{1}[0-9]{11}$',
     MOBILE = '^[6-9]\\d{9}$',
     SALARY = '[0-9]{0,50}',
     /* WEBSITE = '^((https?|ftp|smtp):\\/\\/)?(www.)?[a-z0-9]+\\.[a-z]+(\\/[a-zA-Z0-9#]+\\/?)*$',*/

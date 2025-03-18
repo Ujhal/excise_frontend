@@ -1,0 +1,53 @@
+<div class="container-fluid">
+    <mat-card>
+        <mat-card-header>
+            Act On Application
+        </mat-card-header>
+        <mat-card-content>
+            <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+      
+                <!-- Application Info Column -->
+                <ng-container matColumnDef="applicationInfo">
+                  <th mat-header-cell *matHeaderCellDef> Application Info </th>
+                  <td mat-cell *matCellDef="let element">
+                    <mat-list>
+                      <div class="sessionStorageEntries" *ngFor="let item of element.applicationInfo">
+                        <div class="key">{{ item.key }}:</div>
+                        <div class="value">{{ item.value }}</div>
+                      </div>
+                    </mat-list>
+                  </td>
+                </ng-container>
+              
+                <!-- Company Details Column -->
+                <ng-container matColumnDef="companyDetails">
+                  <th mat-header-cell *matHeaderCellDef> Company Details </th>
+                  <td mat-cell *matCellDef="let element">
+                    <mat-list>
+                      <div class="sessionStorageEntries" *ngFor="let item of element.companyDetails">
+                        <div class="key">{{ item.key }}:</div>
+                        <div class="value">{{ item.value }}</div>
+                      </div>
+                    </mat-list>
+                  </td>
+                </ng-container>
+              
+                <!-- View Column -->
+                <ng-container matColumnDef="view">
+                    <th mat-header-cell *matHeaderCellDef> View </th>
+                    <td mat-cell *matCellDef="let element">
+                        <div class="button-column">
+                            <button mat-button *ngFor="let btn of element.view" (click)="btn.action()">{{ btn.label }}</button>
+                        </div>                  
+                    </td>
+                </ng-container>
+              
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>          
+        </mat-card-content>
+        <mat-card-actions>
+    
+        </mat-card-actions>
+    </mat-card>
+</div>
