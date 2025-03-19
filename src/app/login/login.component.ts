@@ -32,6 +32,8 @@ export class LoginComponent extends BaseComponent {
     this.loginForm.reset(); // Reset form when switching modes
   }
 
+
+  // Post request to backend routes
   onLogin(): void {
     if (this.loginForm.invalid) {
       alert("Please fill in all fields correctly.");

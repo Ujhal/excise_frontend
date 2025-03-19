@@ -3,7 +3,7 @@ export class District {
     DistrictCode!: number;
     District!: string;
     DistrictNameLL!: string;
-    StateCode!: number;
+    stateCode!: number;
     stateName!: string;
     IsActive!: boolean;
   }

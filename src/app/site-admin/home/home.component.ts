@@ -38,7 +38,7 @@ export class HomeComponent extends BaseComponent implements OnInit {
           this.userName = this.userName + ' ' + this.user.middleName;
         } */
         if (this.user.last_name !== null) {
-          console.log('home called 456')
+          
           this.userName = this.userName + ' ' + this.user.last_name;
         }
       } else {

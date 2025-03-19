@@ -57,7 +57,6 @@ export class AddPolicestationComponent extends BaseComponent implements OnInit {
   
 
   cancel(): void {
-    history.back();
     
     this.router.navigate(['/site-admin/list-policestation']);
   }

@@ -34,8 +34,8 @@ export class AddUserComponent extends BaseComponent implements OnInit {
       this.toastrService.error('Failed to load districts.');
     });
   }
-  onDistrictChange(districtCode: number): void {
-    this.siteAdminService.getSubDivisionByDistrictCode(districtCode).subscribe(
+  onDistrictChange(id: number): void {
+    this.siteAdminService.getSubDivisionByDistrictCode(id).subscribe(
       (data: SubDivision[]) => {
         this.subdivisons = data; // Populate the districts list
       },
@@ -67,14 +67,14 @@ export class AddUserComponent extends BaseComponent implements OnInit {
         if (submit.isConfirmed) {
           this.siteAdminService.saveUser(this.user).subscribe(res => {
             this.toastrService.success(res.message);
-            this.router.navigate(['/']);
+            this.router.navigate(['/site-admin/list-user']);
           });
         }
       });
   }
 
   cancel(): void {
-    this.router.navigate(['/previous-route']);  // Redirect to a specified route
+    this.router.navigate(['/site-admin/list-user']);  // Redirect to a specified route
   }
 }
 

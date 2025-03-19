@@ -53,12 +53,13 @@ export class AddDistrictComponent extends BaseComponent implements OnInit {
         if (submit.isConfirmed) {
           this.siteAdminService.saveDistrict(this.district).subscribe(res => {
           this.toastrService.success(res.message);
-          this.router.navigate(['/site-admin/list-district']);
+          this.router.navigate(['/']);
           });
         }
       });
   }
   cancel(): void {
-    this.router.navigate(['/site-admin/list-district']);  
+    history.back();
+   
   }
 }
