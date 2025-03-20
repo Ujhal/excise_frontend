@@ -33,7 +33,7 @@ export class ListLicensetypeComponent extends BaseComponent implements OnInit{
   }
 
   onEdit(element: LicenseType): void {
-    this.router.navigate([`..//${element.id}`]);
+    this.router.navigate([`./site-admin/list-licensetype`]);
   }
   
   onDelete(element: LicenseType): void {
@@ -50,6 +50,7 @@ export class ListLicensetypeComponent extends BaseComponent implements OnInit{
           () => {
             Swal.fire('Deleted!', 'The license type has been deleted.', 'success');
             this.loadLicenseTypes(); // Refresh the table after deletion
+            this.router.navigate([`./site-admin/list-licensetype`]);
           },
           (error) => {
             console.error('Error deleting license type:', error);

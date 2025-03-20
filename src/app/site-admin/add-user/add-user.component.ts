@@ -74,7 +74,7 @@ export class AddUserComponent extends BaseComponent implements OnInit {
   }
 
   cancel(): void {
-    this.router.navigate(['/site-admin/list-user']);  // Redirect to a specified route
+    history.back(); 
   }
 }
 

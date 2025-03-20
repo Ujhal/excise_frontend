@@ -41,6 +41,7 @@ const routes: Routes = [
         path: 'add-policestation',
         loadComponent: () => import('./add-policestation/add-policestation.component').then(m => m.AddPolicestationComponent)
       },
+      { path: 'site-admin/edit-policestation/:id', loadComponent: () => import('./add-policestation/add-policestation.component').then(m => m.AddPolicestationComponent)}, 
       {
         path: 'list-policestation',
         loadComponent: () => import('./list-policestation/list-policestation.component').then(m => m.ListPolicestationComponent),

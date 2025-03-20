@@ -44,6 +44,6 @@ export class AddLicensetypeComponent implements OnInit{
 
   cancel(): void {
     history.back();
-    this.router.navigate(['/site-admin/list-licensetype']);
+    
   }
 }

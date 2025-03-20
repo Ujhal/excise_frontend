@@ -65,7 +65,7 @@ export class AddSubdivisionComponent  extends BaseComponent implements OnInit{
       });
   }
   cancel(): void {
-    this.router.navigate(['/site-admin/list-subdivision']);  // Redirect to a specified route
+    history.back();
   }
 }
 
