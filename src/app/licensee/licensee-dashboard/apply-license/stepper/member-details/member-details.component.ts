@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, EventEmitter, Output, ChangeDetectionStrategy, signal, OnInit } from '@angular/core';
 import { MaterialModule } from '../../../../../material.module';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { merge } from 'rxjs';
@@ -15,7 +15,7 @@ import { PatternConstants } from '../../../../../config/app.constants';
   styleUrl: './member-details.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MemberDetailsComponent {
+export class MemberDetailsComponent implements OnInit{
   memberDetailsForm: FormGroup;
 
   @Output() next = new EventEmitter<void>();
@@ -30,6 +30,14 @@ export class MemberDetailsComponent {
   mobileNumber = new FormControl(this.getFromSessionStorage('mobileNumber'), [Validators.required, Validators.pattern(PatternConstants.MOBILE)]);
   emailId = new FormControl(this.getFromSessionStorage('emailId'), [Validators.required, Validators.pattern(PatternConstants.EMAIL)]);
   photo = new FormControl(this.getFromSessionStorage('photo'));
+
+  ngOnInit() {
+    this.pan.valueChanges.subscribe(value => {
+      if (value) {
+        this.pan.setValue(value.toUpperCase(), { emitEvent: false });
+      }
+    });
+  }
 
   errorMessages = {
     status: signal(''),

@@ -79,7 +79,7 @@
             <div class="col-xl-4 col-lg-4 col-md-4">
               <mat-form-field class="my-form-full-width" appearance="outline">
                 <mat-label>State</mat-label>
-                <mat-select placeholder="Select State" name="statename" #statename="ngModel" [(ngModel)]="district.stateCode" required>
+                <mat-select placeholder="Select State" name="statename" #statename="ngModel" [(ngModel)]="district.StateCode" required>
                   <mat-option>--</mat-option>
                   <mat-option *ngFor="let st of states" [value]="st.stateCode">
                     {{ st.stateName }} ({{ st.stateCode }})

@@ -12,5 +12,12 @@ mat-card{
     }
     mat-card-content{
         padding: 15px;
+        form{
+            justify-items: center;
+            .row{
+                width: 100%;
+                justify-content: center;
+            }
+        }
     }
 }

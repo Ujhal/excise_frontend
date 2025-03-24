@@ -29,7 +29,7 @@ export class AccountService {
 
 
   getUserDetails(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/api/userdetails/`, {});
+    return this.http.get<any>(`${this.baseUrl}/api/user/list/`, {});
   }
 
   logout(): void {

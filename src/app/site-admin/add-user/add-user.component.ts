@@ -15,7 +15,8 @@ import { MaterialModule } from '../../material.module';
 export class AddUserComponent extends BaseComponent implements OnInit {
   user: Account = new Account();
   districts: District[] = [];
-  subdivisons:SubDivision[] =[];
+  subdivisons: SubDivision[] =[];
+  filteredSubdivisions: SubDivision[] = [];
 
   constructor(base: BaseDependency, private siteAdminService: SiteAdminService) {
     super(base);
@@ -24,7 +25,7 @@ export class AddUserComponent extends BaseComponent implements OnInit {
   ngOnInit(): void {
     this.user.is_active = true; 
     this.loadDistricts();
-    
+    this.loadSubdivisions(); // Load all subdivisions initially
   }
 
   loadDistricts(): void {
@@ -34,19 +35,23 @@ export class AddUserComponent extends BaseComponent implements OnInit {
       this.toastrService.error('Failed to load districts.');
     });
   }
-  onDistrictChange(id: number): void {
-    this.siteAdminService.getSubDivisionByDistrictCode(id).subscribe(
+
+  loadSubdivisions(): void {
+    this.siteAdminService.getSubDivision().subscribe(
       (data: SubDivision[]) => {
-        this.subdivisons = data; // Populate the districts list
+        this.subdivisons = data; // Store all subdivisions
       },
       (error) => {
         this.toastrService.error('Failed to load subdivisions.');
       }
     );
   }
- 
- 
-  
+
+  onDistrictChange(id: number): void {
+    console.log('Selected District ID:', id);
+    this.filteredSubdivisions = this.subdivisons.filter(subDiv => subDiv.DistrictCode === id);
+    console.log('Filtered Subdivisions:', this.filteredSubdivisions);
+  }
   
   submit(): void {
     if (this.user.password !== this.user.confirm_password) {
@@ -65,7 +70,7 @@ export class AddUserComponent extends BaseComponent implements OnInit {
       })
       .then((submit: { isConfirmed: any }) => {
         if (submit.isConfirmed) {
-          this.siteAdminService.saveUser(this.user).subscribe(res => {
+          this.siteAdminService.registerUser(this.user).subscribe(res => {
             this.toastrService.success(res.message);
             this.router.navigate(['/site-admin/list-user']);
           });

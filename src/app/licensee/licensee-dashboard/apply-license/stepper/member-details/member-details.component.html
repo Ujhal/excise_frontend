@@ -70,7 +70,7 @@
     <div class="form-row">
       <mat-form-field appearance="outline">
         <mat-label>PAN</mat-label>
-        <input matInput placeholder="Enter PAN" type="text" [formControl]="pan"/>
+        <input matInput placeholder="Enter PAN" type="text" [formControl]="pan"/>  <!-- style="text-transform: uppercase;" -->
         @if (pan.invalid) {
           <mat-error>{{ getErrorMessage('pan') }}</mat-error>
         }

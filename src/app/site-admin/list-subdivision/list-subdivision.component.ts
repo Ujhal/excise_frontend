@@ -1,15 +1,15 @@
 import { Component,OnInit } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { RouterModule } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { BaseComponent } from '../../base/base.components';
 import { BaseDependency } from '../../base/dependency/base.dependendency';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { District } from '../../shared/models/district.model';
 import { SiteAdminService } from '../site-admin-service';
 import { SubDivision } from '../../shared/models/subdivision.model';
 import Swal from 'sweetalert2';
+import { EditSubdivisionComponent } from './edit-subdivision/edit-subdivision.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-list-subdivision',
@@ -24,13 +24,13 @@ export class ListSubdivisionComponent extends BaseComponent implements OnInit {
   allSubdivisions: SubDivision[] = [];
   selectedDistrictCode: number | null = null; // Initialize selectedDistrictCode
 
-  constructor(base: BaseDependency, private siteAdminService: SiteAdminService) {
-    super(base);
+  constructor(base: BaseDependency, private siteAdminService: SiteAdminService, private dialog: MatDialog) { 
+    super(base); 
   }
 
   ngOnInit(): void {
     this.loadDistricts(); // Load districts
-    this.loadSubDiv();    // Load all subdivisions initially
+    this.loadSubDivision();    // Load all subdivisions initially
   }
 
   loadDistricts(): void {
@@ -39,7 +39,7 @@ export class ListSubdivisionComponent extends BaseComponent implements OnInit {
     });
   }
 
-  loadSubDiv(): void {
+  loadSubDivision(): void {
     this.siteAdminService.getSubDivision().subscribe(data => {
       this.allSubdivisions = data; // Store all subdivisions
       this.subdivisionDataSource.data = this.allSubdivisions; // Show all initially
@@ -54,8 +54,17 @@ export class ListSubdivisionComponent extends BaseComponent implements OnInit {
     }
   }
 
-  onEdit(element: SubDivision): void {
-    this.router.navigate([`../edit-subdivision/${element.id}`]);
+  onEdit(district: District): void {
+    const dialogRef = this.dialog.open(EditSubdivisionComponent, {
+      width: '400px',
+      data: { ...district }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadSubDivision(); // Reload districts after update
+      }
+    });
   }
 
   onDelete(element: SubDivision): void {
@@ -71,7 +80,7 @@ export class ListSubdivisionComponent extends BaseComponent implements OnInit {
               this.siteAdminService.deleteSubdivision(element.id).subscribe(
                   () => {
                       Swal.fire('Deleted!', 'Subdivision has been deleted.', 'success');
-                      this.loadSubDiv(); // Reload data
+                      this.loadSubDivision(); // Reload data
                   },
                   error => {
                       console.error('Error deleting subdivision:', error);

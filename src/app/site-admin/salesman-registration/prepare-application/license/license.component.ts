@@ -1,115 +1,111 @@
-import { Component, EventEmitter, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit, DestroyRef } from '@angular/core';
 import { MaterialModule } from '../../../../material.module';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { merge } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { SiteAdminService } from '../../../site-admin-service';
 
 @Component({
   selector: 'app-license',
+  standalone: true,
   imports: [MaterialModule],
   templateUrl: './license.component.html',
   styleUrl: './license.component.scss'
 })
-export class LicenseComponent {
+export class LicenseComponent implements OnInit {
   licenseForm: FormGroup;
+  licenseCategories: string[] = [];
+  districts: string[] = [];
+  licenses: string[] = ['License A', 'License B', 'License C', 'License D'];
+  modeofOperations: string[] = ['Salesman', 'Barman'];
+  applicationYears: string[] = ['2025-2026'];
 
   @Output() next = new EventEmitter<void>();
   @Output() back = new EventEmitter<void>();
 
-  applicationYear = new FormControl(this.getFromSessionStorage('applicationYear'), [Validators.required]);
-  applicationId = new FormControl(this.getFromSessionStorage('applicationId'), [Validators.required]);
-  applicationDate = new FormControl(this.getFromSessionStorage('applicationDate'), [Validators.required]);
-  district = new FormControl(this.getFromSessionStorage('district'), [Validators.required]);
-  licenseCategory = new FormControl(this.getFromSessionStorage('licenseCategory'), [Validators.required]);
-  license = new FormControl(this.getFromSessionStorage('license'), [Validators.required]);
-  modeofOperation = new FormControl(this.getFromSessionStorage('modeofOperation'), [Validators.required]);
-
-  errorMessages = {
-    applicationYear: signal(''),
-    applicationId: signal(''),
-    applicationDate: signal(''),
-    district: signal(''),
-    licenseCategory: signal(''),
-    license: signal(''),
-    modeofOperation: signal('')
-  };
-
-  // Initial dropdown options
-  applicationYears: string[] = ['2025-2026'];
-  districts: string[] = ['Gangtok', 'Namchi', 'Mangan', 'Pakyong', 'Gyalshing', 'Soreng'];
-  licenseCategories: string[] = [
-    'Bar License exclusively for Homemade Wine',
-    'Brewery',
-    'Bar-cum-Hotel & Lodge',
-    'Casino with Bar',
-    'Departmental Store'
-  ];
-  licenses: string[] = ['License A', 'License B', 'License C', 'License D'];
-  modeofOperations: string[] = ['Salesman', 'Barman'];
-
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private siteAdminService: SiteAdminService,
+    private destroyRef: DestroyRef
+  ) {
     this.licenseForm = this.fb.group({
-      applicationYear: this.applicationYear,
-      applicationId: this.applicationId,
-      applicationDate: this.applicationDate,
-      district: this.district,
-      licenseCategory: this.licenseCategory,
-      license: this.license,
-      modeofOperation: this.modeofOperation
+      applicationYear: new FormControl('', [Validators.required]),
+      applicationId: new FormControl('', [Validators.required]),
+      applicationDate: new FormControl('', [Validators.required]),
+      district: new FormControl('', [Validators.required]),
+      licenseCategory: new FormControl('', [Validators.required]),
+      license: new FormControl('', [Validators.required]),
+      modeofOperation: new FormControl('', [Validators.required])
     });
 
-    merge(
-      this.applicationYear.valueChanges,
-      this.applicationId.valueChanges,
-      this.applicationDate.valueChanges,
-      this.district.valueChanges,
-      this.licenseCategory.valueChanges,
-      this.license.valueChanges,
-      this.modeofOperation.valueChanges
-    )
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => {
-        this.saveToSessionStorage();
-        this.updateAllErrorMessages();
-      });
+    // Load stored data from session storage
+    this.loadFromSessionStorage();
+
+    // Listen for form changes and save to session storage
+    this.licenseForm.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.saveToSessionStorage();
+    });
   }
 
-  getFromSessionStorage(key: string): string {
-    return sessionStorage.getItem(key) || '';
+  ngOnInit() {
+    this.loadLicenseCategories();
+    this.loadDistricts();
+  }
+
+  loadLicenseCategories(): void {
+    this.siteAdminService.getLicenseCategories().subscribe(
+      (data) => {
+        this.licenseCategories = data.map(category => category.licenseCategoryDescription);
+      },
+      (error) => {
+        console.error('Error fetching license categories:', error);
+      }
+    );
+  }
+
+  loadDistricts(): void {
+    this.siteAdminService.getDistrict().subscribe(
+      (data) => {
+        this.districts = data.map(district => district.District);
+      },
+      (error) => {
+        console.error('Error fetching districts:', error);
+      }
+    );
   }
 
   saveToSessionStorage() {
-    sessionStorage.setItem('applicationYear', this.applicationYear.value || '');
-    sessionStorage.setItem('applicationId', this.applicationId.value || '');
-    sessionStorage.setItem('applicationDate', this.applicationDate.value || '');
-    sessionStorage.setItem('district', this.district.value || '');
-    sessionStorage.setItem('licenseCategory', this.licenseCategory.value || '');
-    sessionStorage.setItem('license', this.license.value || '');
-    sessionStorage.setItem('modeofOperation', this.modeofOperation.value || '');
+    const formData = this.licenseForm.getRawValue(); // Ensure all values, including disabled ones, are included
+    console.log('Saving form data to session:', formData); // Debugging
+    sessionStorage.setItem('licenseFormData', JSON.stringify(formData));
   }
 
-  updateErrorMessage(field: keyof typeof this.errorMessages) {
-    const control = this[field];
-    if (control.hasError('required')) {
-      this.errorMessages[field].set('This field is required');
-    } else {
-      this.errorMessages[field].set('');
+  loadFromSessionStorage() {
+    const savedData = sessionStorage.getItem('licenseFormData');
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      console.log('Loading data from session:', parsedData); // Debugging
+      this.licenseForm.patchValue(parsedData);
     }
   }
 
-  updateAllErrorMessages() {
-    Object.keys(this.errorMessages).forEach((field) => {
-      this.updateErrorMessage(field as keyof typeof this.errorMessages);
-    });
-  }
-
-  getErrorMessage(field: keyof typeof this.errorMessages) {
-    return this.errorMessages[field]();
+  getErrorMessage(field: string): string {
+    const control = this.licenseForm.get(field);
+    if (!control) return '';
+    
+    if (control.hasError('required')) return 'This field is required';
+    if (control.hasError('minlength')) return 'Minimum length required';
+    if (control.hasError('maxlength')) return 'Maximum length exceeded';
+    if (control.hasError('pattern')) return 'Invalid format';
+    
+    return '';
   }
 
   proceedToNext() {
     if (this.licenseForm.valid) {
+      this.saveToSessionStorage(); // Ensure the latest data is saved before proceeding
       this.next.emit();
+    } else {
+      this.licenseForm.markAllAsTouched(); // Show validation errors if invalid
     }
   }
 
@@ -119,6 +115,6 @@ export class LicenseComponent {
 
   resetForm() {
     this.licenseForm.reset();
-    sessionStorage.clear();
+    sessionStorage.removeItem('licenseFormData');
   }
 }

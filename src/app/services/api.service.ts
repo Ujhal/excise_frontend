@@ -26,7 +26,7 @@ export class ApiService {
   // Login API
   login(data: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post<any>(`${this.apiUrl}/login/`, data, { headers }).pipe(
+    return this.http.post<any>(`${this.apiUrl}/user/login/`, data, { headers }).pipe(
       catchError((error) => {
         console.error('Login failed:', error);
         return throwError(() => error);
@@ -36,7 +36,7 @@ export class ApiService {
 
   // Logout API
   logout(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/logout/`, {}).pipe(
+    return this.http.post(`${this.apiUrl}/user/logout/`, {}).pipe(
       catchError((error) => {
         console.error('Logout failed:', error);
         return throwError(() => error);

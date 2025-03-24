@@ -1,19 +1,17 @@
 import { Component,OnInit } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { RouterModule } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { BaseComponent } from '../../base/base.components';
 import { BaseDependency } from '../../base/dependency/base.dependendency';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { District } from '../../shared/models/district.model';
 import { SiteAdminService } from '../site-admin-service';
 import { State } from '../../shared/models/state.model';
 import { PatternConstants } from '../../config/app.constants';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-add-district',
-  imports: [MaterialModule,RouterModule],
+  imports: [MaterialModule, RouterModule],
   templateUrl: './add-district.component.html',
   styleUrl: './add-district.component.scss'
 })
@@ -40,24 +38,37 @@ export class AddDistrictComponent extends BaseComponent implements OnInit {
   }
 
   save(): void {
-    this.myswal
-      .fire({
-        title: 'Are you sure?',
-        text: 'You want to add district with given details?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Save',
-        cancelButtonText: 'Cancel',
-      })
-      .then((submit: { isConfirmed: any }) => {
-        if (submit.isConfirmed) {
-          this.siteAdminService.saveDistrict(this.district).subscribe(res => {
+    console.log("Save button clicked!", this.district);
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You want to add district with given details?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Save',
+      cancelButtonText: 'Cancel',
+    }).then((submit) => {
+      if (submit.isConfirmed) {
+        this.siteAdminService.saveDistrict(this.district).subscribe(res => {
           this.toastrService.success(res.message);
-          this.router.navigate(['/site-admin/list-district']);
+  
+          Swal.fire({
+            title: 'Success!',
+            text: 'District has been added successfully.',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          }).then(() => {
+            this.router.navigate(['/site-admin/list-district']);
           });
-        }
-      });
+  
+        }, error => {
+          console.error("Error saving district:", error);
+          this.toastrService.error("Failed to save district.");
+        });
+      }
+    });
   }
+  
+  
   cancel(): void {
     history.back();
    

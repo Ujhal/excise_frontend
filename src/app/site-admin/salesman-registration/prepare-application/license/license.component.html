@@ -11,82 +11,67 @@
         <div class="form-field-container">
             <mat-form-field appearance="outline">
                 <mat-label>Select Application Year</mat-label>
-                <mat-select [formControl]="applicationYear" required>
-                    <mat-option>None</mat-option>
-                    @for (applicationYear of applicationYears; track applicationYear) {
-                    <mat-option [value]="applicationYear">{{applicationYear}}</mat-option>
-                    }
+                <mat-select formControlName="applicationYear">
+                    <mat-option *ngFor="let year of applicationYears" [value]="year">{{ year }}</mat-option>
                 </mat-select>
-                @if (applicationYear.invalid) {
-                    <mat-error>{{ getErrorMessage('applicationYear') }}</mat-error>
-                }
+                <mat-error *ngIf="licenseForm.controls['applicationYear'].invalid">
+                    {{ getErrorMessage('applicationYear') }}
+                </mat-error>
             </mat-form-field>
     
             <mat-form-field appearance="outline">
                 <mat-label>Application Id</mat-label>
-                <input matInput placeholder="Application Id" type="number" [formControl]="applicationId"/>
-                @if (applicationId.invalid) {
-                    <mat-error>{{ getErrorMessage('applicationId') }}</mat-error>
-                }
+                <input matInput placeholder="Application Id" type="number" formControlName="applicationId"/>
+                <mat-error *ngIf="licenseForm.controls['applicationId'].invalid">
+                    {{ getErrorMessage('applicationId') }}
+                </mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
                 <mat-label>Application Date</mat-label>
-                <input matInput [matDatepicker]="picker" [formControl]="applicationDate" />
+                <input matInput [matDatepicker]="picker" formControlName="applicationDate" />
                 <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-datepicker #picker></mat-datepicker>
             </mat-form-field>
     
             <mat-form-field appearance="outline">
                 <mat-label>District</mat-label>
-                <mat-select [formControl]="district" required>
-                    <mat-option>None</mat-option>
-                    @for (district of districts; track district) {
-                        <mat-option [value]="district">{{district}}</mat-option>
-                    }
+                <mat-select formControlName="district">
+                    <mat-option *ngFor="let district of districts" [value]="district">{{ district }}</mat-option>
                 </mat-select>
-                @if (district.invalid) {
-                    <mat-error>{{ getErrorMessage('district') }}</mat-error>
-                }
+                <mat-error *ngIf="licenseForm.controls['district'].invalid">
+                    {{ getErrorMessage('district') }}
+                </mat-error>
             </mat-form-field>
     
             <mat-form-field appearance="outline">
                 <mat-label>Select License Category</mat-label>
-                <mat-select [formControl]="licenseCategory" required>
-                    <mat-option>None</mat-option>
-                    @for (category of licenseCategories; track category) {
-                        <mat-option [value]="category">{{category}}</mat-option>
-                    }
+                <mat-select formControlName="licenseCategory">
+                    <mat-option *ngFor="let category of licenseCategories" [value]="category">{{ category }}</mat-option>
                 </mat-select>
-                @if (licenseCategory.invalid) {
-                    <mat-error>{{ getErrorMessage('licenseCategory') }}</mat-error>
-                }
+                <mat-error *ngIf="licenseForm.controls['licenseCategory'].invalid">
+                    {{ getErrorMessage('licenseCategory') }}
+                </mat-error>
             </mat-form-field>
     
             <mat-form-field appearance="outline">
                 <mat-label>Select License</mat-label>
-                <mat-select [formControl]="license" required>
-                    <mat-option>None</mat-option>
-                    @for (license of licenses; track license) {
-                        <mat-option [value]="license">{{license}}</mat-option>
-                    }
+                <mat-select formControlName="license">
+                    <mat-option *ngFor="let license of licenses" [value]="license">{{ license }}</mat-option>
                 </mat-select>
-                @if (license.invalid) {
-                    <mat-error>{{ getErrorMessage('license') }}</mat-error>
-                }
+                <mat-error *ngIf="licenseForm.controls['license'].invalid">
+                    {{ getErrorMessage('license') }}
+                </mat-error>
             </mat-form-field>
     
             <mat-form-field appearance="outline">
                 <mat-label>Select Mode of Operation</mat-label>
-                <mat-select [formControl]="modeofOperation" required>
-                    <mat-option>None</mat-option>
-                    @for (modeofOperation of modeofOperations; track modeofOperation) {
-                        <mat-option [value]="modeofOperation">{{modeofOperation}}</mat-option>
-                    }
+                <mat-select formControlName="modeofOperation">
+                    <mat-option *ngFor="let mode of modeofOperations" [value]="mode">{{ mode }}</mat-option>
                 </mat-select>
-                @if (modeofOperation.invalid) {
-                    <mat-error>{{ getErrorMessage('modeofOperation') }}</mat-error>
-                }
+                <mat-error *ngIf="licenseForm.controls['modeofOperation'].invalid">
+                    {{ getErrorMessage('modeofOperation') }}
+                </mat-error>
             </mat-form-field>
         </div>
       </mat-card-content>
@@ -98,5 +83,3 @@
       </mat-card-actions>
     </mat-card>
 </form>
-
-  

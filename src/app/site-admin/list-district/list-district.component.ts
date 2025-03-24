@@ -1,25 +1,28 @@
-import { Component,OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { RouterModule } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { BaseComponent } from '../../base/base.components';
 import { BaseDependency } from '../../base/dependency/base.dependendency';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { MatDialog } from '@angular/material/dialog';
 import { District } from '../../shared/models/district.model';
 import { SiteAdminService } from '../site-admin-service';
+import { EditDistrictComponent } from './edit-district/edit-district.component';
 import Swal from 'sweetalert2';
+
 @Component({
   selector: 'app-list-district',
-  imports: [MaterialModule,RouterModule],
+  imports: [MaterialModule, RouterModule],
   templateUrl: './list-district.component.html',
   styleUrl: './list-district.component.scss'
 })
-export class ListDistrictComponent extends BaseComponent implements OnInit{
-  displayedColumns: string[] = ['slNo', 'id', 'district', 'districtCode', 'state', 'stateCode', 'actions'];
+export class ListDistrictComponent extends BaseComponent implements OnInit {
+  displayedColumns: string[] = ['slNo', 'id', 'district', 'districtNameLL', 'districtCode', 'state', 'stateCode', 'actions'];
   districtDataSource = new MatTableDataSource<District>();
 
-  constructor(base: BaseDependency, private siteAdminService: SiteAdminService) { super(base) }
+  constructor(base: BaseDependency, private siteAdminService: SiteAdminService, private dialog: MatDialog) { 
+    super(base); 
+  }
 
   ngOnInit(): void {
     this.loadDistricts();
@@ -32,9 +35,18 @@ export class ListDistrictComponent extends BaseComponent implements OnInit{
   }
 
   onEdit(district: District): void {
-    this.router.navigate(['/edit-district', district.id]);
+    const dialogRef = this.dialog.open(EditDistrictComponent, {
+      width: '400px',
+      data: { ...district }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadDistricts(); // Reload districts after update
+      }
+    });
   }
-  
+
   onDelete(district: District): void {
     Swal.fire({
       title: 'Are you sure?',
@@ -58,5 +70,4 @@ export class ListDistrictComponent extends BaseComponent implements OnInit{
       }
     });
   }
-
 }

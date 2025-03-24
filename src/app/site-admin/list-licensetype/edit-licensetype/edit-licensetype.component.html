@@ -1,0 +1,17 @@
+<div class="container-fluid">
+    <h2 mat-dialog-title>Edit License Type</h2>
+    
+    <mat-dialog-content>
+      <mat-form-field appearance="outline">
+        <mat-label>License Type</mat-label>
+        <input matInput [(ngModel)]="data.licenseType">
+      </mat-form-field>
+    </mat-dialog-content>
+    
+    <mat-dialog-actions>
+      <button mat-button (click)="onCancel()">Cancel</button>
+      <button mat-flat-button (click)="onSave()">Save</button>
+    </mat-dialog-actions>
+</div>
+  
+  

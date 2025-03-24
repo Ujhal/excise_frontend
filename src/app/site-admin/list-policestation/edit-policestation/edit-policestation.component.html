@@ -1,0 +1,36 @@
+<div class="container-fluid">
+    <h2 mat-dialog-title>Edit Police Station</h2>
+    <mat-dialog-content>
+    
+        <mat-form-field appearance="outline">
+            <mat-label>Police Station Name</mat-label>
+            <input matInput [(ngModel)]="data.PoliceStationName">
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+            <mat-label>Police Station Code</mat-label>
+            <input matInput [(ngModel)]="data.PoliceStationCode">
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+            <mat-label>Sub Division</mat-label>
+            <mat-select [(ngModel)]="data.SubDivisionName" (selectionChange)="onSubDivisionChange($event.value)">
+            <mat-option *ngFor="let subDivision of subDivisions" [value]="subDivision">
+                {{ subDivision.SubDivisionName }}
+            </mat-option>
+            </mat-select>          
+        </mat-form-field>      
+        
+        <mat-form-field appearance="outline">
+            <mat-label>Sub Division Code</mat-label>
+            <input matInput [(ngModel)]="data.SubDivisionCode" disabled>
+        </mat-form-field>
+    </mat-dialog-content>
+    
+    <mat-dialog-actions>
+      <button mat-button (click)="onCancel()">Cancel</button>
+      <button mat-flat-button (click)="onSave()">Save</button>
+    </mat-dialog-actions>
+  </div>
+    
+    

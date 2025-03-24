@@ -13,5 +13,12 @@ mat-card{
     }
     mat-card-content{
         padding: 15px;
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            mat-table {
+                min-width: 700px;
+            }          
+        }
     }
 }

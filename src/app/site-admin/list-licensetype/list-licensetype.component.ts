@@ -7,6 +7,8 @@ import Swal from 'sweetalert2';
 import { MatTableDataSource } from '@angular/material/table';
 import { LicenseType } from '../../shared/models/license-type.model';
 import { SiteAdminService } from '../site-admin-service';
+import { EditLicensetypeComponent } from './edit-licensetype/edit-licensetype.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-list-licensetype',
@@ -18,8 +20,8 @@ export class ListLicensetypeComponent extends BaseComponent implements OnInit{
   displayedColumns: string[] = ['slNo', 'id', 'licenseType', 'actions'];
   licenseTypeDataSource = new MatTableDataSource<LicenseType>();
 
-  constructor(base: BaseDependency, private siteAdminService: SiteAdminService) {
-    super(base);
+  constructor(base: BaseDependency, private siteAdminService: SiteAdminService, private dialog: MatDialog) { 
+    super(base); 
   }
 
   ngOnInit(): void {
@@ -32,10 +34,19 @@ export class ListLicensetypeComponent extends BaseComponent implements OnInit{
     });
   }
 
-  onEdit(element: LicenseType): void {
-    this.router.navigate([`./site-admin/list-licensetype`]);
+  onEdit(district: LicenseType): void {
+    const dialogRef = this.dialog.open(EditLicensetypeComponent, {
+      width: '400px',
+      data: { ...district }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadLicenseTypes(); // Reload districts after update
+      }
+    });
   }
-  
+
   onDelete(element: LicenseType): void {
     Swal.fire({
       title: 'Are you sure?',

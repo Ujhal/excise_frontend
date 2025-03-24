@@ -7,8 +7,9 @@
       </button> 
     </mat-card-header>
     <mat-card-content class="page-card-content">
-     
-        <mat-table [dataSource]="districtDataSource" class="mat-table">
+
+      <div class="table-container">
+        <mat-table [dataSource]="districtDataSource">
           <ng-container matColumnDef="slNo">
             <mat-header-cell *matHeaderCellDef> Sl. No. </mat-header-cell>
             <mat-cell *matCellDef="let user; let i=index"> {{i+1}} </mat-cell>
@@ -24,6 +25,11 @@
             <mat-cell *matCellDef="let element"> {{element.District}} </mat-cell>
           </ng-container>
 
+          <ng-container matColumnDef="districtNameLL">
+            <mat-header-cell *matHeaderCellDef> District Name LL </mat-header-cell>
+            <mat-cell *matCellDef="let element"> {{element.DistrictNameLL}} </mat-cell>
+          </ng-container>
+
           <ng-container matColumnDef="districtCode">
             <mat-header-cell *matHeaderCellDef> District Code </mat-header-cell>
             <mat-cell *matCellDef="let element"> {{element.DistrictCode}} </mat-cell>
@@ -36,7 +42,7 @@
 
           <ng-container matColumnDef="stateCode">
             <mat-header-cell *matHeaderCellDef> State Code </mat-header-cell>
-            <mat-cell *matCellDef="let element"> {{element.stateCode}} </mat-cell>
+            <mat-cell *matCellDef="let element"> {{element.StateCode}} </mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="actions">
@@ -54,7 +60,8 @@
           <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
           <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
         </mat-table>
-     
+      </div>
+
     </mat-card-content>
   </mat-card>
 </div>

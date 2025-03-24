@@ -1,0 +1,41 @@
+<div class="container-fluid">
+  <h2 mat-dialog-title>Edit Subdivision</h2>
+  <mat-dialog-content>
+    
+    <mat-form-field appearance="outline">
+      <mat-label>Subdivision Name</mat-label>
+      <input matInput [(ngModel)]="data.SubDivisionName">
+    </mat-form-field>
+  
+    <mat-form-field appearance="outline">
+      <mat-label>Subdivision Name LL</mat-label>
+      <input matInput [(ngModel)]="data.SubDivisionNameLL">
+    </mat-form-field>
+  
+    <mat-form-field appearance="outline">
+      <mat-label>Subdivision Code</mat-label>
+      <input matInput [(ngModel)]="data.SubDivisionCode">
+    </mat-form-field>
+  
+    <mat-form-field appearance="outline">
+      <mat-label>District</mat-label>
+      <mat-select [(ngModel)]="data.District" (selectionChange)="onDistrictChange($event.value)">
+        <mat-option *ngFor="let district of districts" [value]="district">
+          {{ district.District }}
+        </mat-option>
+      </mat-select>          
+    </mat-form-field>      
+  
+    <mat-form-field appearance="outline">
+      <mat-label>District Code</mat-label>
+      <input matInput [(ngModel)]="data.DistrictCode" disabled>
+    </mat-form-field>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions>
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-flat-button (click)="onSave()">Save</button>
+  </mat-dialog-actions>
+</div>
+  
+  

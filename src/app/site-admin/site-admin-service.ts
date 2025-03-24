@@ -23,25 +23,36 @@ export class SiteAdminService {
   }
 
   //user
-  saveUser(user: Account): Observable<any> {
-    return this.http.post(`${this.baseUrl}/api/register`, user);
+  registerUser(user: Account): Observable<any> {
+    console.log("Registering user:", user); // Debugging step
+    return this.http.post(`${this.baseUrl}/api/user/register/`, user);
   }
+  
   getUsers(): Observable<any> {
-    return this.http.get<Account[]>(`${this.baseUrl}/api/users`);
+    return this.http.get<Account[]>(`${this.baseUrl}/api/user/list/`);
+  }
+  getUserByUsername(username: string): Observable<any> {
+    return this.http.get<Account[]>(`${this.baseUrl}/api/user/detail/${username}/`);
+  }
+  updateUser(username: string): Observable<any> {
+    return this.http.get<Account[]>(`${this.baseUrl}/api/user/update/${username}/`);
+  }
+  deleteUser(username: string): Observable<any> {
+    return this.http.get<Account[]>(`${this.baseUrl}/api/user/delete/${username}/`);
   }
 
-  //district CRUD
+  //district
   saveDistrict(district: District): Observable<any> {
     return this.http.post(`${this.apiUrl}/districts/create/`, district);
   }
   getDistrict(): Observable<District[]> {
     return this.http.get<District[]>(`${this.apiUrl}/districts/list`);
   }
-  updateDistrict(id: number, changes: Partial<SubDivision>): Observable<District> {
-    return this.http.put<District>(`${this.apiUrl}/districts/update/${id}`, changes);
-  }
+  updateDistrict(id: number, changes: Partial<District>): Observable<District> {
+    return this.http.put<District>(`${this.apiUrl}/districts/update/${id}/`, changes);
+  }  
   deleteDistrict(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/districts/delete/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/districts/delete/${id}/`);
   }
 
   //sub division
@@ -51,19 +62,19 @@ export class SiteAdminService {
   getSubDivision(): Observable<SubDivision[]> {
     return this.http.get<SubDivision[]>(`${this.apiUrl}/subdivisions/list`);
   }
-  getSubDivisionByDistrictCode(districtCode: number): Observable<SubDivision[]> {
-    return this.http.get<SubDivision[]>(`${this.apiUrl}/subdivision/detail/${districtCode}`);
-  } 
+  getSubDivisionByDistrictCode(id: number): Observable<SubDivision[]> {
+    return this.http.get<SubDivision[]>(`/api/subdivisions/${id}`);
+  }
   updateSubDivision(id: number, changes: Partial<SubDivision>): Observable<SubDivision> {
-    return this.http.put<SubDivision>(`${this.apiUrl}/subdivisions/update/${id}`, changes);
+    return this.http.put<SubDivision>(`${this.apiUrl}/subdivisions/update/${id}/`, changes);
   }
   deleteSubdivision(id: number) {
-    return this.http.delete(`${this.apiUrl}/subdivisions/delete/${id}`);
+    return this.http.delete(`${this.apiUrl}/subdivisions/delete/${id}/`);
   }
 
   //police station
   addPoliceStation(policeStation: PoliceStation) {
-    return this.http.post(`${this.apiUrl}/policestations/create`, policeStation);
+    return this.http.post(`${this.apiUrl}/policestations/create/`, policeStation);
   }
   getPoliceStations() {
     return this.http.get<PoliceStation[]>(`${this.apiUrl}/policestations/list`);
@@ -72,7 +83,7 @@ export class SiteAdminService {
     return this.http.get<PoliceStation[]>(`${this.apiUrl}/subdivision/detail/${SubDivisionCode}`);
   }
   updatePolicestation(id: number, changes: Partial<PoliceStation>): Observable<PoliceStation> {
-    return this.http.put<PoliceStation>(`${this.apiUrl}/policestations/update/${id}`, changes);
+    return this.http.put<PoliceStation>(`${this.apiUrl}/policestations/update/${id}/`, changes);
   }
   deletePoliceStation(id: number) {
     return this.http.delete(`${this.apiUrl}/policestations/delete/${id}/`);
@@ -85,6 +96,9 @@ export class SiteAdminService {
   getLicenseTypes(): Observable<LicenseType[]> {
     return this.http.get<LicenseType[]>(`${this.apiUrl}/licensetypes/list/`);
   }
+  updateLicenseType(id: number, changes: Partial<LicenseType>): Observable<LicenseType> {
+    return this.http.put<LicenseType>(`${this.apiUrl}/licensetypes/delete/${id}/`, changes);
+  }
   deleteLicenseType(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/licensetypes/delete/${id}/`);
   }
@@ -96,6 +110,9 @@ export class SiteAdminService {
   getLicenseCategories(): Observable<LicenseCategory[]> {
     return this.http.get<LicenseCategory[]>(`${this.apiUrl}/licensecategories/list`);
   } 
+  updateLicenseCategory(id: number, changes: Partial<LicenseCategory>): Observable<LicenseCategory> {
+    return this.http.put<LicenseCategory>(`${this.apiUrl}/licensecategories/update/${id}/`, changes);
+  }
   deleteLicenseCategory(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/licensecategories/delete/${id}/`);
   }  

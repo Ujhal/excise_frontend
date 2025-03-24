@@ -1,16 +1,14 @@
 import { Component,OnInit } from '@angular/core';
 import { MaterialModule } from '../../material.module';
 import { RouterModule } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { BaseComponent } from '../../base/base.components';
 import { BaseDependency } from '../../base/dependency/base.dependendency';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { District } from '../../shared/models/district.model';
 import { SiteAdminService } from '../site-admin-service';
 import { State } from '../../shared/models/state.model';
 import { PatternConstants } from '../../config/app.constants';
 import { SubDivision } from '../../shared/models/subdivision.model';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-add-subdivision',
@@ -46,24 +44,36 @@ export class AddSubdivisionComponent  extends BaseComponent implements OnInit{
   }
 
   save(): void {
-    this.myswal
-      .fire({
-        title: 'Are you sure?',
-        text: 'You want to add subdivision with given details?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Save',
-        cancelButtonText: 'Cancel',
-      })
-      .then((submit: { isConfirmed: any }) => {
-        if (submit.isConfirmed) {
-          this.siteAdminService.saveSubDivision(this.subdivision).subscribe(res => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You want to add subdivision with given details?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Save',
+      cancelButtonText: 'Cancel',
+    }).then((submit) => {
+      if (submit.isConfirmed) {
+        this.siteAdminService.saveSubDivision(this.subdivision).subscribe(res => {
           this.toastrService.success(res.message);
-          this.router.navigate(['/site-admin/list-subdivision']);
+  
+          // Success Swal alert
+          Swal.fire({
+            title: 'Success!',
+            text: 'Subdivision has been added successfully.',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          }).then(() => {
+            this.router.navigate(['/site-admin/list-subdivision']);
           });
-        }
-      });
+  
+        }, error => {
+          console.error("Error saving subdivision:", error);
+          this.toastrService.error("Failed to save subdivision.");
+        });
+      }
+    });
   }
+  
   cancel(): void {
     history.back();
   }

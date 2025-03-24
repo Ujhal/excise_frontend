@@ -7,6 +7,8 @@ import Swal from 'sweetalert2';
 import { MatTableDataSource } from '@angular/material/table';
 import { LicenseCategory } from '../../shared/models/license-category.model';
 import { SiteAdminService } from '../site-admin-service';
+import { EditLicensecategoryComponent } from './edit-licensecategory/edit-licensecategory.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-list-licensecategory',
@@ -18,8 +20,8 @@ export class ListLicensecategoryComponent extends BaseComponent implements OnIni
   displayedColumns: string[] = ['slNo', 'id', 'licenseCategory', 'actions'];
   licenseCategoryDataSource = new MatTableDataSource<LicenseCategory>();
 
-  constructor(base: BaseDependency, private siteAdminService: SiteAdminService) {
-    super(base);
+  constructor(base: BaseDependency, private siteAdminService: SiteAdminService, private dialog: MatDialog) { 
+    super(base); 
   }
 
   ngOnInit(): void {
@@ -32,8 +34,17 @@ export class ListLicensecategoryComponent extends BaseComponent implements OnIni
     });
   }
 
-  onEdit(element: LicenseCategory): void {
-    this.router.navigate([`..//${element.id}`]);
+  onEdit(district: LicenseCategory): void {
+    const dialogRef = this.dialog.open(EditLicensecategoryComponent, {
+      width: '400px',
+      data: { ...district }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadLicenseCategories(); // Reload districts after update
+      }
+    });
   }
 
   onDelete(element: LicenseCategory): void {

@@ -8,6 +8,8 @@ import { SiteAdminService } from '../site-admin-service';
 import Swal from 'sweetalert2';
 import { PoliceStation } from '../../shared/models/policestation.model';
 import { SubDivision } from '../../shared/models/subdivision.model';
+import { EditPolicestationComponent } from './edit-policestation/edit-policestation.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-list-policestation',
@@ -22,8 +24,8 @@ export class ListPolicestationComponent extends BaseComponent implements OnInit{
   allPoliceStations: PoliceStation[] = [];
   selectedSubDivisionCode: number | null = null;
 
-  constructor(base: BaseDependency, private siteAdminService: SiteAdminService) {
-    super(base);
+  constructor(base: BaseDependency, private siteAdminService: SiteAdminService, private dialog: MatDialog) { 
+    super(base); 
   }
 
   ngOnInit(): void {
@@ -52,8 +54,17 @@ export class ListPolicestationComponent extends BaseComponent implements OnInit{
     }
   }
 
-  onEdit(element: PoliceStation): void {
-    this.router.navigate([`..//${element.id}`]);
+  onEdit(district: PoliceStation): void {
+    const dialogRef = this.dialog.open(EditPolicestationComponent, {
+      width: '400px',
+      data: { ...district }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadPoliceStations();
+      }
+    });
   }
 
   onDelete(element: PoliceStation): void {

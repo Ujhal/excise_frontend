@@ -1,9 +1,12 @@
-import { Component, OnInit, ViewChild, } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { SiteAdminService } from '../site-admin-service';
+import { MatDialog } from '@angular/material/dialog';
 import { BaseComponent } from '../../base/base.components';
 import { BaseDependency } from '../../base/dependency/base.dependendency';
 import { Account } from '../../shared/models/accounts';
+import { SiteAdminService } from '../site-admin-service';
+import { EditUserComponent } from './edit-user/edit-user.component';
+import Swal from 'sweetalert2';
 import { MaterialModule } from '../../material.module';
 import { RouterModule } from '@angular/router';
 
@@ -11,13 +14,18 @@ import { RouterModule } from '@angular/router';
   selector: 'app-list-user',
   imports: [MaterialModule, RouterModule],
   templateUrl: './list-user.component.html',
-  styleUrl: './list-user.component.scss'
+  styleUrls: ['./list-user.component.scss']
 })
 export class ListUserComponent extends BaseComponent implements OnInit {
-  displayedColumns: string[] = ['slNo','firstName', 'middleName', 'lastName', 'username', 'contactNumber','emailId', 'role', 'createdBy', 'actions'];
-  users: MatTableDataSource<Account> = new MatTableDataSource<Account>();
+  displayedColumns: string[] = ['slNo', 'firstName', 'middleName', 'lastName', 'username', 'phoneNumber', 'email', 'district', 'subDivision', 'role', 'actions'];
+  users = new MatTableDataSource<Account>();
+  allUsers: Account[] = [];
 
-  constructor(base: BaseDependency, private siteAdminService: SiteAdminService) {
+  constructor(
+    base: BaseDependency,
+    private siteAdminService: SiteAdminService,
+    private dialog: MatDialog
+  ) {
     super(base);
   }
 
@@ -26,77 +34,60 @@ export class ListUserComponent extends BaseComponent implements OnInit {
   }
 
   loadUsers(): void {
-    // Fetch users from the service
-    this.siteAdminService.getUsers().subscribe((data: Account[]) => {
-      // Sort users by role
-      this.users.data = this.sortUsersByRole(data);
-    },
-    error => console.error('Error loading users', error)
+    this.siteAdminService.getUsers().subscribe(
+      (data) => {  
+        if (data) {
+          if (Array.isArray(data)) {
+            this.users.data = data; 
+          } else {
+            this.users.data = [data];
+          }
+        }
+      },
+      (error) => {
+        console.error('Error fetching users:', error);
+      }
     );
   }
+  
+  
+  
 
-  onEdit(element: Account): void {
-    this.router.navigate([`..//${element.first_name}`]);
-  }
+  onEdit(user: Account): void {
+    const dialogRef = this.dialog.open(EditUserComponent, {
+      width: '400px',
+      data: { ...user }
+    });
 
-  onView(element: Account): void {
-      this.router.navigate([`..//${element.first_name}`]);
-  }
-
-  /*
-  onDelete(element: Account): void {
-      Swal.fire({
-          title: 'Are you sure?',
-          text: 'You will not be able to recover this subdivision!',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Yes, delete it!',
-          cancelButtonText: 'Cancel'
-      }).then((result) => {
-          if (result.isConfirmed) {
-              this.siteAdminService.deleteUser(element.id).subscribe(
-                  () => {
-                      Swal.fire('Deleted!', 'Subdivision has been deleted.', 'success');
-                      this.loadUsers(); // Reload data
-                  },
-                  error => {
-                      console.error('Error deleting user:', error);
-                      Swal.fire('Error!', 'User could not be deleted.', 'error');
-                  }
-              );
-          }
-      });
-  }
-  */
-
-  sortUsersByRole(users: Account[]): Account[] {
-    const roleOrder = ['site_admin', '1', '2', '3', '4', '5', '6'];
-
-    return users.sort((a, b) => {
-      const roleA = roleOrder.indexOf(a.role);
-      const roleB = roleOrder.indexOf(b.role);
-      return roleA - roleB;
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadUsers(); 
+      }
     });
   }
 
-  getRoleName(role: string): string {
-    const roleMapping: { [key: string]: string } = {
-      'site_admin': 'Site Admin',
-      '2': 'licensee',
-      
-    };
-    return roleMapping[role] || 'Unknown Role';
-  }
-
-  showDetails(user: Account): void {
-    alert(`Details of ${user.username}:
-    \nPhone: ${user.phonenumber}
-    \nEmail: ${user.email}`);
-  }
-
-  applyFilter(filterValue: string): void {
-    filterValue = filterValue.trim(); // Remove whitespace
-    filterValue = filterValue.toLowerCase(); // MatTableDataSource defaults to lowercase matches
-    this.users.filter = filterValue;
+  onDelete(user: Account): void {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `Do you really want to delete ${user.username}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.siteAdminService.deleteUser(user.username).subscribe(
+          () => {
+            Swal.fire('Deleted!', 'The user has been deleted.', 'success');
+            this.loadUsers();
+          },
+          (error) => {
+            Swal.fire('Error!', 'Failed to delete the user.', 'error');
+            console.error('Error deleting user:', error);
+          }
+        );
+      }
+    });
   }
 }
+
