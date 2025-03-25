@@ -4,6 +4,7 @@ import { MaterialModule } from '../material.module';
 import { CaptchaComponent } from '../shared/components/captcha/captcha.component';
 import { BaseComponent } from '../base/base.components';
 import { BaseDependency } from '../base/dependency/base.dependendency';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-login',
@@ -16,7 +17,7 @@ export class LoginComponent extends BaseComponent {
   isPasswordMode: boolean = true;
   
 
-  constructor(protected baseDependancy: BaseDependency, private fb: FormBuilder) {
+  constructor(protected baseDependancy: BaseDependency, private fb: FormBuilder, private snackBar: MatSnackBar) {
     super(baseDependancy);
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
@@ -36,7 +37,9 @@ export class LoginComponent extends BaseComponent {
   // Post request to backend routes
   onLogin(): void {
     if (this.loginForm.invalid) {
-      alert("Please fill in all fields correctly.");
+      this.snackBar.open('Please fill in all fields correctly.', 'Close', { 
+        duration: 3000 
+      });
       return;
     }
 
