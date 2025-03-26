@@ -1,12 +1,10 @@
 <form [formGroup]="detailsForm">
   <mat-card>
     <mat-card-header>
-      <div *ngIf="isSalesman()">
-        Salesman Details
-      </div>
-      <div *ngIf="isBarman()">
-        Barman Details
-      </div>
+       <div class="heading" [innerText]="modeofOperation === 'Barman' ? 'Barman Details' : (
+        modeofOperation === 'Salesman' ? 'Salesman Details' : 'Details'
+        )">
+        </div>
       <div class="validation">
         * Marked Fields Are Mandatory
       </div>
@@ -17,61 +15,62 @@
         <mat-form-field appearance="outline"> 
           <mat-label>First Name</mat-label>
           <input matInput placeholder="Enter First Name" type="text" formControlName="firstName"/>
-          @if (detailsForm.get('firstName')?.invalid) {
-              <mat-error>{{ getErrorMessage('firstName') }}</mat-error>
-          }
+          <mat-error *ngIf="detailsForm.controls['firstName'].invalid">
+            {{ getErrorMessage('firstName') }}
+          </mat-error>
         </mat-form-field>
   
         <mat-form-field appearance="outline">
           <mat-label>Middle Name</mat-label>
           <input matInput placeholder="Enter Middle Name" type="text" formControlName="middleName"/>
-          @if (detailsForm.get('middleName')?.invalid) {
-              <mat-error>{{ getErrorMessage('middleName') }}</mat-error>
-          }
+          <mat-error *ngIf="detailsForm.controls['middleName'].invalid">
+            {{ getErrorMessage('middleName') }}
+          </mat-error>
         </mat-form-field>
   
         <mat-form-field appearance="outline">
           <mat-label>Last Name</mat-label>
           <input matInput placeholder="Enter Last Name" type="text" formControlName="lastName"/>
-          @if (detailsForm.get('lastName')?.invalid) {
-              <mat-error>{{ getErrorMessage('lastName') }}</mat-error>
-          }
+          <mat-error *ngIf="detailsForm.controls['lastName'].invalid">
+            {{ getErrorMessage('lastName') }}
+          </mat-error>
         </mat-form-field>
   
         <mat-form-field appearance="outline">
           <mat-label>Father's/Husband's Name</mat-label>
           <input matInput placeholder="Enter Father's/Husband's Name" type="text" formControlName="fatherName"/>
-          @if (detailsForm.get('fatherName')?.invalid) {
-              <mat-error>{{ getErrorMessage('fatherName') }}</mat-error>
-          }
+          <mat-error *ngIf="detailsForm.controls['fatherName'].invalid">
+            {{ getErrorMessage('fatherName') }}
+          </mat-error>
         </mat-form-field>
   
         <mat-radio-group aria-label="Gender" formControlName="gender" required>
           <mat-radio-button value="Male">Male</mat-radio-button>
           <mat-radio-button value="Female">Female</mat-radio-button>
-          @if (detailsForm.get('gender')?.invalid) {
-            <mat-error>{{ getErrorMessage('gender') }}</mat-error>
-          }
+          <mat-error *ngIf="detailsForm.controls['gender'].invalid">
+            {{ getErrorMessage('gender') }}
+          </mat-error>
         </mat-radio-group>
   
         <mat-form-field appearance="outline">
           <mat-label>Date of Birth</mat-label>
-          <input matInput [matDatepicker]="picker" [formControl]="dob" />
+          <input matInput [matDatepicker]="picker" formControlName="dob" required>
           <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
+          <mat-error *ngIf="detailsForm.controls['dob'].invalid">
+            {{ getErrorMessage('dob') }}
+          </mat-error>
         </mat-form-field>
   
         <mat-form-field appearance="outline">
           <mat-label>Nationality</mat-label>
           <mat-select formControlName="nationality" required>
             <mat-option>None</mat-option>
-            @for (nationality of nationalities; track nationality) {
-              <mat-option [value]="nationality">{{nationality}}</mat-option>
-            }
+            <mat-option *ngFor="let nationality of nationalities" [value]="nationality">{{ nationality }}</mat-option>
           </mat-select>
-          @if (detailsForm.get('nationality')?.invalid) {
-            <mat-error>{{ getErrorMessage('nationality') }}</mat-error>
-          }
+          <mat-error *ngIf="detailsForm.controls['nationality'].invalid">
+            {{ getErrorMessage('nationality') }}
+          </mat-error>
         </mat-form-field>
   
         <mat-form-field appearance="outline">
@@ -85,51 +84,50 @@
                     cdkAutosizeMaxRows="5"
                     required>
           </textarea>
-          @if (detailsForm.get('address')?.invalid) {
-            <mat-error>{{ getErrorMessage('address') }}</mat-error>
-          }
+          <mat-error *ngIf="detailsForm.controls['address'].invalid">
+            {{ getErrorMessage('address') }}
+          </mat-error>
         </mat-form-field>
   
         <mat-form-field appearance="outline">
           <mat-label>PAN</mat-label>
           <input matInput placeholder="Enter PAN" type="text" formControlName="pan" appUppercase/>
-          @if (detailsForm.get('pan')?.invalid) {
-            <mat-error>{{ getErrorMessage('pan') }}</mat-error>
-          }
+          <mat-error *ngIf="detailsForm.controls['pan'].invalid">
+            {{ getErrorMessage('pan') }}
+          </mat-error>
         </mat-form-field>
   
         <mat-form-field appearance="outline">
           <mat-label>Aadhaar No.</mat-label>
           <input matInput placeholder="Enter Aadhaar No." type="text" formControlName="aadhaar"/>
-          @if (detailsForm.get('aadhaar')?.invalid) {
-            <mat-error>{{ getErrorMessage('aadhaar') }}</mat-error>
-          }
+          <mat-error *ngIf="detailsForm.controls['aadhaar'].invalid">
+            {{ getErrorMessage('aadhaar') }}
+          </mat-error>
         </mat-form-field>
   
         <mat-form-field appearance="outline">
             <mat-label>Enter Mobile Number</mat-label>
             <input matInput placeholder="Enter Phone Number" type="number" formControlName="mobileNumber"/>
-            @if (detailsForm.get('mobileNumber')?.invalid) {
-            <mat-error>{{ getErrorMessage('mobileNumber') }}</mat-error>
-            }
+            <mat-error *ngIf="detailsForm.controls['mobileNumber'].invalid">
+              {{ getErrorMessage('mobileNumber') }}
+            </mat-error>
         </mat-form-field>
   
         <mat-form-field appearance="outline">
           <mat-label>Email Id</mat-label>
           <input matInput placeholder="Enter Email" type="email" formControlName="emailId"/>
-          @if (detailsForm.get('emailId')?.invalid) {
-            <mat-error>{{ getErrorMessage('emailId') }}</mat-error>
-          }
+          <mat-error *ngIf="detailsForm.controls['emailId'].invalid">
+            {{ getErrorMessage('emailId') }}
+          </mat-error>
         </mat-form-field>
   
         <div class="checkbox">
           <mat-checkbox formControlName="sikkimSubject" required>
-            The barman holds Sikkim Subject Certificate
-          </mat-checkbox>
-  
-          @if (detailsForm.get('sikkimSubject')?.invalid && detailsForm.get('sikkimSubject')?.touched) {
-            <mat-error>{{ getErrorMessage('sikkimSubject') }}</mat-error>
-          }
+            The <span [innerText]="modeofOperation === 'Barman' ? 'Barman' : 'Salesman'"></span> holds Sikkim Subject Certificate / Certificate of Identification / Residential Certificate (for urban area only).
+          </mat-checkbox> 
+          <mat-error *ngIf="detailsForm.controls['sikkimSubject'].invalid">
+            {{ getErrorMessage('sikkimSubject') }}
+          </mat-error>
         </div>
       </div>
 

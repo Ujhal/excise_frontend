@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Output, signal } from '@angular/core';
-import { MaterialModule } from '../../../../material.module';
+import { Component, EventEmitter, Output, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { merge } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { merge, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { MaterialModule } from '../../../../material.module';
 import { PatternConstants } from '../../../../config/app.constants';
 
 @Component({
@@ -14,15 +14,11 @@ import { PatternConstants } from '../../../../config/app.constants';
 export class MemberDetailsComponent {
   memberDetailsForm: FormGroup;
   
-  @Output() next = new EventEmitter<void>();
-  @Output() back = new EventEmitter<void>();
+  @Output() readonly next = new EventEmitter<void>();
+  @Output() readonly back = new EventEmitter<void>();
 
-  memberName = new FormControl(this.getFromSessionStorage('memberName'), [Validators.required, Validators.pattern(PatternConstants.NAME)]);
-  memberDesignation = new FormControl(this.getFromSessionStorage('memberDesignation'), [Validators.required, Validators.maxLength(100)]);
-  mobileNumber = new FormControl(this.getFromSessionStorage('mobileNumber'), [Validators.required, Validators.pattern(PatternConstants.MOBILE)]);
-  emailId = new FormControl(this.getFromSessionStorage('emailId'), [Validators.pattern(PatternConstants.EMAIL)]);
-  memberAddress = new FormControl(this.getFromSessionStorage('memberAddress'), [Validators.required, Validators.maxLength(500)]);
-
+  private destroy$ = new Subject<void>();
+  
   errorMessages = {
     memberName: signal(''),
     memberDesignation: signal(''),
@@ -32,54 +28,62 @@ export class MemberDetailsComponent {
   };
   
   constructor(private fb: FormBuilder) {
+    const storedValues = {
+      memberName: this.getFromSessionStorage('memberName'),
+      memberDesignation: this.getFromSessionStorage('memberDesignation'),
+      mobileNumber: this.getFromSessionStorage('mobileNumber'),
+      emailId: this.getFromSessionStorage('emailId'),
+      memberAddress: this.getFromSessionStorage('memberAddress'),
+    };
+
     this.memberDetailsForm = this.fb.group({
-      memberName: this.memberName,
-      memberDesignation: this.memberDesignation,
-      mobileNumber: this.mobileNumber,
-      emailId: this.emailId,
-      memberAddress: this.memberAddress,
+      memberName: new FormControl(storedValues.memberName, [Validators.required, Validators.pattern(PatternConstants.NAME)]),
+      memberDesignation:new FormControl(storedValues.memberDesignation, [Validators.required, Validators.maxLength(100)]),
+      mobileNumber: new FormControl(storedValues.mobileNumber, [Validators.required, Validators.pattern(PatternConstants.MOBILE)]),
+      emailId: new FormControl(storedValues.emailId, [Validators.pattern(PatternConstants.EMAIL)]),
+      memberAddress: new FormControl(storedValues.memberAddress, [Validators.required, Validators.maxLength(500)])
     });
 
-    merge(
-      this.memberName.valueChanges,
-      this.memberDesignation.valueChanges,
-      this.mobileNumber.valueChanges,
-      this.emailId.valueChanges,
-      this.memberAddress.valueChanges,
-    )
-    
-    .pipe(takeUntilDestroyed())
-    .subscribe(() => {
-      this.saveToSessionStorage();
-      this.updateAllErrorMessages();
-    });
+    // Auto-save on form changes
+    merge(...Object.values(this.memberDetailsForm.controls).map(control => control.valueChanges))
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.saveToSessionStorage();
+        this.updateAllErrorMessages();
+      });
   }
 
-  getFromSessionStorage(key: string): string {
+  ngOnInit() {}
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }  
+
+  private getFromSessionStorage(key: string): string {
     return sessionStorage.getItem(key) || '';
   }
 
-  saveToSessionStorage() {
-    sessionStorage.setItem('memberName', this.memberName.value || '');
-    sessionStorage.setItem('memberDesignation', this.memberDesignation.value || '');
-    sessionStorage.setItem('mobileNumber', this.mobileNumber.value || '');
-    sessionStorage.setItem('emailId', this.emailId.value || '');
+  private saveToSessionStorage() {
+    Object.keys(this.memberDetailsForm.controls).forEach((key) => {
+      sessionStorage.setItem(key, this.memberDetailsForm.get(key)?.value || '');
+    });
   }
 
-  updateErrorMessage(field: keyof typeof this.errorMessages) {
-    const control = this[field];
-    if (control.hasError('required')) {
+  private updateErrorMessage(field: keyof typeof this.errorMessages) {
+    const control = this.memberDetailsForm.get(field);
+    if (control?.hasError('required')) {
       this.errorMessages[field].set('This field is required');
-    } else if (control.hasError('pattern')) {
+    } else if (control?.hasError('pattern')) {
       this.errorMessages[field].set('Invalid format');
-    } else if (control.hasError('email')) {
+    } else if (control?.hasError('email')) {
       this.errorMessages[field].set('Not a valid email');
     } else {
       this.errorMessages[field].set('');
     }
   }
 
-  updateAllErrorMessages() {
+  private updateAllErrorMessages() {
     Object.keys(this.errorMessages).forEach((field) => {
       this.updateErrorMessage(field as keyof typeof this.errorMessages);
     });
@@ -94,13 +98,13 @@ export class MemberDetailsComponent {
       this.next.emit();
     }
   }
-
-  goBack() {
-    this.back.emit();
-  }
-
+  
   resetForm() {
     this.memberDetailsForm.reset();
     sessionStorage.clear();
+  }
+
+  goBack() {
+    this.back.emit();
   }
 }

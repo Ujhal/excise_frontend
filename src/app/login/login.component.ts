@@ -14,7 +14,7 @@ import { BaseDependency } from '../base/dependency/base.dependendency';
 export class LoginComponent extends BaseComponent {
   loginForm: FormGroup;
   isPasswordMode: boolean = true;
-  
+  hidePassword = true;
 
   constructor(protected baseDependancy: BaseDependency, private fb: FormBuilder) {
     super(baseDependancy);
@@ -32,7 +32,10 @@ export class LoginComponent extends BaseComponent {
     this.loginForm.reset(); // Reset form when switching modes
   }
 
-
+  togglePasswordVisibility() {
+    this.hidePassword = !this.hidePassword;
+  }
+  
   // Post request to backend routes
   onLogin(): void {
     if (this.loginForm.invalid) {
@@ -51,7 +54,6 @@ export class LoginComponent extends BaseComponent {
         const authenticatedUser = res.authenticated_user;
         
         if (authenticatedUser && authenticatedUser.access && authenticatedUser.refresh) {
-          console.log(authenticatedUser, 'user');
           const access = authenticatedUser.access;
           const refresh = authenticatedUser.refresh;
   
@@ -62,7 +64,6 @@ export class LoginComponent extends BaseComponent {
           this.accountService.identity(true).subscribe({
             next: (user) => {
               if (user) {
-                console.log(user, 'user2');
                 console.log('LOGIN SUCCESS');
                 this.router.navigate(['/site-admin/dashboard']); 
                 this.redirectBasedOnRole(user.role); // Redirect to role-based dashboard

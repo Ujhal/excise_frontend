@@ -1,8 +1,9 @@
-import { Component, EventEmitter, Output, signal } from '@angular/core';
-import { MaterialModule } from '../../../../material.module';
+import { Component, EventEmitter, Output, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { merge } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { merge, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { SiteAdminService } from '../../../site-admin-service';
+import { MaterialModule } from '../../../../material.module';
 import { PatternConstants } from '../../../../config/app.constants';
 
 @Component({
@@ -11,25 +12,18 @@ import { PatternConstants } from '../../../../config/app.constants';
   templateUrl: './company-details.component.html',
   styleUrl: './company-details.component.scss'
 })
-export class CompanyDetailsComponent {
+export class CompanyDetailsComponent implements OnInit, OnDestroy {
   companyDetailsForm: FormGroup;
+  licenses: string[] = ['New', 'A', 'B', 'C', 'D'];
+  applicationYears: string[] = ['2025-2026'];
+  countries: string[] = ['India', 'Nepal', 'Bhutan', 'China'];
+  states: string[] = ['Sikkim', 'West Bengal', 'Bihar', 'Assam'];
   
-  @Output() next = new EventEmitter<void>();
-  @Output() back = new EventEmitter<void>();
+  @Output() readonly next = new EventEmitter<void>();
+  @Output() readonly back = new EventEmitter<void>();
 
-  brandType = new FormControl(this.getFromSessionStorage('brandType'), [Validators.required]);
-  license = new FormControl(this.getFromSessionStorage('license'), Validators.required);
-  applicationYear = new FormControl(this.getFromSessionStorage('applicationYear'), Validators.required);
-  companyName = new FormControl(this.getFromSessionStorage('companyName'), [Validators.required, Validators.pattern(PatternConstants.NAME)]);
-  pan = new FormControl(this.getFromSessionStorage('pan'), [Validators.pattern(PatternConstants.PAN)]);
-  officeAddress = new FormControl(this.getFromSessionStorage('officeAddress'), [Validators.required, Validators.maxLength(1000)]);
-  country = new FormControl(this.getFromSessionStorage('country'), [Validators.required, Validators.pattern(PatternConstants.NAME)]);
-  state = new FormControl(this.getFromSessionStorage('state'), [Validators.required]);
-  factoryAddress = new FormControl(this.getFromSessionStorage('factoryAddress'), [Validators.required, Validators.maxLength(500)]);
-  pinCode = new FormControl(this.getFromSessionStorage('pinCode'), [Validators.required, Validators.pattern(PatternConstants.PINCODE)]);
-  mobileNumber = new FormControl(this.getFromSessionStorage('mobileNumber'), [Validators.required, Validators.pattern(PatternConstants.MOBILE)]);
-  emailId = new FormControl(this.getFromSessionStorage('emailId'), [Validators.pattern(PatternConstants.EMAIL)]);
-
+  private destroy$ = new Subject<void>();
+  
   errorMessages = {
     brandType: signal(''),
     license: signal(''),
@@ -45,81 +39,77 @@ export class CompanyDetailsComponent {
     emailId: signal(''),
   };
 
-  licenses: string[] = ['License A', 'License B', 'License C', 'License D'];
-  applicationYears: string[] = ['2025-2026'];
-  countries: string[] = ['India', 'Nepal', 'Bhutan', 'China'];
-  states: string[] = ['Sikkim', 'West Bengal', 'Bihar', 'Assam'];
-  
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private siteAdminService: SiteAdminService) {
+    const storedValues = {
+      brandType: this.getFromSessionStorage('brandType'),
+      license: this.getFromSessionStorage('license') || 'New',
+      applicationYear: this.getFromSessionStorage('applicationYear'),
+      companyName: this.getFromSessionStorage('companyName'),
+      pan: this.getFromSessionStorage('pan'),
+      officeAddress: this.getFromSessionStorage('licenseCategory'),
+      country: this.getFromSessionStorage('country'),
+      state: this.getFromSessionStorage('state'),
+      factoryAddress: this.getFromSessionStorage('factoryAddress'),
+      pinCode: this.getFromSessionStorage('pinCode'),
+      mobileNumber: this.getFromSessionStorage('mobileNumber'),
+      emailId: this.getFromSessionStorage('emailId'),
+    };
+
     this.companyDetailsForm = this.fb.group({
-      brandType: this.brandType,
-      license: this.license,
-      applicationYear: this.applicationYear,
-      companyName: this.companyName,
-      pan: this.pan,
-      officeAddress: this.officeAddress,
-      country: this.country,
-      state: this.state,
-      factoryAddress: this.factoryAddress,
-      pinCode: this.pinCode,
-      mobileNumber: this.mobileNumber,
-      emailId: this.emailId,
+      brandType: new FormControl(storedValues.brandType, [Validators.required]),
+      license: new FormControl(storedValues.license, Validators.required),
+      applicationYear: new FormControl(storedValues.applicationYear, Validators.required),
+      companyName: new FormControl(storedValues.companyName, [Validators.required, Validators.pattern(PatternConstants.NAME)]),
+      pan: new FormControl(storedValues.pan, [Validators.pattern(PatternConstants.PAN)]),
+      officeAddress: new FormControl(storedValues.officeAddress, [Validators.required, Validators.maxLength(1000)]),
+      country: new FormControl(storedValues.country, [Validators.required, Validators.pattern(PatternConstants.NAME)]),
+      state: new FormControl(storedValues.state, [Validators.required]),
+      factoryAddress: new FormControl(storedValues.factoryAddress, [Validators.required, Validators.maxLength(500)]),
+      pinCode: new FormControl(storedValues.pinCode, [Validators.required, Validators.pattern(PatternConstants.PINCODE)]),
+      mobileNumber: new FormControl(storedValues.mobileNumber, [Validators.required, Validators.pattern(PatternConstants.MOBILE)]),
+      emailId: new FormControl(storedValues.emailId, [Validators.pattern(PatternConstants.EMAIL)])
     });
 
-    merge(
-      this.brandType.valueChanges,
-      this.license.valueChanges,
-      this.applicationYear.valueChanges,
-      this.companyName.valueChanges,
-      this.pan.valueChanges,
-      this.officeAddress.valueChanges,
-      this.country.valueChanges,
-      this.state.valueChanges,
-      this.factoryAddress.valueChanges,
-      this.pinCode.valueChanges,
-      this.mobileNumber.valueChanges,
-      this.emailId.valueChanges,
-    )
-      .pipe(takeUntilDestroyed())
+    // Auto-save on form changes
+    merge(...Object.values(this.companyDetailsForm.controls).map(control => control.valueChanges))
+      .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.saveToSessionStorage();
         this.updateAllErrorMessages();
       });
   }
 
-  getFromSessionStorage(key: string): string {
+  ngOnInit() {}
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+  
+  private getFromSessionStorage(key: string): string {
     return sessionStorage.getItem(key) || '';
   }
 
-  saveToSessionStorage() {
-    sessionStorage.setItem('brandType', this.brandType.value || '');
-    sessionStorage.setItem('license', this.license.value || '');
-    sessionStorage.setItem('applicationYear', this.applicationYear.value || '');
-    sessionStorage.setItem('companyName', this.companyName.value || '');
-    sessionStorage.setItem('pan', this.pan.value || '');
-    sessionStorage.setItem('officeAddress', this.officeAddress.value || '');
-    sessionStorage.setItem('country', this.country.value || '');
-    sessionStorage.setItem('state', this.state.value || '');
-    sessionStorage.setItem('factoryAddress', this.factoryAddress.value || '');   
-    sessionStorage.setItem('pinCode', this.pinCode.value || '');
-    sessionStorage.setItem('mobileNumber', this.mobileNumber.value || '');
-    sessionStorage.setItem('emailId', this.emailId.value || '');
+  private saveToSessionStorage() {
+    Object.keys(this.companyDetailsForm.controls).forEach((key) => {
+      sessionStorage.setItem(key, this.companyDetailsForm.get(key)?.value || '');
+    });
   }
 
-  updateErrorMessage(field: keyof typeof this.errorMessages) {
-    const control = this[field];
-    if (control.hasError('required')) {
+  private updateErrorMessage(field: keyof typeof this.errorMessages) {
+    const control = this.companyDetailsForm.get(field);
+    if (control?.hasError('required')) {
       this.errorMessages[field].set('This field is required');
-    } else if (control.hasError('pattern')) {
+    } else if (control?.hasError('pattern')) {
       this.errorMessages[field].set('Invalid format');
-    } else if (control.hasError('email')) {
+    } else if (control?.hasError('email')) {
       this.errorMessages[field].set('Not a valid email');
     } else {
       this.errorMessages[field].set('');
     }
   }
 
-  updateAllErrorMessages() {
+  private updateAllErrorMessages() {
     Object.keys(this.errorMessages).forEach((field) => {
       this.updateErrorMessage(field as keyof typeof this.errorMessages);
     });
@@ -134,13 +124,25 @@ export class CompanyDetailsComponent {
       this.next.emit();
     }
   }
+  
+  resetForm() {
+    this.companyDetailsForm.reset();
+    ['brandType', 
+      'license', 
+      'applicationYear', 
+      'companyName', 
+      'pan', 
+      'officeAddress',
+      'country', 
+      'state', 
+      'factoryAddress', 
+      'pinCode', 
+      'mobileNumber',
+      'emailId']
+    .forEach((key) => sessionStorage.removeItem(key));
+  }
 
   goBack() {
     this.back.emit();
-  }
-
-  resetForm() {
-    this.companyDetailsForm.reset();
-    sessionStorage.clear();
   }
 }
