@@ -1,0 +1,23 @@
+mat-card{
+    align-items: center;
+    mat-card-header{
+        background-color: #1C2B78;
+        color: #ffffff;
+        width: 100%;
+        padding: 16px;
+        font-size: 22px;
+        font-weight: 500;
+        justify-content: center;
+    }
+    mat-card-content{
+        padding: 20px;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 10px;
+        table{
+            td{
+                padding: 6px;
+            }
+        }
+    }
+}

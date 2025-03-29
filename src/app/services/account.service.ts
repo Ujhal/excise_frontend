@@ -5,6 +5,8 @@ import { BehaviorSubject, Observable, ReplaySubject, catchError, mergeMap, of, s
 import { Account } from '../shared/models/accounts'
 import { ApiService } from './api.service';
 import { environment } from '../../environments/environment';
+import { throwError } from 'rxjs';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -32,18 +34,26 @@ export class AccountService {
     return this.http.get<any>(`${this.baseUrl}/api/user/list/`, {});
   }
 
-  logout(): void {
-    localStorage.removeItem('access');
-    localStorage.removeItem('refresh');
-    localStorage.removeItem('username');
-    localStorage.removeItem('role');
-    localStorage.removeItem('firstName');
-    localStorage.removeItem('lastName');
-   
-
-    this.authenticate(null)
-    // this.apiService.logout().subscribe({ complete: () => this.authenticate(null) });
-  }
+  logout(): Observable<any> {
+    return this.apiService.logout().pipe(
+      tap(() => {
+        // Clear local storage on successful logout
+        localStorage.removeItem('access');
+        localStorage.removeItem('refresh');
+        localStorage.removeItem('username');
+        localStorage.removeItem('role');
+        localStorage.removeItem('firstName');
+        localStorage.removeItem('lastName');
+  
+        // Notify authentication state change
+        this.authenticate(null);
+      }),
+      catchError((error) => {
+        console.error("Logout API error:", error);
+        return throwError(() => error);
+      })
+    );
+  }  
 
   getAuthenticationState(): Observable<Account | null> {
     return this.authenticationState.asObservable();
@@ -69,10 +79,10 @@ export class AccountService {
     if (!this.accountCache$ || force) {
       this.accountCache$ = this.getUserDetails().pipe(
         tap((account: Account) => {
-          localStorage.setItem('username', account.username);
+          localStorage.setItem('userName', account.username);
           localStorage.setItem('role', account.role);
-          localStorage.setItem('firstName', account.first_name);
-          localStorage.setItem('lastName', account.last_name);
+          localStorage.setItem('firstName', account.firstName);
+          localStorage.setItem('lastName', account.lastName);
           
           this.authenticate(account);
         }),

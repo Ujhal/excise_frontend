@@ -6,8 +6,13 @@
         </button>
       </div>
       <div class="sidebar-content">
-        <div class="username">
-          {{userName}}
+        <div class="profile">
+          <div class="username">
+            {{userName}}
+          </div>
+          <button mat-raised-button class="view-profile" (click)="viewProfile()" type="button">
+            View Profile
+          </button>          
         </div>
         <mat-divider class="profile-divider"></mat-divider>
         <mat-nav-list>

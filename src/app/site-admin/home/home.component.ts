@@ -8,6 +8,8 @@ import { Account } from '../../shared/models/accounts';
 import { MaterialModule } from '../../material.module';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import {MatMenuModule} from '@angular/material/menu';
+import { UserProfileComponent } from './user-profile/user-profile.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-home',
@@ -24,22 +26,21 @@ export class HomeComponent extends BaseComponent implements OnInit {
   loaded = false;
   userName!: string;
 
-  constructor(public baseDependancy: BaseDependency) {
+  constructor(public baseDependancy: BaseDependency, private dialog: MatDialog) {
     super(baseDependancy);
   }
 
   ngOnInit(): void {
-    console.log('home called ')
     this.accountService.getAuthenticationState().subscribe(acc => {
       if (acc !== null) {
         this.user = acc;
-        this.userName = this.user.first_name!;
+        this.userName = this.user.firstName!;
         /*  if (this.user.middleName !== null) {
           this.userName = this.userName + ' ' + this.user.middleName;
         } */
-        if (this.user.last_name !== null) {
+        if (this.user.lastName !== null) {
           
-          this.userName = this.userName + ' ' + this.user.last_name;
+          this.userName = this.userName + ' ' + this.user.lastName;
         }
       } else {
         this.router.navigate(['/']);
@@ -53,6 +54,16 @@ export class HomeComponent extends BaseComponent implements OnInit {
   snavToggle(sidenav: any) {
     this.isSidenavOpen = !this.isSidenavOpen;
     sidenav.toggle();
+  }
+
+  viewProfile(): void {
+    const dialogRef = this.dialog.open(UserProfileComponent, {
+      width: '500px',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Dialog closed', result);
+    });
   }
 
 }

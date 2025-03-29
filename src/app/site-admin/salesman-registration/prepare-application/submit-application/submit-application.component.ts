@@ -42,9 +42,20 @@ export class SubmitApplicationComponent {
 
   private getEntries(keys: string[]) {
     return keys
-      .map(key => ({ key, value: sessionStorage.getItem(key) || '' }))
+      .map(key => ({
+        key: this.formatKey(key), 
+        value: sessionStorage.getItem(key) || ''
+      }))
       .filter(entry => entry.value !== ''); // Remove empty values if needed
   }
+  
+  private formatKey(key: string): string {
+    return key
+      .replace(/([A-Z])/g, ' $1') 
+      .replace(/^./, str => str.toUpperCase())
+      .trim();
+  }
+  
     
   proceedToNext() {
     if (this.submitForm.valid) {

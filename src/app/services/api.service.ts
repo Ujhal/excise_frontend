@@ -36,13 +36,28 @@ export class ApiService {
 
   // Logout API
   logout(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/user/logout/`, {}).pipe(
+    const refresh = localStorage.getItem('refresh');
+    const access = localStorage.getItem('access');
+  
+    if (!refresh || !access) {
+      console.error("No token found for logout.");
+      return throwError(() => new Error("No token found"));
+    }
+  
+    const headers = {
+      'Authorization': `Bearer ${access}`, // Send access token
+      'Content-Type': 'application/json'
+    };
+  
+    return this.http.post(`${this.apiUrl}/user/logout/`, { refresh }, { headers }).pipe(
       catchError((error) => {
         console.error('Logout failed:', error);
         return throwError(() => error);
       })
     );
   }
+  
+  
 
   // Refresh Token API (with Fix)
   refreshToken(): Observable<any> {

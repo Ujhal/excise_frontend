@@ -17,17 +17,17 @@
 
           <ng-container matColumnDef="firstName">
             <mat-header-cell *matHeaderCellDef> First Name </mat-header-cell>
-            <mat-cell *matCellDef="let user"> {{user.first_name}} </mat-cell>
+            <mat-cell *matCellDef="let user"> {{user.firstName}} </mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="middleName">
             <mat-header-cell *matHeaderCellDef> Middle Name </mat-header-cell>
-            <mat-cell *matCellDef="let user"> {{user.middle_name}} </mat-cell>
+            <mat-cell *matCellDef="let user"> {{user.middleName}} </mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="lastName">
             <mat-header-cell *matHeaderCellDef> Last Name </mat-header-cell>
-            <mat-cell *matCellDef="let user"> {{user.last_name}} </mat-cell>
+            <mat-cell *matCellDef="let user"> {{user.lastName}} </mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="username">
@@ -37,7 +37,7 @@
 
           <ng-container matColumnDef="phoneNumber">
             <mat-header-cell *matHeaderCellDef> Phone Number </mat-header-cell>
-            <mat-cell *matCellDef="let user"> {{user.phonenumber}} </mat-cell>
+            <mat-cell *matCellDef="let user"> {{user.phoneNumber}} </mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="email">
@@ -58,6 +58,11 @@
           <ng-container matColumnDef="subDivision">
             <mat-header-cell *matHeaderCellDef> Sub Division </mat-header-cell>
             <mat-cell *matCellDef="let user"> {{user.subDivision}} </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="createdBy">
+            <mat-header-cell *matHeaderCellDef> Created By </mat-header-cell>
+            <mat-cell *matCellDef="let user"> {{user.createdBy}} </mat-cell>
           </ng-container>
   
           <ng-container matColumnDef="actions">

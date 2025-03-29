@@ -13,9 +13,14 @@
             </a>
 
             <div class="nav-links-container">
-                <button mat-button (click)="login()">
-                    <mat-icon class ="login">login</mat-icon>
+                <button mat-button *ngIf="!isLoggedIn" (click)="login()">
+                    <mat-icon>login</mat-icon>
                     <span class="text">Sign In</span>
+                </button>   
+
+                <button mat-button *ngIf="isLoggedIn" (click)="logout()">
+                    <mat-icon>logout</mat-icon>
+                    <span class="text">Sign Out</span>
                 </button>   
             </div>
         </div>
