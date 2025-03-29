@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -33,6 +33,35 @@ export class ApiService {
       })
     );
   }
+
+  // Send OTP Request
+  sendOtp(formData: FormData): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/user/otp/get/`, formData).pipe(
+      catchError((error) => {
+        console.error('Error sending OTP:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+  
+
+// Verify OTP
+verifyOtp(username: string, otp: string, index: number): Observable<any> {
+  const formData = new FormData();
+  formData.append('username', username);
+  formData.append('otp', otp);
+  formData.append('index', index.toString()); // Convert index to string to prevent issues
+
+  return this.http.post(`${this.apiUrl}/user/otp/login/`, formData).pipe(
+    catchError((error) => {
+      console.error('❌ OTP verification error:', error);
+      return throwError(() => new Error('Failed to verify OTP.'));
+    })
+  );
+}
+
+
+
 
   // Logout API
   logout(): Observable<any> {
