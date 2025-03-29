@@ -6,18 +6,18 @@
 	
 		<mat-card-content class="page-card-content">
 			<div class="login-toggle">
-				<button id = "password" [class.active]="isPasswordMode" (click)="toggleMode(true)">
+				<button id="password" [class.active]="isPasswordMode" (click)="toggleMode(true)">
 					Password-based
 				</button>
-				<button id = "otp" [class.active]="!isPasswordMode" (click)="toggleMode(false)">
+				<button id="otp" [class.active]="!isPasswordMode" (click)="toggleMode(false)">
 					OTP-based
 				</button>
 			</div>
 			<form [formGroup]="loginForm" (ngSubmit)="onLogin()">		
 				<ng-container *ngIf="isPasswordMode">
 					<mat-form-field appearance="outline">
-					<mat-label>Username</mat-label>
-					<input matInput formControlName="username" placeholder="Enter your Username" />
+						<mat-label>Username</mat-label>
+						<input matInput formControlName="username" placeholder="Enter your Username" />
 					</mat-form-field>
 		
 					<mat-form-field appearance="outline">
@@ -26,7 +26,7 @@
 						<button mat-icon-button matSuffix (click)="togglePasswordVisibility()" type="button">
 						  <mat-icon>{{ hidePassword ? 'visibility' : 'visibility_off' }}</mat-icon>
 						</button>
-					  </mat-form-field>					  
+					</mat-form-field>					  
 		
 					<!-- Captcha Section -->
 					<app-captcha [formGroup]="loginForm"></app-captcha>
@@ -40,14 +40,28 @@
 		
 				<ng-container *ngIf="!isPasswordMode">
 					<mat-form-field appearance="outline">
-					<mat-label>Phone Number</mat-label>
-					<input matInput formControlName="username" placeholder="Enter your Phone Number" type="tel" />
+						<mat-label>Phone Number</mat-label>
+						<input matInput formControlName="username" placeholder="Enter your Phone Number" type="tel" />
 					</mat-form-field>
 
-					<div class="text-center mt-3">
-						<button mat-raised-button type="submit" class="sign-in-btn" [disabled]="loginForm.invalid">
+					<div class="text-center mt-3" *ngIf="!otpSent">
+						<button mat-raised-button type="button" class="sign-in-btn" (click)="sendOtp()" [disabled]="loginForm.controls['username'].invalid">
 							Send OTP
 						</button>
+					</div>
+
+					<!-- OTP Input Field -->
+					<div *ngIf="otpSent">
+						<mat-form-field appearance="outline">
+							<mat-label>Enter OTP</mat-label>
+							<input matInput formControlName="otp" placeholder="Enter OTP" />
+						</mat-form-field>
+
+						<div class="text-center mt-3">
+							<button mat-raised-button type="submit" class="sign-in-btn" [disabled]="loginForm.controls['otp'].invalid">
+								Verify OTP
+							</button>
+						</div>
 					</div>
 				</ng-container>
 			</form>
@@ -56,12 +70,12 @@
 
 	<mat-card class="overlay">
 		<mat-card-header>
-			<img src = "assets/images/header/Seal_of_Sikkim_greyscale.png">
+			<img src="assets/images/header/Seal_of_Sikkim_greyscale.png">
 		</mat-card-header>
 		<mat-card-content>
 			<div class="text">
 				<h1>Hello!</h1>
-				<p>Register youself if you don't have an account.</p>
+				<p>Register yourself if you don't have an account.</p>
 			</div>
 			<button mat-raised-button>
 				Register

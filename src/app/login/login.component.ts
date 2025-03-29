@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
-import { FormGroup, FormsModule, ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MaterialModule } from '../material.module';
 import { CaptchaComponent } from '../shared/components/captcha/captcha.component';
 import { BaseComponent } from '../base/base.components';
 import { BaseDependency } from '../base/dependency/base.dependendency';
+import { ApiService } from '../services/api.service';
 
 @Component({
   selector: 'app-login',
-  imports: [MaterialModule, ReactiveFormsModule, FormsModule, CaptchaComponent],
+  imports: [MaterialModule, CaptchaComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
@@ -15,93 +16,120 @@ export class LoginComponent extends BaseComponent {
   loginForm: FormGroup;
   isPasswordMode: boolean = true;
   hidePassword = true;
+  otpSent: boolean = false; // Tracks OTP request status
+  otpIndex: string | null = null; // Stores index received from OTP request
 
-  constructor(protected baseDependancy: BaseDependency, private fb: FormBuilder) {
-    super(baseDependancy);
+  constructor(protected override baseDependency: BaseDependency, protected override apiService: ApiService, private fb: FormBuilder) {
+    super(baseDependency);
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
       password: ['', Validators.required],
+      otp: [''], // OTP input field
       response: ['', Validators.required], // Captcha response
       hashkey: ['', Validators.required], // Captcha hashkey
     });
   }
-  
 
   toggleMode(isPassword: boolean): void {
     this.isPasswordMode = isPassword;
+    this.otpSent = false;
+    this.otpIndex = null;
     this.loginForm.reset(); // Reset form when switching modes
   }
 
   togglePasswordVisibility() {
     this.hidePassword = !this.hidePassword;
   }
-  
-  // Post request to backend routes
-  onLogin(): void {
-    if (this.loginForm.invalid) {
-      alert("Please fill in all fields correctly.");
+
+  sendOtp(): void {
+    if (this.loginForm.controls['username'].invalid) {
+      alert('Please enter a valid phone number.');
       return;
     }
-
-    const toggleMode = (isPassword: boolean): void => {
-      this.isPasswordMode = isPassword;
-      this.loginForm.reset(); // Reset form when switching modes
-    };
-
-    // Post request to backend routes
-    this.apiService.login(this.loginForm.value).subscribe({
-      next: (res: any) => {
-        const authenticatedUser = res.authenticated_user;
+  
+    const username = this.loginForm.value.username;
+    console.log('🔹 Sending OTP request for:', username);
+  
+    const formData = new FormData();
+    formData.append('username', username); // ✅ Using FormData
+  
+    this.apiService.sendOtp(formData).subscribe({
+      next: (response) => {
+        console.log('✅ OTP API Response:', response);
         
-        if (authenticatedUser && authenticatedUser.access && authenticatedUser.refresh) {
-          const access = authenticatedUser.access;
-          const refresh = authenticatedUser.refresh;
-  
-          localStorage.setItem('access', access);
-          localStorage.setItem('refresh', refresh);
-  
-          // Fetch user identity after login
-          this.accountService.identity(true).subscribe({
-            next: (user) => {
-              if (user) {
-                console.log('LOGIN SUCCESS');
-                this.router.navigate(['/site-admin/dashboard']); 
-                this.redirectBasedOnRole(user.role); // Redirect to role-based dashboard
-              } else {
-                console.error('User identity is null');
-                alert('Failed to fetch user details. Please log in again.');
-              }
-            },
-            error: (error) => {
-              console.error('Error fetching identity:', error);
-              alert("An error occurred while fetching user details. Please try again.");
-            },
-          });
-        } else {
-          alert("Check Username or Password");
-        }
+        this.otpSent = true; // ✅ Track OTP request status
+        alert('OTP sent successfully. Please check your phone.');
       },
-      error: (error) => {
-        console.error('Error:', error);
-        alert("An error occurred. Please try again.");
-      },
+      error: (err) => {
+        console.error('❌ Error sending OTP:', err);
+        alert('Failed to send OTP. Please try again.');
+      }
     });
   }
   
-  private redirectBasedOnRole(role: string): void {
-    switch (role) {
-      case 'site_admin':
-        this.router.navigate(['site-admin/dashboard']);
-        break;
-      case '2':
-        this.router.navigate(['licensee/dashboard']);
-        break;
+  
+
+  onLogin(): void {
+
+
+    if (this.isPasswordMode) {
+      this.loginWithPassword();
+    } else {
+      if (!this.otpSent) {
+        this.sendOtp();
+      } else {
+        this.verifyOtp();
+      }
     }
   }
 
-  goToHome(): void {
-    this.router.navigate(['/']); // Implemented goToHome method
+  private loginWithPassword(): void {
+    this.apiService.login(this.loginForm.value).subscribe({
+      next: (res: any) => {
+        this.handleAuthResponse(res);
+      },
+      error: (err) => {
+        console.error('Login error:', err);
+        alert('Incorrect username or password.');
+      }
+    });
   }
 
+  private verifyOtp(): void {
+    if (!this.loginForm.value.otp) {
+      alert('Please enter the OTP.');
+      return;
+    }
+  
+    if (this.otpIndex === undefined) {
+      alert('OTP index missing. Please request OTP again.');
+      return;
+    }
+  
+    const requestData = {
+      username: this.loginForm.value.username,
+      otp: this.loginForm.value.otp,
+      index: Number(this.otpIndex)
+    };
+    
+    this.apiService.verifyOtp(requestData.username, requestData.otp, requestData.index).subscribe({
+      next: (res: any) => {
+        this.handleAuthResponse(res);
+      },
+      error: (err) => {
+        console.error('OTP verification error:', err);
+        alert('Invalid OTP. Please try again.');
+      }
+    });
+  }
 
+  private handleAuthResponse(res: any): void {
+    if (res.authenticated_user?.access && res.authenticated_user?.refresh) {
+      localStorage.setItem('access', res.authenticated_user.access);
+      localStorage.setItem('refresh', res.authenticated_user.refresh);
+      this.router.navigate(['/site-admin/dashboard']);
+    } else {
+      alert('Authentication failed.');
+    }
+  }
 }
