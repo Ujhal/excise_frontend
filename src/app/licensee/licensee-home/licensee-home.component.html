@@ -1,30 +1,35 @@
 <mat-sidenav-container class="mat-elevation-z8" style="padding: 0; min-height: 800px" *ngIf="loaded">
-    <mat-sidenav #sidenav mode="side" [opened]="true">
-      <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-        <button class="mr-auto" class="sidenav-inner-btn" mat-icon-button (click)="snavToggle(sidenav)" color="primary">
-          <fa-icon icon="arrow-left" color="primary"></fa-icon>
+    <mat-sidenav #sidenav mode="side" [opened]="false">
+      <div class="sidenav-header">
+        <button mat-icon-button (click)="snavToggle(sidenav)" color="primary">
+          <mat-icon style="font-size: 27px">close</mat-icon>
         </button>
       </div>
-      <div class="profile-detail">
-        <img src="../../../content/images/user-profile.png" alt="profile image" class="profile-img" style="margin-top: -48px" />
-        <h5>{{ userName }}</h5>
+      <div class="sidebar-content">
+        <div class="profile">
+          <div class="username">
+            {{userName}}
+          </div>
+          <button mat-raised-button class="view-profile" (click)="viewProfile()" type="button">
+            View Profile
+          </button>          
+        </div>
+        <mat-divider class="profile-divider"></mat-divider>
+          <mat-nav-list>
+            <mat-list-item routerLink="dashboard" routerLinkActive="active-link">
+              <span class="nav-header-cus">Dashboard</span>
+            </mat-list-item>
+
+            <mat-list-item routerLink="apply-license" routerLinkActive="active-link">
+              <span class="nav-header-cus">Apply For License</span>
+            </mat-list-item>
+          </mat-nav-list>
       </div>
-      <mat-divider class="profile-divider"></mat-divider>
-      <mat-nav-list>
-        <a mat-list-item routerLink="dashboard">
-          <div class="icon-menu ml-2"><i class="icofont icofont-dashboard-web float-left"></i></div>
-          <span class="nav-item-cus ml-2 mt-2">Home Page</span>
-        </a>
-        <a mat-list-item routerLink="user-management">
-          <div class="icon-menu ml-2"><i class="icofont icofont-users-social float-left"></i></div>
-          <span class="nav-item-cus ml-2 mt-2">User Management</span>
-        </a>
-      </mat-nav-list>
     </mat-sidenav>
     <mat-sidenav-content>
-      <div class="col-xl-12 col-lg-12 col-md-12">
+      <div class="toggle-btn">
         <button mat-icon-button (click)="snavToggle(sidenav)" *ngIf="!sidenav.opened" color="primary">
-          <fa-icon icon="bars" color="primary"></fa-icon>
+          <mat-icon style="font-size: 27px">menu</mat-icon>
         </button>
       </div>
       <router-outlet></router-outlet>

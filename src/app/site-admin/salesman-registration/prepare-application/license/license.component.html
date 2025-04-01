@@ -21,7 +21,7 @@
     
             <mat-form-field appearance="outline">
                 <mat-label>Application Id</mat-label>
-                <input matInput placeholder="Application Id" type="number" formControlName="applicationId"/>
+                <input matInput placeholder="Enter Application Id" type="number" formControlName="applicationId"/>
                 <mat-error *ngIf="licenseForm.controls['applicationId'].invalid">
                     {{ getErrorMessage('applicationId') }}
                 </mat-error>

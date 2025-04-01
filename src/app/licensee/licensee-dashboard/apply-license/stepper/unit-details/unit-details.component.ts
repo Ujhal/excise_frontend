@@ -1,34 +1,24 @@
-import { Component, EventEmitter, Output,  ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { merge, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { MaterialModule } from '../../../../../material.module';
-import { merge } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { PatternConstants } from '../../../../../config/app.constants';
+import { PatternConstants, FormUtils } from '../../../../../config/app.constants';
 
 @Component({
   selector: 'app-unit-details',
   standalone: true,
-  imports: [
-    MaterialModule
-  ],
+  imports: [MaterialModule],
   templateUrl: './unit-details.component.html',
   styleUrl: './unit-details.component.scss'
 })
-export class UnitDetailsComponent {
+export class UnitDetailsComponent implements OnInit, OnDestroy{
   unitDetailsForm: FormGroup;
 
-  @Output() next = new EventEmitter<void>();
-  @Output() back = new EventEmitter<void>();
+  @Output() readonly next = new EventEmitter<void>();
+  @Output() readonly back = new EventEmitter<void>();
 
-  companyName = new FormControl(this.getFromSessionStorage('companyName'), [Validators.required, Validators.pattern(PatternConstants.NAME)]);
-  companyAddress = new FormControl(this.getFromSessionStorage('companyAddress'), [Validators.required]);
-  companyPan = new FormControl(this.getFromSessionStorage('companyPan'), [Validators.required, Validators.pattern(PatternConstants.PAN)]);
-  companyCin = new FormControl(this.getFromSessionStorage('companyCin'), [Validators.required]);
-  incorporationDate = new FormControl(this.getFromSessionStorage('incorporationDate'));
-  phoneNumber = new FormControl(this.getFromSessionStorage('phoneNumber'), [Validators.required, Validators.pattern(PatternConstants.MOBILE)]);
-  emailId = new FormControl(this.getFromSessionStorage('emailId'), [Validators.required, Validators.pattern(PatternConstants.EMAIL)]);
-
-
+  private destroy$ = new Subject<void>();
 
   errorMessages = {
     companyName: signal(''),
@@ -36,56 +26,53 @@ export class UnitDetailsComponent {
     companyPan: signal(''),
     companyCin: signal(''),
     incorporationDate: signal(''),
-    phoneNumber: signal(''),
+    companyPhoneNumber: signal(''),
     emailId: signal(''),
   };
 
   constructor(private fb: FormBuilder) {
+    const storedValues = this.getFromSessionStorage();
+    
     this.unitDetailsForm = this.fb.group({
-      companyName: this.companyName,
-      companyAddress: this.companyAddress,
-      companyPan: this.companyPan,
-      companyCin: this.companyCin,
-      incorporationDate: this.incorporationDate,
-      phoneNumber: this.phoneNumber,
-      emailId: this.emailId,
-    });
+      companyName: new FormControl(storedValues.companyName, [Validators.required, Validators.pattern(PatternConstants.NAME)]),
+      companyAddress: new FormControl(storedValues.companyAddress, [Validators.required]),
+      companyPan: new FormControl(storedValues.companyPan, [Validators.required, Validators.pattern(PatternConstants.PAN)]),
+      companyCin: new FormControl(storedValues.companyCin, [Validators.required]),
+      incorporationDate: new FormControl(storedValues.incorporationDate, [Validators.required]),
+      companyPhoneNumber: new FormControl(storedValues.companyPhoneNumber, [Validators.required, Validators.pattern(PatternConstants.MOBILE)]),
+      emailId: new FormControl(storedValues.emailId, [Validators.required, Validators.pattern(PatternConstants.EMAIL)])
+    })
 
-    merge(this.companyName.valueChanges,
-      this.companyAddress.valueChanges,
-      this.companyPan.valueChanges,
-      this.companyCin.valueChanges,
-      this.incorporationDate.valueChanges,
-      this.phoneNumber.valueChanges,
-      this.emailId.valueChanges,
-    )
-
-    .pipe(takeUntilDestroyed())
-    .subscribe(() => {
+    this.unitDetailsForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.saveToSessionStorage();
-      this.updateAllErrorMessages();
-    });
+        this.updateAllErrorMessages();
+      });
+  }  
+  
+  ngOnInit() {
+    FormUtils.capitalizePAN(this.unitDetailsForm.get('companyPan')!, this.destroy$);
   }
 
-  getFromSessionStorage(key: string): string {
-    return sessionStorage.getItem(key) || '';
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  saveToSessionStorage() {
-    sessionStorage.setItem('companyName', this.companyName.value || '');
-    sessionStorage.setItem('companyAddress', this.companyAddress.value || '');
-    sessionStorage.setItem('companyPan', this.companyPan.value || '');
-    sessionStorage.setItem('companyCin', this.companyCin.value || '');
-    sessionStorage.setItem('incorporationDate', this.incorporationDate.value || '');
-    sessionStorage.setItem('phoneNumber', this.phoneNumber.value || '');
-    sessionStorage.setItem('emailId', this.emailId.value || '');
+  private getFromSessionStorage(): any {
+    const storedData = sessionStorage.getItem('unitDetails');
+    return storedData ? JSON.parse(storedData) : {};
   }
 
-  updateErrorMessage(field: keyof typeof this.errorMessages) {
-    const control = this[field];
-    if (control.hasError('required')) {
+  private saveToSessionStorage() {
+    const formData = this.unitDetailsForm.getRawValue(); 
+    sessionStorage.setItem('unitDetails', JSON.stringify(formData));
+  }
+
+  private updateErrorMessage(field: keyof typeof this.errorMessages) {
+    const control = this.unitDetailsForm.get(field);
+    if (control?.hasError('required')) {
       this.errorMessages[field].set('This field is required');
-    } else if (control.hasError('pattern')) {
+    } else if (control?.hasError('pattern')) {
       this.errorMessages[field].set('Invalid format');
     } else {
       this.errorMessages[field].set('');
@@ -102,29 +89,18 @@ export class UnitDetailsComponent {
     return this.errorMessages[field]();
   }
 
-  get licenseType() {
-    return sessionStorage.getItem('licenseType');
-  }
-
-  isIndividual() {
-    return this.licenseType === 'Individual';
-  } 
-
-  isCompany() {
-    return this.licenseType === 'Company';
-  }
-
   proceedToNext() {
-    if (this.isIndividual() ||this.unitDetailsForm.valid) {
+    if (this.unitDetailsForm.valid) {
       this.next.emit();
     }
   }
 
-  goBack() {
-    this.back.emit();
-  }
-
   resetForm() {
     this.unitDetailsForm.reset();
+    sessionStorage.removeItem('unitDetails');
+  }
+ 
+  goBack() {
+    this.back.emit();
   }
 }

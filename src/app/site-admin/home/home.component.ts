@@ -6,15 +6,15 @@ import { BaseComponent } from '../../base/base.components';
 import { BaseDependency } from '../../base/dependency/base.dependendency';
 import { Account } from '../../shared/models/accounts';
 import { MaterialModule } from '../../material.module';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import {MatMenuModule} from '@angular/material/menu';
 import { UserProfileComponent } from './user-profile/user-profile.component';
 import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
+
 
 @Component({
   selector: 'app-home',
   standalone: true, // Mark as standalone
-  imports: [CommonModule, RouterModule, MaterialModule, MatSidenavModule, MatMenuModule], // Import necessary modules
+  imports: [CommonModule, RouterModule, MaterialModule, MatMenuModule], // Import necessary modules
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })

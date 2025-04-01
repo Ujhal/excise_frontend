@@ -1,9 +1,10 @@
-import { Component, EventEmitter, Output, signal, inject } from '@angular/core';
-import { MaterialModule } from '../../../../material.module';
+import { Component, EventEmitter, Output, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { merge } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { PatternConstants } from '../../../../config/app.constants';
+import { merge, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { SiteAdminService } from '../../../site-admin-service';
+import { PatternConstants, FormUtils } from '../../../../config/app.constants';
+import { MaterialModule } from '../../../../material.module';
 import { DatePipe } from '@angular/common';
 
 @Component({
@@ -18,13 +19,10 @@ export class UploadDocumentsComponent {
 
   uploadDocumentsForm: FormGroup;
 
-  @Output() next = new EventEmitter<void>();
-  @Output() back = new EventEmitter<void>();
+  @Output() readonly next = new EventEmitter<void>();
+  @Output() readonly back = new EventEmitter<void>();
 
-  paymentId = new FormControl(this.getFromSessionStorage('paymentId'), [Validators.required, Validators.pattern(PatternConstants.NUMBER)]);
-  paymentDate = new FormControl(this.formatDate(this.getFromSessionStorage('paymentDate')), Validators.required);
-  paymentAmount = new FormControl(this.getFromSessionStorage('paymentAmount'), [Validators.required, Validators.pattern(PatternConstants.NUMBER)]);
-  paymentRemarks = new FormControl(this.getFromSessionStorage('paymentRemarks'), Validators.maxLength(500));
+  private destroy$ = new Subject<void>();
 
   errorMessages = {
     paymentId: signal(''),
@@ -32,59 +30,66 @@ export class UploadDocumentsComponent {
     paymentAmount: signal(''),
     paymentRemarks: signal('')
   };
-
-  constructor(private fb: FormBuilder) {
+  
+  constructor(private fb: FormBuilder, private siteAdminService: SiteAdminService) {
+    const storedValues = this.getFromSessionStorage();
+    
     this.uploadDocumentsForm = this.fb.group({
-      paymentId: this.paymentId,
-      paymentDate: this.paymentDate,
-      paymentAmount: this.paymentAmount,
-      paymentRemarks: this.paymentRemarks
-    });
+      paymentId: new FormControl(storedValues.paymentId, [Validators.required, Validators.pattern(PatternConstants.NUMBER)]),
+      paymentDate: new FormControl(storedValues.paymentDate, Validators.required),
+      paymentAmount: new FormControl(storedValues.paymentAmount, [Validators.required, Validators.pattern(PatternConstants.NUMBER)]),
+      paymentRemarks: new FormControl(storedValues.paymentRemarks, Validators.maxLength(500))
+    })
 
-    merge(
-      this.paymentId.valueChanges,
-      this.paymentDate.valueChanges,
-      this.paymentAmount.valueChanges,
-      this.paymentRemarks.valueChanges
-    )
-    .pipe(takeUntilDestroyed())
-    .subscribe(() => {
+    this.uploadDocumentsForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.saveToSessionStorage();
       this.updateAllErrorMessages();
     });
   }
 
-  getFromSessionStorage(key: string): string {
-    return sessionStorage.getItem(key) || '';
+  ngOnDestroy() {
+    const storedDocuments = this.getStoredDocuments();
+    Object.values(storedDocuments).forEach((doc: any) => {
+      if (doc.fileUrl) {
+        URL.revokeObjectURL(doc.fileUrl);
+      }
+    });
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  saveToSessionStorage() {
-    sessionStorage.setItem('paymentId', this.paymentId.value || '');
-    
-    // Format the date before saving
-    const formattedDate = this.paymentDate.value ? this.formatDate(this.paymentDate.value) : '';
-    sessionStorage.setItem('paymentDate', formattedDate);
-    
 
-    sessionStorage.setItem('paymentAmount', this.paymentAmount.value || '');
-    sessionStorage.setItem('paymentRemarks', this.paymentRemarks.value || '');
+  private getFromSessionStorage(): any {
+    const storedData = sessionStorage.getItem('paymentDetails');
+    const storedDocuments = this.getStoredDocuments();
+
+    // Restore file metadata
+    this.documents.forEach(doc => {
+      if (storedDocuments[doc.name]) {
+        doc.file = storedDocuments[doc.name]; // Restore file metadata
+      }
+    });
+    return storedData ? JSON.parse(storedData) : {};
+  }
+
+  private saveToSessionStorage() {
+    const formData = this.uploadDocumentsForm.getRawValue(); // Ensures all values are captured
+    sessionStorage.setItem('paymentDetails', JSON.stringify(formData));
   }
 
   formatDate(date: string | Date): string {
     if (!date) return '';
-    
     // Convert string to Date object if needed
     const parsedDate = typeof date === 'string' ? new Date(date) : date;
-
     // Format as dd/MM/yyyy
     return this.datePipe.transform(parsedDate, 'dd/MM/yyyy') || '';
   }
 
   updateErrorMessage(field: keyof typeof this.errorMessages) {
-    const control = this[field];
-    if (control.hasError('required')) {
+    const control = this.uploadDocumentsForm.get(field);
+    if (control?.hasError('required')) {
       this.errorMessages[field].set('This field is required');
-    } else if (control.hasError('pattern')) {
+    } else if (control?.hasError('pattern')) {
       this.errorMessages[field].set('Invalid format');
     } else {
       this.errorMessages[field].set('');
@@ -112,18 +117,41 @@ export class UploadDocumentsComponent {
     const file = event.target.files[0];
     if (file) {
       document.file = file;
+  
+      // Create a URL for the uploaded file
+      const fileUrl = URL.createObjectURL(file);
+  
+      // Store file metadata + URL in sessionStorage
+      const storedDocuments = this.getStoredDocuments();
+      storedDocuments[document.name] = {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        fileUrl: fileUrl
+      };
+  
+      sessionStorage.setItem('companyDocuments', JSON.stringify(storedDocuments));
     }
   }
 
+  private getStoredDocuments(): any {
+    const storedDocs = sessionStorage.getItem('companyDocuments');
+    return storedDocs ? JSON.parse(storedDocs) : {};
+  }
+
   viewFile(document: any) {
-    if (document.file) {
-      const fileURL = URL.createObjectURL(document.file);
-      window.open(fileURL, '_blank');
+    const storedDocuments = this.getStoredDocuments();
+    const docInfo = storedDocuments[document.name];
+  
+    if (docInfo?.fileUrl) {
+      window.open(docInfo.fileUrl, '_blank');
+    } else {
+      console.warn("File not found in sessionStorage");
     }
   }
 
   areDocumentsUploaded(): boolean {
-    return this.documents.every(doc => !doc.required || doc.file);
+    return this.documents.every(doc => !doc.required || this.getStoredDocuments()[doc.name]);
   }  
 
   goBack() {
@@ -134,4 +162,6 @@ export class UploadDocumentsComponent {
     this.uploadDocumentsForm.reset();
     sessionStorage.clear();
   }
+
+  submit(){}
 }

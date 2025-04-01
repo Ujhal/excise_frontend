@@ -13,6 +13,7 @@ import { SubmitApplicationComponent } from "./submit-application/submit-applicat
 })
 export class PrepareApplicationComponent {
   get modeofOperation() {
-    return sessionStorage.getItem('modeofOperation');
+    const storedData = sessionStorage.getItem('licenseDetails');
+    return storedData ? JSON.parse(storedData).modeofOperation : null;
   }
 }

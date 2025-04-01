@@ -16,33 +16,60 @@ import { Router, RouterModule } from '@angular/router';
   styleUrl: './license.component.scss'
 })
 export class LicenseComponent {
-  licenseForm: FormGroup;
 
-  @Output() next = new EventEmitter<void>();
   @Output() back = new EventEmitter<void>();
 
-  constructor(private fb: FormBuilder, private router: Router) {
-    this.licenseForm = this.fb.group({
-    });
+  get selectLicenseDetails() {
+    return this.getGroupedEntries('selectLicenseDetails');
   }
 
-  get sessionStorageEntries() {
-    let data: { key: string; value: string }[] = [];
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i);
-      if (key) {
-        data.push({ key, value: sessionStorage.getItem(key) || '' });
-      }
+  get keyInfoDetails() {
+    return this.getGroupedEntries('keyInfoDetails');
+  }
+
+  get addressDetails() {
+    return this.getGroupedEntries('addressDetails');
+  }
+  
+  get unitDetails() {
+    return this.getGroupedEntries('unitDetails');
+  }
+
+  get memberDetails() {
+    return this.getGroupedEntries('memberDetails');
+  }
+
+  get licenseType() {
+    const storedData = sessionStorage.getItem('keyInfoDetails');
+    return storedData ? JSON.parse(storedData).licenseType : null;
+  }
+
+  private getGroupedEntries(groupKey: string) {
+    const storedData = sessionStorage.getItem(groupKey);
+    if (!storedData) return [];
+
+    try {
+      const parsedData = JSON.parse(storedData);
+      return Object.keys(parsedData).map(key => ({
+        key: this.formatKey(key),
+        value: parsedData[key]
+      }));
+    } catch (error) {
+      console.error(`Error parsing sessionStorage key "${groupKey}":`, error);
+      return [];
     }
-    return data;
+  }
+  
+  private formatKey(key: string): string {
+    return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+  }
+  
+    
+  submit() {
+    
   }
 
   goBack() {
     this.back.emit();
   }
-
-  home(): void {
-    this.router.navigate(['/']);
-  }
-
 }

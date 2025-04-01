@@ -1,113 +1,106 @@
-import { Component, EventEmitter, Output, ChangeDetectionStrategy, signal } from '@angular/core';
-import { MaterialModule } from '../../../../../material.module';
+import { Component, EventEmitter, Output, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { merge } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { merge, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { LicenseeService } from '../../../../licensee.services';
+import { MaterialModule } from '../../../../../material.module';
+import { LicenseType } from '../../../../../shared/models/license-type.model';
 import { PatternConstants } from '../../../../../config/app.constants';
 
 @Component({
   selector: 'app-key-info',
   standalone: true,
-  imports: [
-    MaterialModule,
-  ],
+  imports: [MaterialModule],
   templateUrl: './key-info.component.html',
   styleUrl: './key-info.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class KeyInfoComponent {
+export class KeyInfoComponent implements OnInit, OnDestroy{
   keyInfoForm: FormGroup;
+  licenseTypes: LicenseType[] = [];
+  licenseNatures: string[] = ['Regular', 'Temporary', 'Seasonal', 'Special Event'];
+  functioningStatuses: string[] = ['Yes', 'No'];
+  modeofOperations: string[] = ['Self', 'Salesman', 'Barman'];
 
-  @Output() next = new EventEmitter<void>();
-  @Output() back = new EventEmitter<void>();
+  @Output() readonly next = new EventEmitter<void>();
+  @Output() readonly back = new EventEmitter<void>();
 
-  licenseType = new FormControl(this.getFromSessionStorage('licenseType'), [Validators.required]);
-  establishmentName = new FormControl(this.getFromSessionStorage('establishmentName'), [
-    Validators.required,
-    Validators.maxLength(150),
-    Validators.pattern(PatternConstants.ORGANISATION_NAME),
-  ]);
-  mobileNumber = new FormControl(this.getFromSessionStorage('mobileNumber'), [Validators.required, Validators.pattern(PatternConstants.MOBILE)]);
-  licenseNo = new FormControl(this.getFromSessionStorage('licenseNo'), [Validators.pattern(PatternConstants.CODE), Validators.maxLength(50)]);
-  initialGrantDate = new FormControl(this.getFromSessionStorage('initialGrantDate'));
-  renewedFrom = new FormControl(this.getFromSessionStorage('renewedFrom'));
-  validUpTo = new FormControl(this.getFromSessionStorage('validUpTo'));
-  yearlyFee = new FormControl(this.getFromSessionStorage('yearlyFee'), [Validators.pattern(PatternConstants.NUMBER)]);
-  licenseNature = new FormControl(this.getFromSessionStorage('licenseNature'), [Validators.required]);
-  functioningStatus = new FormControl(this.getFromSessionStorage('functioningStatus'), [Validators.required]);
-  modeofOperation = new FormControl(this.getFromSessionStorage('modeofOperation'), [Validators.required]);
-
+  private destroy$ = new Subject<void>();
+  
   errorMessages = {
     licenseType: signal(''),
     establishmentName: signal(''),
     mobileNumber: signal(''),
+    emailId: signal(''),
     licenseNo: signal(''),
+    initialGrantDate: signal(''),
+    renewedFrom: signal(''),
+    validUpTo: signal(''),
     yearlyFee: signal(''),
     licenseNature: signal(''),
     functioningStatus: signal(''),
     modeofOperation: signal('')
   };
 
-  licenseTypes: string[] = ['Individual', 'Company'];
-  licenseNatures: string[] = ['Regular', 'Temporary', 'Seasonal', 'Special Event'];
-  functioningStatuses: string[] = ['Yes', 'No'];
-  modeofOperations: string[] = ['Self', 'Salesman', 'Barman'];
+  constructor(private fb: FormBuilder, private licenseeService: LicenseeService) {
+    const storedValues = this.getFromSessionStorage();
 
-  constructor(private fb: FormBuilder) {
     this.keyInfoForm = this.fb.group({
-      licenseType: this.licenseType,
-      establishmentName: this.establishmentName,
-      mobileNumber: this.mobileNumber,
-      licenseNo: this.licenseNo,
-      initialGrantDate: this.initialGrantDate,
-      renewedFrom: this.renewedFrom,
-      validUpTo: this.validUpTo,
-      yearlyFee: this.yearlyFee,
-      licenseNature: this.licenseNature,
-      functioningStatus: this.functioningStatus,
-      modeofOperation: this.modeofOperation
+      licenseType: new FormControl(storedValues.licenseType, [Validators.required]),
+      establishmentName: new FormControl(storedValues.establishmentName, [
+        Validators.required,
+        Validators.maxLength(150),
+        Validators.pattern(PatternConstants.ORGANISATION_NAME),
+      ]),
+      mobileNumber: new FormControl(storedValues.mobileNumber, [Validators.required, Validators.pattern(PatternConstants.MOBILE)]),
+      emailId: new FormControl(storedValues.emailId, [Validators.required, Validators.pattern(PatternConstants.EMAIL)]),
+      licenseNo: new FormControl(storedValues.licenseNo, [Validators.pattern(PatternConstants.CODE), Validators.maxLength(50)]),
+      initialGrantDate: new FormControl(storedValues.initialGrantDate),
+      renewedFrom: new FormControl(storedValues.renewedFrom),
+      validUpTo: new FormControl(storedValues.validUpTo),
+      yearlyFee: new FormControl(storedValues.yearlyFee,[Validators.pattern(PatternConstants.NUMBER)]),
+      licenseNature: new FormControl(storedValues.licenseNature, [Validators.required]),
+      functioningStatus: new FormControl(storedValues.functioningStatus, [Validators.required]),
+      modeofOperation: new FormControl(storedValues.modeofOperation, [Validators.required])
     });
 
-    merge(
-      this.licenseType.valueChanges,
-      this.establishmentName.valueChanges,
-      this.mobileNumber.valueChanges,
-      this.licenseNo.valueChanges,
-      this.yearlyFee.valueChanges,
-      this.licenseNature.valueChanges,
-      this.functioningStatus.valueChanges,
-      this.modeofOperation.valueChanges
-    )
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => {
-        this.saveToSessionStorage();
+    this.keyInfoForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.saveToSessionStorage();
         this.updateAllErrorMessages();
       });
   }
 
-  getFromSessionStorage(key: string): string {
-    return sessionStorage.getItem(key) || '';
+  ngOnInit() {
+    this.loadDropdownData();
   }
 
-  saveToSessionStorage() {
-    sessionStorage.setItem('licenseType', this.licenseType.value || '');
-    sessionStorage.setItem('establishmentName', this.establishmentName.value || '');
-    sessionStorage.setItem('mobileNumber', this.mobileNumber.value || '');
-    sessionStorage.setItem('licenseNo', this.licenseNo.value || '');
-    sessionStorage.setItem('initialGrantDate', this.initialGrantDate.value || '');
-    sessionStorage.setItem('renewedFrom', this.renewedFrom.value || '');
-    sessionStorage.setItem('validUpTo', this.validUpTo.value || '');
-    sessionStorage.setItem('yearlyFee', this.yearlyFee.value || '');
-    sessionStorage.setItem('licenseNature', this.licenseNature.value || '');
-    sessionStorage.setItem('functioningStatus', this.functioningStatus.value || '');
-    sessionStorage.setItem('modeofOperation', this.modeofOperation.value || '');
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  updateErrorMessage(field: keyof typeof this.errorMessages) {
-    const control = this[field];
-    if (control.hasError('required')) {
+  private loadDropdownData(): void {    
+    this.licenseeService.getLicenseTypes().subscribe((data: LicenseType[]) => {
+      this.licenseTypes = data;
+      }, error => {
+        console.error('Failed to load license types.', error);
+    });
+  }
+
+  private getFromSessionStorage(): any {
+    const storedData = sessionStorage.getItem('keyInfoDetails');
+    return storedData ? JSON.parse(storedData) : {};
+  }
+
+  private saveToSessionStorage() {
+    const formData = this.keyInfoForm.getRawValue(); 
+    sessionStorage.setItem('keyInfoDetails', JSON.stringify(formData));
+  }
+
+  private updateErrorMessage(field: keyof typeof this.errorMessages) {
+    const control = this.keyInfoForm.get(field);
+    if (control?.hasError('required')) {
       this.errorMessages[field].set('This field is required');
-    } else if (control.hasError('pattern')) {
+    } else if (control?.hasError('pattern')) {
       this.errorMessages[field].set('Invalid format');
     } else {
       this.errorMessages[field].set('');
@@ -130,12 +123,12 @@ export class KeyInfoComponent {
     }
   }
 
-  goBack() {
-    this.back.emit();
-  }
-
   resetForm() {
     this.keyInfoForm.reset();
-    sessionStorage.clear();
+    sessionStorage.removeItem('keyInfoDetails');
+  }
+
+  goBack() {
+    this.back.emit();
   }
 }

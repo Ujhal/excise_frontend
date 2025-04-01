@@ -116,4 +116,71 @@ export class SiteAdminService {
   deleteLicenseCategory(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/licensecategories/delete/${id}/`);
   }  
+
+  // Salesman Barman
+  getSalesmanBarmanList(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/salesmanbarman/list/`);
+  }
+  createSalesmanBarman(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/salesmanbarman/create/`, data);
+  }
+  getSalesmanBarmanDetail(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/salesmanbarman/detail/${id}/`);
+  }
+  updateSalesmanBarman(id: number, changes: Partial<any>): Observable<any> {
+    return this.http.put(`${this.apiUrl}/salesmanbarman/update/${id}/`, changes);
+  }
+  deleteSalesmanBarman(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/salesmanbarman/delete/${id}/`);
+  }
+  // Salesman Barman Documents
+  getSalesmanBarmanDocuments(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/salesmanbarman/document/list/`);
+  }
+  createSalesmanBarmanDocument(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/salesmanbarman/document/create/`, data);
+  }
+  getSalesmanBarmanDocumentDetail(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/salesmanbarman/document/detail/${id}/`);
+  }
+  updateSalesmanBarmanDocument(id: number, changes: Partial<any>): Observable<any> {
+    return this.http.put(`${this.apiUrl}/salesmanbarman/document/update/${id}/`, changes);
+  }
+  deleteSalesmanBarmanDocument(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/salesmanbarman/document/delete/${id}/`);
+  }
+
+  // Company
+  getCompanies(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/companies/list/`);
+  }
+  createCompany(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/companies/create/`, data);
+  }
+  getCompanyDetail(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/companies/detail/${id}/`);
+  }
+  updateCompany(id: number, changes: Partial<any>): Observable<any> {
+    return this.http.put(`${this.apiUrl}/companies/update/${id}/`, changes);
+  }
+  deleteCompany(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/companies/delete/${id}/`);
+  }
+  getDocuments(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/documents/list/`);
+  }
+
+  //Documents
+  createDocument(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/documents/create/`, data);
+  }
+  getDocumentDetail(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/documents/detail/${id}/`);
+  }
+  updateDocument(id: number, changes: Partial<any>): Observable<any> {
+    return this.http.put(`${this.apiUrl}/documents/update/${id}/`, changes);
+  }
+  deleteDocument(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/documents/delete/${id}/`);
+  }
 }

@@ -21,13 +21,25 @@ mat-card{
             gap: 20px 40px;
             padding: 20px 15px;
             justify-items: center;
+            align-items: start;
             .checkbox {
                 grid-column: span 3;
+                width: 100%;
             }
-            mat-label{
-                font-size: 14px;
+            mat-form-field{
+                width: 100%;
+                mat-label{
+                    font-size: 14px;
+                }
+                textarea {
+                    resize: vertical;
+                    min-height: 40px;
+                }
+                input::placeholder, textarea::placeholder{
+                    font-size: 13px;
+                }
             }
-            mat-form-field, mat-radio-group, .checkbox{
+            mat-radio-group{
                 width: 100%;
             }
         }

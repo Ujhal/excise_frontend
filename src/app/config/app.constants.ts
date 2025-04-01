@@ -1,3 +1,5 @@
+import { AbstractControl } from '@angular/forms';
+import { takeUntil } from 'rxjs';
 
 export enum PatternConstants {
     PASSWORD = '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&]{8,}',
@@ -35,4 +37,14 @@ export enum PatternConstants {
     FAMILYID = '[A-Za-z0-9]+',
     // PASSWORD = '(^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,32}$)?(^(?=.*\d)(?=.*[a-z])(?=.*[@#$%^&+=]).{8,32}$)?(^(?=.*\\d)(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,32}$)?(^(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,32}$)?'
   }
+
+export class FormUtils {
+  static capitalizePAN(control: AbstractControl, destroy$: any) {
+    control.valueChanges.pipe(takeUntil(destroy$)).subscribe((value) => {
+      if (value) {
+        control.setValue(value.toUpperCase(), { emitEvent: false });
+      }
+    });
+  }
+}
   

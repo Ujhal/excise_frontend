@@ -35,34 +35,41 @@
 							Sign In
 						</button>
 					</div>
-					<a class="lf--forgot" href="#">Forgot password?</a>
+					<div class="forgot-password link">
+						<a (click)="resetPhoneNumber()">Forgot Password?</a>
+					</div>
 				</ng-container>
 		
 				<ng-container *ngIf="!isPasswordMode">
-					<mat-form-field appearance="outline">
+					<mat-form-field appearance="outline" *ngIf="!otpSent">
 						<mat-label>Phone Number</mat-label>
 						<input matInput formControlName="username" placeholder="Enter your Phone Number" type="tel" />
 					</mat-form-field>
 
 					<div class="text-center mt-3" *ngIf="!otpSent">
-						<button mat-raised-button type="button" class="sign-in-btn" (click)="sendOtp()" [disabled]="loginForm.controls['username'].invalid">
+						<button mat-raised-button type="button" (click)="sendOtp()" [disabled]="loginForm.controls['username'].invalid">
 							Send OTP
 						</button>
 					</div>
 
 					<!-- OTP Input Field -->
 					<div *ngIf="otpSent">
-						<mat-form-field appearance="outline">
-							<mat-label>Enter OTP</mat-label>
-							<input matInput formControlName="otp" placeholder="Enter OTP" />
-						</mat-form-field>
-
+						<ng-otp-input
+							[formControl]="otpControl"
+							[config]="{ length: 4, inputStyles: { width: '54.4px', height: '50px' } }"
+							(onInputChange)="onOtpChange($event)">
+					  	</ng-otp-input>										
+					  
 						<div class="text-center mt-3">
-							<button mat-raised-button type="submit" class="sign-in-btn" [disabled]="loginForm.controls['otp'].invalid">
-								Verify OTP
-							</button>
+						  <button mat-raised-button type="submit" [disabled]="loginForm.controls['otp'].invalid">
+							Verify OTP
+						  </button>
 						</div>
-					</div>
+					  </div>
+					  
+					  <div class="use-another-number link" *ngIf="otpSent">
+						<a (click)="resetPhoneNumber()">Use another phone number</a>
+					  </div>
 				</ng-container>
 			</form>
 		</mat-card-content>
@@ -77,9 +84,8 @@
 				<h1>Hello!</h1>
 				<p>Register yourself if you don't have an account.</p>
 			</div>
-			<button mat-raised-button>
-				Register
-			</button>
+			<button mat-raised-button (click)="goToApplyLicense()">Register</button>
+					
 		</mat-card-content>
 		<mat-card-footer>
 			<h6>HELP DESK</h6>

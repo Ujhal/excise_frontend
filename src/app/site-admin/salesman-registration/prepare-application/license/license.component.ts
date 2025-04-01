@@ -35,15 +35,7 @@ export class LicenseComponent implements OnInit, OnDestroy {
   };
 
   constructor(private fb: FormBuilder, private siteAdminService: SiteAdminService) {
-    const storedValues = {
-      applicationYear: this.getFromSessionStorage('applicationYear'),
-      applicationId: this.getFromSessionStorage('applicationId'),
-      applicationDate: this.getFromSessionStorage('applicationDate'),
-      district: this.getFromSessionStorage('district'),
-      licenseCategory: this.getFromSessionStorage('licenseCategory'),
-      license: this.getFromSessionStorage('license') || 'New',
-      modeofOperation: this.getFromSessionStorage('modeofOperation'),
-    };
+    const storedValues = this.getFromSessionStorage();
 
     this.licenseForm = this.fb.group({
       applicationYear: new FormControl(storedValues.applicationYear, [Validators.required]),
@@ -55,10 +47,7 @@ export class LicenseComponent implements OnInit, OnDestroy {
       modeofOperation: new FormControl(storedValues.modeofOperation, [Validators.required])
     });
 
-    // Auto-save on form changes
-    merge(...Object.values(this.licenseForm.controls).map(control => control.valueChanges))
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
+    this.licenseForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.saveToSessionStorage();
         this.updateAllErrorMessages();
       });
@@ -85,14 +74,14 @@ export class LicenseComponent implements OnInit, OnDestroy {
     );
   }
 
-  private getFromSessionStorage(key: string): string {
-    return sessionStorage.getItem(key) || '';
+  private getFromSessionStorage(): any {
+    const storedData = sessionStorage.getItem('licenseDetails');
+    return storedData ? JSON.parse(storedData) : {};
   }
 
   private saveToSessionStorage() {
-    Object.keys(this.licenseForm.controls).forEach((key) => {
-      sessionStorage.setItem(key, this.licenseForm.get(key)?.value || '');
-    });
+    const formData = this.licenseForm.getRawValue();
+    sessionStorage.setItem('licenseDetails', JSON.stringify(formData));
   }
 
   private updateErrorMessage(field: keyof typeof this.errorMessages) {
@@ -122,14 +111,7 @@ export class LicenseComponent implements OnInit, OnDestroy {
 
   resetForm() {
     this.licenseForm.reset();
-    ['applicationYear', 
-      'applicationId', 
-      'applicationDate', 
-      'district', 
-      'licenseCategory', 
-      'license', 
-      'modeofOperation']
-    .forEach((key) => sessionStorage.removeItem(key));
+    sessionStorage.removeItem('licenseDetails');
   }
 
   goBack() {

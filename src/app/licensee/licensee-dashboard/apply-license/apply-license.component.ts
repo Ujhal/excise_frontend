@@ -24,6 +24,7 @@ import { SelectLicenseComponent } from './stepper/select-license/select-license.
 })
 export class ApplyLicenseComponent {
   get licenseType() {
-    return sessionStorage.getItem('licenseType');
+    const storedData = sessionStorage.getItem('keyInfoDetails');
+    return storedData ? JSON.parse(storedData).licenseType : null;
   }
 }

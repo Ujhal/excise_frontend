@@ -1,14 +1,15 @@
 import { Component } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MaterialModule } from '../material.module';
 import { CaptchaComponent } from '../shared/components/captcha/captcha.component';
 import { BaseComponent } from '../base/base.components';
 import { BaseDependency } from '../base/dependency/base.dependendency';
 import { ApiService } from '../services/api.service';
+import { NgOtpInputModule } from 'ng-otp-input';
 
 @Component({
   selector: 'app-login',
-  imports: [MaterialModule, CaptchaComponent],
+  imports: [MaterialModule, CaptchaComponent, NgOtpInputModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
@@ -23,18 +24,35 @@ export class LoginComponent extends BaseComponent {
     super(baseDependency);
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
-      password: ['', Validators.required],
-      otp: [''], // OTP input field
+      password: [''],
+      otp: [''],
       response: ['', Validators.required], // Captcha response
       hashkey: ['', Validators.required], // Captcha hashkey
     });
+
+    this.setValidators(); // Set initial validation rules
   }
 
+  /** Toggles between Password & OTP Login */
   toggleMode(isPassword: boolean): void {
     this.isPasswordMode = isPassword;
     this.otpSent = false;
     this.otpIndex = null;
     this.loginForm.reset(); // Reset form when switching modes
+    this.setValidators(); // Update validation rules dynamically
+  }
+
+  /** Updates Form Validation Based on Login Mode */
+  private setValidators(): void {
+    if (this.isPasswordMode) {
+      this.loginForm.controls['password'].setValidators(Validators.required);
+      this.loginForm.controls['otp'].clearValidators();
+    } else {
+      this.loginForm.controls['password'].clearValidators();
+      this.loginForm.controls['otp'].setValidators(Validators.required);
+    }
+    this.loginForm.controls['password'].updateValueAndValidity();
+    this.loginForm.controls['otp'].updateValueAndValidity();
   }
 
   togglePasswordVisibility() {
@@ -46,19 +64,17 @@ export class LoginComponent extends BaseComponent {
       alert('Please enter a valid phone number.');
       return;
     }
-  
+
     const username = this.loginForm.value.username;
     console.log('🔹 Sending OTP request for:', username);
-  
+
     const formData = new FormData();
-    formData.append('username', username); // ✅ Using FormData
-  
+    formData.append('username', username);
+
     this.apiService.sendOtp(formData).subscribe({
       next: (response) => {
         console.log('✅ OTP API Response:', response);
-        
-        this.otpSent = true; // ✅ Track OTP request status
-        alert('OTP sent successfully. Please check your phone.');
+        this.otpSent = true;
       },
       error: (err) => {
         console.error('❌ Error sending OTP:', err);
@@ -66,12 +82,12 @@ export class LoginComponent extends BaseComponent {
       }
     });
   }
-  
-  
+
+  get otpControl(): FormControl {
+    return this.loginForm.get('otp') as FormControl;
+  }  
 
   onLogin(): void {
-
-
     if (this.isPasswordMode) {
       this.loginWithPassword();
     } else {
@@ -83,7 +99,16 @@ export class LoginComponent extends BaseComponent {
     }
   }
 
+  goToApplyLicense() {
+    this.router.navigate(['/licensee/apply-license']);
+  }
+
   private loginWithPassword(): void {
+    if (this.loginForm.invalid) {
+      alert("Please fill in all fields correctly.");
+      return;
+    }
+
     this.apiService.login(this.loginForm.value).subscribe({
       next: (res: any) => {
         this.handleAuthResponse(res);
@@ -95,23 +120,27 @@ export class LoginComponent extends BaseComponent {
     });
   }
 
+  onOtpChange(otp: string): void {
+    this.loginForm.controls['otp'].setValue(otp);
+  }  
+
   private verifyOtp(): void {
     if (!this.loginForm.value.otp) {
       alert('Please enter the OTP.');
       return;
     }
-  
+
     if (this.otpIndex === undefined) {
       alert('OTP index missing. Please request OTP again.');
       return;
     }
-  
+
     const requestData = {
       username: this.loginForm.value.username,
       otp: this.loginForm.value.otp,
       index: Number(this.otpIndex)
     };
-    
+
     this.apiService.verifyOtp(requestData.username, requestData.otp, requestData.index).subscribe({
       next: (res: any) => {
         this.handleAuthResponse(res);
@@ -131,5 +160,11 @@ export class LoginComponent extends BaseComponent {
     } else {
       alert('Authentication failed.');
     }
+  }
+
+  resetPhoneNumber(): void {
+    this.otpSent = false;
+    this.loginForm.reset();
+    this.setValidators(); // Reset validation rules
   }
 }

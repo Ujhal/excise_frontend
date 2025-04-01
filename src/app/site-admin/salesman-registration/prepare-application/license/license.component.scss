@@ -4,8 +4,7 @@
     border-radius: 8px;
 }
 
-mat-card{
-    
+mat-card{    
     mat-card-header{
         padding: 12px;
         border-radius: 8px 8px 0 0;
@@ -28,11 +27,14 @@ mat-card{
             gap: 20px 40px;
             padding: 20px 15px;
             justify-items: center;
-            mat-label{
-                font-size: 14px;
-            }
             mat-form-field{
                 width: 100%;
+                mat-label{
+                    font-size: 14px;
+                }
+                input::placeholder{
+                    font-size: 13px;
+                }
             }
         }
     }

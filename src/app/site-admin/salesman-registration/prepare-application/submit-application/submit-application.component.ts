@@ -1,74 +1,77 @@
-import { Component, EventEmitter, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { MaterialModule } from '../../../../material.module';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { merge } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-submit-application',
+  standalone: true,
   imports: [MaterialModule],
   templateUrl: './submit-application.component.html',
   styleUrl: './submit-application.component.scss'
 })
 export class SubmitApplicationComponent {
-  submitForm: FormGroup;
 
-  @Output() next = new EventEmitter<void>();
   @Output() back = new EventEmitter<void>();
 
-  constructor(private fb: FormBuilder) {
-    this.submitForm = this.fb.group({
-    });
+  get licenseDetails() {
+    return this.getGroupedEntries('licenseDetails');
   }
 
-  get licenseDetails() {
-    return this.getEntries([
-      'applicationYear', 'applicationId', 'applicationDate',
-      'district', 'licenseCategory', 'license', 'modeofOperation'
-    ]);
+  get personDetails() {
+    return this.getGroupedEntries('personDetails');
+  }
+
+  get uploadedDocuments() {
+    const storedDocs = sessionStorage.getItem('uploadedDocuments');
+    if (!storedDocs) return [];
+  
+    try {
+      const parsedDocs = JSON.parse(storedDocs);
+      
+      // Convert the object into an array of { key: "Document Type", ...fileObject }
+      return Object.entries(parsedDocs).map(([key, fileObj]: [string, any]) => ({
+        key,  // The document type (e.g., "Passport Size Photo")
+        name: fileObj.name,
+        type: fileObj.type,
+        size: fileObj.size,
+        fileUrl: fileObj.fileUrl || ''  // Ensure fileUrl exists if saved
+      }));
+    } catch (error) {
+      console.error("Error parsing uploadedDocuments:", error);
+      return [];
+    }
   }
 
   get modeofOperation() {
-    return sessionStorage.getItem('modeofOperation') || 'Default';
-  }
-  
-  get details() {
-    return this.getEntries([
-      'firstName', 'middleName', 'lastName', 'fatherName',
-      'gender', 'dob', 'nationality', 'address',
-      'pan', 'aadhaar', 'mobileNumber', 'emailId'
-    ]);
+    const storedData = sessionStorage.getItem('licenseDetails');
+    return storedData ? JSON.parse(storedData).modeofOperation : null;
   }
 
-  private getEntries(keys: string[]) {
-    return keys
-      .map(key => ({
-        key: this.formatKey(key), 
-        value: sessionStorage.getItem(key) || ''
-      }))
-      .filter(entry => entry.value !== ''); // Remove empty values if needed
-  }
-  
-  private formatKey(key: string): string {
-    return key
-      .replace(/([A-Z])/g, ' $1') 
-      .replace(/^./, str => str.toUpperCase())
-      .trim();
-  }
-  
-    
-  proceedToNext() {
-    if (this.submitForm.valid) {
-      this.next.emit();
+  private getGroupedEntries(groupKey: string) {
+    const storedData = sessionStorage.getItem(groupKey);
+    if (!storedData) return [];
+
+    try {
+      const parsedData = JSON.parse(storedData);
+      return Object.keys(parsedData).map(key => ({
+        key: this.formatKey(key),
+        value: parsedData[key]
+      }));
+    } catch (error) {
+      console.error(`Error parsing sessionStorage key "${groupKey}":`, error);
+      return [];
     }
+  }
+
+  private formatKey(key: string): string {
+    return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+  }
+
+  submit() {
+
   }
 
   goBack() {
     this.back.emit();
-  }
-
-  resetForm() {
-    this.submitForm.reset();
-    sessionStorage.clear();
   }
 }

@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Output, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { merge, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SiteAdminService } from '../../../site-admin-service';
 import { MaterialModule } from '../../../../material.module';
-import { PatternConstants } from '../../../../config/app.constants';
+import { PatternConstants, FormUtils } from '../../../../config/app.constants';
 
 @Component({
   selector: 'app-company-details',
@@ -40,20 +40,7 @@ export class CompanyDetailsComponent implements OnInit, OnDestroy {
   };
 
   constructor(private fb: FormBuilder, private siteAdminService: SiteAdminService) {
-    const storedValues = {
-      brandType: this.getFromSessionStorage('brandType'),
-      license: this.getFromSessionStorage('license') || 'New',
-      applicationYear: this.getFromSessionStorage('applicationYear'),
-      companyName: this.getFromSessionStorage('companyName'),
-      pan: this.getFromSessionStorage('pan'),
-      officeAddress: this.getFromSessionStorage('licenseCategory'),
-      country: this.getFromSessionStorage('country'),
-      state: this.getFromSessionStorage('state'),
-      factoryAddress: this.getFromSessionStorage('factoryAddress'),
-      pinCode: this.getFromSessionStorage('pinCode'),
-      mobileNumber: this.getFromSessionStorage('mobileNumber'),
-      emailId: this.getFromSessionStorage('emailId'),
-    };
+    const storedValues = this.getFromSessionStorage();
 
     this.companyDetailsForm = this.fb.group({
       brandType: new FormControl(storedValues.brandType, [Validators.required]),
@@ -70,30 +57,29 @@ export class CompanyDetailsComponent implements OnInit, OnDestroy {
       emailId: new FormControl(storedValues.emailId, [Validators.pattern(PatternConstants.EMAIL)])
     });
 
-    // Auto-save on form changes
-    merge(...Object.values(this.companyDetailsForm.controls).map(control => control.valueChanges))
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
+    this.companyDetailsForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.saveToSessionStorage();
         this.updateAllErrorMessages();
       });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    FormUtils.capitalizePAN(this.companyDetailsForm.get('pan')!, this.destroy$);
+  }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
   
-  private getFromSessionStorage(key: string): string {
-    return sessionStorage.getItem(key) || '';
+  private getFromSessionStorage(): any {
+    const storedData = sessionStorage.getItem('companyDetails');
+    return storedData ? JSON.parse(storedData) : {};
   }
 
   private saveToSessionStorage() {
-    Object.keys(this.companyDetailsForm.controls).forEach((key) => {
-      sessionStorage.setItem(key, this.companyDetailsForm.get(key)?.value || '');
-    });
+    const formData = this.companyDetailsForm.getRawValue();
+    sessionStorage.setItem('companyDetails', JSON.stringify(formData));
   }
 
   private updateErrorMessage(field: keyof typeof this.errorMessages) {
@@ -127,19 +113,7 @@ export class CompanyDetailsComponent implements OnInit, OnDestroy {
   
   resetForm() {
     this.companyDetailsForm.reset();
-    ['brandType', 
-      'license', 
-      'applicationYear', 
-      'companyName', 
-      'pan', 
-      'officeAddress',
-      'country', 
-      'state', 
-      'factoryAddress', 
-      'pinCode', 
-      'mobileNumber',
-      'emailId']
-    .forEach((key) => sessionStorage.removeItem(key));
+    sessionStorage.removeItem('companyDetails');
   }
 
   goBack() {

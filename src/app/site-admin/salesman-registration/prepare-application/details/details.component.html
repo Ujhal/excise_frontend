@@ -107,7 +107,7 @@
   
         <mat-form-field appearance="outline">
             <mat-label>Enter Mobile Number</mat-label>
-            <input matInput placeholder="Enter Phone Number" type="number" formControlName="mobileNumber"/>
+            <input matInput placeholder="Enter Phone Number" type="tel" formControlName="mobileNumber"/>
             <mat-error *ngIf="detailsForm.controls['mobileNumber'].invalid">
               {{ getErrorMessage('mobileNumber') }}
             </mat-error>

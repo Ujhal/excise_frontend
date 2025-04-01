@@ -1,32 +1,35 @@
 import { Component } from '@angular/core';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatDividerModule } from '@angular/material/divider';
 import { RouterModule, RouterOutlet } from '@angular/router';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { CommonModule } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
+import { UserProfileComponent } from './user-profile/user-profile.component';
+import { MaterialModule } from '../../material.module';
 
 @Component({
   selector: 'app-licensee-home',
-  imports: [ CommonModule,
-    MatSidenavModule,
-    MatButtonModule,
-    MatIconModule,
-    MatListModule,
-    MatDividerModule,
-    RouterModule,
-    RouterOutlet,
-    FontAwesomeModule,],
+  imports: [ CommonModule, RouterModule, RouterOutlet, MaterialModule],
   templateUrl: './licensee-home.component.html',
   styleUrl: './licensee-home.component.scss'
 })
 export class LicenseeHomeComponent {
+  loaded = true; 
 
-  loaded = true; // Set this based on your logic (e.g., after data is loaded)
-  userName = 'John Doe2';
+  constructor(private dialog: MatDialog) {}
+  
+  userName = 'FirstName LN';
   snavToggle(sidenav: any) {
     sidenav.toggle();
   }
+
+  viewProfile(): void {
+    console.log('Button Clicked!');
+    const dialogRef = this.dialog.open(UserProfileComponent, {
+      width: '500px',
+    });
+  
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Dialog closed', result);
+    });
+  }
+  
 }

@@ -1,0 +1,41 @@
+mat-sidenav{
+    border-radius: 0;
+    border-right: 2px solid #cdcdcd;
+    .sidebar-content{
+        .profile{
+            background-color: #1C2B78;
+            color: #ffffff;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            .username{
+                font-size: 20px;
+                font-weight: 500;
+            }
+            .view-profile{
+                font-size: 13px;
+            }            
+        }
+    }
+}
+
+mat-nav-list{
+    padding: 0;
+    mat-list-item{
+        padding: 25px;
+        border-radius: 0 !important;
+        border-bottom: 2px solid #e7e7e7;
+    }
+}
+.active-link {
+    background-color: #f4feff !important;
+    border-left: 5px solid #005CBB;
+    span{
+        font-weight: 500;
+    } 
+}
+  
+.toggle-btn, .sidenav-header {
+border-bottom: 2px solid #cdcdcd;
+}

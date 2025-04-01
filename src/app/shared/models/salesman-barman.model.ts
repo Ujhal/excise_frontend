@@ -24,12 +24,12 @@ export class SalesmanBarman {
     licenseCategory!: string;
     license!: string;
     modeofOperation!: string;    
-
-    //files
-    passPhoto!: string; //(png, jpg, jpeg)
-    aadhaarCard!: string; //(pdf)
-    residentialCertificate!: string; //(pdf)
-    dobProof!: string; //(pdf)
 }
   
-
+//documents
+export interface UploadedDocument {
+    passPhoto: string;
+    aadhaarCard: string;
+    residentialCertificate: string;
+    dateofBirthProof: string;
+}

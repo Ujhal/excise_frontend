@@ -2,7 +2,7 @@
     <mat-sidenav #sidenav mode="side" [opened]="false">
       <div class="sidenav-header">
         <button mat-icon-button (click)="snavToggle(sidenav)" color="primary">
-          <fa-icon icon="times" color="primary"></fa-icon>
+          <mat-icon style="font-size: 27px">close</mat-icon>
         </button>
       </div>
       <div class="sidebar-content">
@@ -77,7 +77,7 @@
     <mat-sidenav-content>
       <div class="toggle-btn">
         <button mat-icon-button [class.hidden]="isSidenavOpen" (click)="snavToggle(sidenav)" color="primary" >
-          <fa-icon icon="bars" color="primary"></fa-icon>
+          <mat-icon style="font-size: 27px">menu</mat-icon>
         </button>
       </div>
         <!-- <div class="col-xl-12 col-lg-12 col-md-12" > -->

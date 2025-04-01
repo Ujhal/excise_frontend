@@ -1,48 +1,32 @@
-import { Component, EventEmitter, Output, ChangeDetectionStrategy, signal, OnInit } from '@angular/core';
-import { MaterialModule } from '../../../../../material.module';
+import { Component, EventEmitter, Output, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { merge } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { PatternConstants } from '../../../../../config/app.constants';
+import { merge, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { LicenseeService } from '../../../../licensee.services';
+import { MaterialModule } from '../../../../../material.module';
+import { PatternConstants, FormUtils } from '../../../../../config/app.constants';
 
 @Component({
   selector: 'app-member-details',
   standalone: true,
-  imports: [
-    MaterialModule,
-  ],
+  imports: [MaterialModule],
   templateUrl: './member-details.component.html',
   styleUrl: './member-details.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MemberDetailsComponent implements OnInit{
+export class MemberDetailsComponent implements OnInit, OnDestroy{
   memberDetailsForm: FormGroup;
+  statuses: string[] = ['Single', 'Married', 'Divorced'];
+  nationalities: string[] = ['Indian', 'Foreign'];
+  
+  @Output() readonly next = new EventEmitter<void>();
+  @Output() readonly back = new EventEmitter<void>();
 
-  @Output() next = new EventEmitter<void>();
-  @Output() back = new EventEmitter<void>();
-
-  status = new FormControl(this.getFromSessionStorage('status'), [Validators.required]);
-  memberName = new FormControl(this.getFromSessionStorage('memberName'), [Validators.required, Validators.pattern(PatternConstants.NAME)]);
-  fatherName = new FormControl(this.getFromSessionStorage('fatherName'), [Validators.required, Validators.pattern(PatternConstants.NAME)]);
-  nationality = new FormControl(this.getFromSessionStorage('nationality'), [Validators.required]);
-  gender = new FormControl(this.getFromSessionStorage('gender'), [Validators.required]);
-  pan = new FormControl(this.getFromSessionStorage('pan'), [Validators.required, Validators.pattern(PatternConstants.PAN)]);
-  mobileNumber = new FormControl(this.getFromSessionStorage('mobileNumber'), [Validators.required, Validators.pattern(PatternConstants.MOBILE)]);
-  emailId = new FormControl(this.getFromSessionStorage('emailId'), [Validators.required, Validators.pattern(PatternConstants.EMAIL)]);
-  photo = new FormControl(this.getFromSessionStorage('photo'));
-
-  ngOnInit() {
-    this.pan.valueChanges.subscribe(value => {
-      if (value) {
-        this.pan.setValue(value.toUpperCase(), { emitEvent: false });
-      }
-    });
-  }
-
+  private destroy$ = new Subject<void>();
+  
   errorMessages = {
     status: signal(''),
     memberName: signal(''),
-    fatherName: signal(''),
+    fatherHusbandName: signal(''),
     nationality: signal(''),
     gender: signal(''),
     pan: signal(''),
@@ -50,63 +34,54 @@ export class MemberDetailsComponent implements OnInit{
     emailId: signal(''),
     photo: signal('')
   };
+  
+  constructor(private fb: FormBuilder, private licenseeService: LicenseeService) {
+    const storedValues = this.getFromSessionStorage();
 
-  statuses: string[] = ['Single', 'Married', 'Divorced'];
-  nationalities: string[] = ['Indian', 'Foreign'];
-
-  constructor(private fb: FormBuilder) {
     this.memberDetailsForm = this.fb.group({
-      status: this.status,
-      memberName: this.memberName,
-      fatherName: this.fatherName,
-      nationality: this.nationality,
-      gender: this.gender,
-      pan: this.pan,
-      mobileNumber: this.mobileNumber,
-      emailId: this.emailId,
-    });
+      status: new FormControl(storedValues.status, [Validators.required]),
+      memberName: new FormControl(storedValues.memberName, [Validators.required, Validators.pattern(PatternConstants.NAME)]),
+      fatherHusbandName: new FormControl(storedValues.fatherHusbandName, [Validators.required, Validators.pattern(PatternConstants.NAME)]),
+      nationality: new FormControl(storedValues.nationality, [Validators.required]),
+      gender: new FormControl(storedValues.gender, [Validators.required]),
+      pan: new FormControl(storedValues.pan, [Validators.required, Validators.pattern(PatternConstants.PAN)]),
+      mobileNumber: new FormControl(storedValues.mobileNumber, [Validators.required, Validators.pattern(PatternConstants.MOBILE)]),
+      emailId: new FormControl(storedValues.emailId, [Validators.required, Validators.pattern(PatternConstants.EMAIL)]),
+      photo: new FormControl(storedValues.photo),
+    })
 
-    merge(
-      this.status.valueChanges,
-      this.memberName.valueChanges,
-      this.fatherName.valueChanges,
-      this.nationality.valueChanges,
-      this.gender.valueChanges,
-      this.pan.valueChanges,
-      this.mobileNumber.valueChanges,
-      this.emailId.valueChanges,
-      this.photo.valueChanges
-    )
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => {
+    this.memberDetailsForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.saveToSessionStorage();
         this.updateAllErrorMessages();
       });
   }
-
-  getFromSessionStorage(key: string): string {
-    return sessionStorage.getItem(key) || '';
+  
+  ngOnInit() {
+    FormUtils.capitalizePAN(this.memberDetailsForm.get('pan')!, this.destroy$);
   }
 
-  saveToSessionStorage() {
-    sessionStorage.setItem('status', this.status.value || '');
-    sessionStorage.setItem('memberName', this.memberName.value || '');
-    sessionStorage.setItem('fatherName', this.fatherName.value || '');
-    sessionStorage.setItem('nationality', this.nationality.value || '');
-    sessionStorage.setItem('gender', this.gender.value || '');
-    sessionStorage.setItem('pan', this.pan.value || '');
-    sessionStorage.setItem('mobileNumber', this.mobileNumber.value || '');
-    sessionStorage.setItem('emailId', this.emailId.value || '');
-    sessionStorage.setItem('photo', this.photo.value || '');
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+  
+  private getFromSessionStorage(): any {
+    const storedData = sessionStorage.getItem('memberDetails');
+    return storedData ? JSON.parse(storedData) : {};
   }
 
-  updateErrorMessage(field: keyof typeof this.errorMessages) {
-    const control = this[field];
-    if (control.hasError('required')) {
+  private saveToSessionStorage() {
+    const formData = this.memberDetailsForm.getRawValue(); 
+    sessionStorage.setItem('memberDetails', JSON.stringify(formData));
+  }
+
+  private updateErrorMessage(field: keyof typeof this.errorMessages) {
+    const control = this.memberDetailsForm.get(field);
+    if (control?.hasError('required')) {
       this.errorMessages[field].set('This field is required');
-    } else if (control.hasError('pattern')) {
+    } else if (control?.hasError('pattern')) {
       this.errorMessages[field].set('Invalid format');
-    } else if (control.hasError('email')) {
+    } else if (control?.hasError('email')) {
       this.errorMessages[field].set('Not a valid email');
     } else {
       this.errorMessages[field].set('');
@@ -128,13 +103,13 @@ export class MemberDetailsComponent implements OnInit{
       this.next.emit();
     }
   }
-
-  goBack() {
-    this.back.emit();
-  }
-
+  
   resetForm() {
     this.memberDetailsForm.reset();
-    sessionStorage.clear();
+    sessionStorage.removeItem('memberDetails');
+  }
+  
+  goBack() {
+    this.back.emit();
   }
 }

@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { merge, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SiteAdminService } from '../../../site-admin-service';
-import { PatternConstants } from '../../../../config/app.constants';
+import { PatternConstants, FormUtils } from '../../../../config/app.constants';
 import { MaterialModule } from '../../../../material.module';
 
 @Component({
@@ -15,10 +15,6 @@ import { MaterialModule } from '../../../../material.module';
 export class DetailsComponent implements OnInit, OnDestroy{
   detailsForm: FormGroup;
   nationalities: string[] = ['Indian', 'Foreign'];
-  
-  get modeofOperation() {
-    return sessionStorage.getItem('modeofOperation');
-  }
   
   @Output() readonly next = new EventEmitter<void>();
   @Output() readonly back = new EventEmitter<void>();
@@ -42,21 +38,8 @@ export class DetailsComponent implements OnInit, OnDestroy{
   };
 
   constructor(private fb: FormBuilder, private siteAdminService: SiteAdminService) {
-    const storedValues = {
-      firstName: this.getFromSessionStorage('firstName'),
-      middleName: this.getFromSessionStorage('middleName'),
-      lastName: this.getFromSessionStorage('lastName'),
-      fatherName: this.getFromSessionStorage('fatherName'),
-      gender: this.getFromSessionStorage('gender'),
-      dob: this.getFromSessionStorage('dob'),
-      nationality: this.getFromSessionStorage('nationality'),
-      address: this.getFromSessionStorage('address'),
-      pan: this.getFromSessionStorage('pan'),
-      aadhaar: this.getFromSessionStorage('aadhaar'),
-      mobileNumber: this.getFromSessionStorage('mobileNumber'),
-      emailId: this.getFromSessionStorage('emailId'),
-      sikkimSubject: this.getFromSessionStorage('sikkimSubject'),
-    };
+    const storedValues = this.getFromSessionStorage();
+
     this.detailsForm = this.fb.group({
       firstName: new FormControl(storedValues.firstName, [Validators.required, Validators.pattern(PatternConstants.NAME)]),
       middleName: new FormControl(storedValues.middleName, [Validators.pattern(PatternConstants.NAME)]),
@@ -73,38 +56,48 @@ export class DetailsComponent implements OnInit, OnDestroy{
       sikkimSubject: new FormControl(storedValues.sikkimSubject, [Validators.required])
     });
 
-    this.detailsForm.get('pan')?.valueChanges
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(value => {
-      if (value) {
-        this.detailsForm.get('pan')?.setValue(value.toUpperCase(), { emitEvent: false });
-      }
+    this.detailsForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.saveToSessionStorage();
+      this.updateAllErrorMessages();
     });
-
-    // Auto-save on form changes
-    merge(...Object.values(this.detailsForm.controls).map(control => control.valueChanges))
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.saveToSessionStorage();
-        this.updateAllErrorMessages();
-      });
   }
   
-  ngOnInit() {}
+  ngOnInit() {
+    FormUtils.capitalizePAN(this.detailsForm.get('pan')!, this.destroy$);
+  }
   
   ngOnDestroy() {
+    const storedDocuments = this.getStoredDocuments();
+    Object.values(storedDocuments).forEach((doc: any) => {
+      if (doc.fileUrl) {
+        URL.revokeObjectURL(doc.fileUrl);
+      }
+    });
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  get modeofOperation() {
+    const storedData = sessionStorage.getItem('licenseDetails');
+    return storedData ? JSON.parse(storedData).modeofOperation : null;
+  }
   
-  private getFromSessionStorage(key: string): string {
-    return sessionStorage.getItem(key) || '';
+  private getFromSessionStorage(): any {
+    const storedData = sessionStorage.getItem('personDetails');
+    const storedDocuments = this.getStoredDocuments();
+
+    // Restore file metadata
+    this.documents.forEach(doc => {
+      if (storedDocuments[doc.name]) {
+        doc.file = storedDocuments[doc.name]; // Restore file metadata
+      }
+    });
+    return storedData ? JSON.parse(storedData) : {};
   }
 
   private saveToSessionStorage() {
-    Object.keys(this.detailsForm.controls).forEach((key) => {
-      sessionStorage.setItem(key, this.detailsForm.get(key)?.value || '');
-    });
+    const formData = this.detailsForm.getRawValue(); // Ensures all values are captured
+    sessionStorage.setItem('personDetails', JSON.stringify(formData));
   }
   
   private updateErrorMessage(field: keyof typeof this.errorMessages) {
@@ -143,19 +136,42 @@ export class DetailsComponent implements OnInit, OnDestroy{
       const file = event.target.files[0];
       if (file) {
         document.file = file;
+    
+        // Create a URL for the uploaded file
+        const fileUrl = URL.createObjectURL(file);
+    
+        // Store file metadata + URL in sessionStorage
+        const storedDocuments = this.getStoredDocuments();
+        storedDocuments[document.name] = {
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          fileUrl: fileUrl
+        };
+    
+        sessionStorage.setItem('uploadedDocuments', JSON.stringify(storedDocuments));
       }
-    }
+    }     
+    
+    private getStoredDocuments(): any {
+      const storedDocs = sessionStorage.getItem('uploadedDocuments');
+      return storedDocs ? JSON.parse(storedDocs) : {};
+    }    
   
     viewFile(document: any) {
-      if (document.file) {
-        const fileURL = URL.createObjectURL(document.file);
-        window.open(fileURL, '_blank');
+      const storedDocuments = this.getStoredDocuments();
+      const docInfo = storedDocuments[document.name];
+    
+      if (docInfo?.fileUrl) {
+        window.open(docInfo.fileUrl, '_blank');
+      } else {
+        console.warn("File not found in sessionStorage");
       }
-    }
+    }  
 
     areDocumentsUploaded(): boolean {
-      return this.documents.every(doc => !doc.required || doc.file);
-    }    
+      return this.documents.every(doc => !doc.required || this.getStoredDocuments()[doc.name]);
+    }   
   
     proceedToNext() {
       if (this.detailsForm.valid && this.areDocumentsUploaded()) {
@@ -165,20 +181,7 @@ export class DetailsComponent implements OnInit, OnDestroy{
     
     resetForm() {
       this.detailsForm.reset();
-      ['firstName', 
-        'middleName', 
-        'lastName', 
-        'fatherName', 
-        'gender', 
-        'dob',
-        'nationality',
-        'address',
-        'pan',
-        'aadhaar',
-        'mobileNumber',
-        'emailId',
-        'sikkimSubject']
-      .forEach((key) => sessionStorage.removeItem(key));
+      sessionStorage.removeItem('personDetails');
     }
 
     goBack() {

@@ -28,13 +28,7 @@ export class MemberDetailsComponent {
   };
   
   constructor(private fb: FormBuilder) {
-    const storedValues = {
-      memberName: this.getFromSessionStorage('memberName'),
-      memberDesignation: this.getFromSessionStorage('memberDesignation'),
-      mobileNumber: this.getFromSessionStorage('mobileNumber'),
-      emailId: this.getFromSessionStorage('emailId'),
-      memberAddress: this.getFromSessionStorage('memberAddress'),
-    };
+    const storedValues = this.getFromSessionStorage();
 
     this.memberDetailsForm = this.fb.group({
       memberName: new FormControl(storedValues.memberName, [Validators.required, Validators.pattern(PatternConstants.NAME)]),
@@ -44,11 +38,8 @@ export class MemberDetailsComponent {
       memberAddress: new FormControl(storedValues.memberAddress, [Validators.required, Validators.maxLength(500)])
     });
 
-    // Auto-save on form changes
-    merge(...Object.values(this.memberDetailsForm.controls).map(control => control.valueChanges))
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.saveToSessionStorage();
+    this.memberDetailsForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.saveToSessionStorage();
         this.updateAllErrorMessages();
       });
   }
@@ -60,14 +51,14 @@ export class MemberDetailsComponent {
     this.destroy$.complete();
   }  
 
-  private getFromSessionStorage(key: string): string {
-    return sessionStorage.getItem(key) || '';
+  private getFromSessionStorage(): any {
+    const storedData = sessionStorage.getItem('memberDetails');
+    return storedData ? JSON.parse(storedData) : {};
   }
 
   private saveToSessionStorage() {
-    Object.keys(this.memberDetailsForm.controls).forEach((key) => {
-      sessionStorage.setItem(key, this.memberDetailsForm.get(key)?.value || '');
-    });
+    const formData = this.memberDetailsForm.getRawValue();
+    sessionStorage.setItem('memberDetails', JSON.stringify(formData));
   }
 
   private updateErrorMessage(field: keyof typeof this.errorMessages) {
@@ -101,7 +92,7 @@ export class MemberDetailsComponent {
   
   resetForm() {
     this.memberDetailsForm.reset();
-    sessionStorage.clear();
+    sessionStorage.removeItem('memberDetails');
   }
 
   goBack() {

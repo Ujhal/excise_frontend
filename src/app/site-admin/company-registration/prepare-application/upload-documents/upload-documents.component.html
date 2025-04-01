@@ -52,8 +52,7 @@
                 </ng-container>
           
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>        
               </table>
             </div>
           </div>
@@ -62,50 +61,52 @@
             Payment Details
           </div>
 
-          <div class="form-field-container">
-                
+          <div class="form-field-container">        
             <mat-form-field appearance="outline">
                 <mat-label>Payment Reference Id</mat-label>
-                <input matInput placeholder="Enter Payment Reference Id" type="number" formControlName="paymentId"/>
-                @if (uploadDocumentsForm.get('paymentId')?.invalid) {
-                    <mat-error>{{ getErrorMessage('paymentId') }}</mat-error>
-                }
+                <input matInput placeholder="Enter Payment Reference Id" type="number" formControlName="paymentId" required/>
+                <mat-error *ngIf="uploadDocumentsForm.controls['paymentId'].invalid">
+                  {{ getErrorMessage('paymentId') }}
+                </mat-error>
             </mat-form-field>
             
             <mat-form-field appearance="outline">
               <mat-label>Payment Date</mat-label>
-              <input matInput [matDatepicker]="picker"[formControl]="paymentDate" />
+              <input matInput [matDatepicker]="picker" placeholder="Enter Payment Date" formControlName="paymentDate" required/>
               <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
+              <mat-error *ngIf="uploadDocumentsForm.controls['paymentDate'].invalid">
+                {{ getErrorMessage('paymentDate') }}
+              </mat-error>
             </mat-form-field>            
 
             <mat-form-field floatLabel="always" appearance="outline">
                 <mat-label>Payment Amount</mat-label>
-                <input matInput type="number" class="example-right-align" [formControl]="paymentAmount" placeholder="0" />
+                <input matInput type="number" class="example-right-align" formControlName="paymentAmount" placeholder="0" required/>
                 <span matTextPrefix>₹&nbsp;</span>
-                @if (paymentAmount.invalid) {
-                  <mat-error>{{ getErrorMessage('paymentAmount') }}</mat-error>
-                }
+                <mat-error *ngIf="uploadDocumentsForm.controls['paymentAmount'].invalid">
+                  {{ getErrorMessage('paymentAmount') }}
+                </mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
                 <mat-label>Remarks</mat-label>
                 <textarea matInput
                           placeholder="Enter Payment Remarks, if any (max 500 characters)"
-                          [formControl]="paymentRemarks"
+                          formControlName="paymentRemarks"
                           cdkTextareaAutosize
                           #autosize="cdkTextareaAutosize"
                           cdkAutosizeMinRows="1"
                           cdkAutosizeMaxRows="5">
                 </textarea>
             </mat-form-field>
-
           </div>
       </mat-card-content>
   
       <mat-card-actions>
         <button mat-stroked-button (click)="goBack()">Back</button>
         <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
+        <button mat-flat-button (click)="submit()">Submit</button>
       </mat-card-actions>
     </mat-card>
 </form>
