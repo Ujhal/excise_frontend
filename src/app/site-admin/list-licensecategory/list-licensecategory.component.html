@@ -10,11 +10,6 @@
 
       <div class="table-container">
         <mat-table [dataSource]="licenseCategoryDataSource" class="mat-table">
-          <ng-container matColumnDef="slNo">
-            <mat-header-cell *matHeaderCellDef> Sl. No. </mat-header-cell>
-            <mat-cell *matCellDef="let user; let i=index"> {{i+1}} </mat-cell>
-          </ng-container>
-  
           <ng-container matColumnDef="id">
             <mat-header-cell *matHeaderCellDef> Id </mat-header-cell>
             <mat-cell *matCellDef="let element"> {{element.id}} </mat-cell>

@@ -17,7 +17,7 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./list-user.component.scss']
 })
 export class ListUserComponent extends BaseComponent implements OnInit {
-  displayedColumns: string[] = ['slNo', 'firstName', 'middleName', 'lastName', 'username', 'phoneNumber', 'email', 'district', 'subDivision', 'role', 'createdBy', 'actions'];
+  displayedColumns: string[] = ['firstName', 'middleName', 'lastName', 'username', 'phoneNumber', 'email', 'district', 'subDivision', 'role', 'createdBy', 'actions'];
   users = new MatTableDataSource<Account>();
   allUsers: Account[] = [];
 

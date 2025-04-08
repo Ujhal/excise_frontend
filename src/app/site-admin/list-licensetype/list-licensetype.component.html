@@ -9,12 +9,7 @@
     <mat-card-content>
 
       <div class="table-container">
-        <mat-table [dataSource]="licenseTypeDataSource" class="mat-table">
-          <ng-container matColumnDef="slNo">
-            <mat-header-cell *matHeaderCellDef> Sl. No. </mat-header-cell>
-            <mat-cell *matCellDef="let user; let i=index"> {{i+1}} </mat-cell>
-          </ng-container>
-  
+        <mat-table [dataSource]="licenseTypeDataSource" class="mat-table"> 
           <ng-container matColumnDef="id">
             <mat-header-cell *matHeaderCellDef> Id </mat-header-cell>
             <mat-cell *matCellDef="let element"> {{element.id}} </mat-cell>

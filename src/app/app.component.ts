@@ -20,7 +20,7 @@ import { filter } from 'rxjs'
     FooterComponent,
     FontAwesomeModule,
     CarouselComponent
-  ],
+],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

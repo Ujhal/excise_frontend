@@ -14,7 +14,7 @@
       <div class="form-field-container">
         <mat-form-field appearance="outline"> 
           <mat-label>First Name</mat-label>
-          <input matInput placeholder="Enter First Name" type="text" formControlName="firstName"/>
+          <input matInput placeholder="Enter First Name" type="text" formControlName="firstName" required/>
           <mat-error *ngIf="detailsForm.controls['firstName'].invalid">
             {{ getErrorMessage('firstName') }}
           </mat-error>
@@ -30,7 +30,7 @@
   
         <mat-form-field appearance="outline">
           <mat-label>Last Name</mat-label>
-          <input matInput placeholder="Enter Last Name" type="text" formControlName="lastName"/>
+          <input matInput placeholder="Enter Last Name" type="text" formControlName="lastName" required/>
           <mat-error *ngIf="detailsForm.controls['lastName'].invalid">
             {{ getErrorMessage('lastName') }}
           </mat-error>
@@ -38,9 +38,9 @@
   
         <mat-form-field appearance="outline">
           <mat-label>Father's/Husband's Name</mat-label>
-          <input matInput placeholder="Enter Father's/Husband's Name" type="text" formControlName="fatherName"/>
-          <mat-error *ngIf="detailsForm.controls['fatherName'].invalid">
-            {{ getErrorMessage('fatherName') }}
+          <input matInput placeholder="Enter Father's/Husband's Name" type="text" formControlName="fatherHusbandName" required/>
+          <mat-error *ngIf="detailsForm.controls['fatherHusbandName'].invalid">
+            {{ getErrorMessage('fatherHusbandName') }}
           </mat-error>
         </mat-form-field>
   
@@ -91,7 +91,7 @@
   
         <mat-form-field appearance="outline">
           <mat-label>PAN</mat-label>
-          <input matInput placeholder="Enter PAN" type="text" formControlName="pan" appUppercase/>
+          <input matInput placeholder="Enter PAN" type="text" formControlName="pan" appUppercase required/>
           <mat-error *ngIf="detailsForm.controls['pan'].invalid">
             {{ getErrorMessage('pan') }}
           </mat-error>
@@ -99,7 +99,7 @@
   
         <mat-form-field appearance="outline">
           <mat-label>Aadhaar No.</mat-label>
-          <input matInput placeholder="Enter Aadhaar No." type="text" formControlName="aadhaar"/>
+          <input matInput placeholder="Enter Aadhaar No." type="text" formControlName="aadhaar" required/>
           <mat-error *ngIf="detailsForm.controls['aadhaar'].invalid">
             {{ getErrorMessage('aadhaar') }}
           </mat-error>
@@ -107,7 +107,7 @@
   
         <mat-form-field appearance="outline">
             <mat-label>Enter Mobile Number</mat-label>
-            <input matInput placeholder="Enter Phone Number" type="tel" formControlName="mobileNumber"/>
+            <input matInput placeholder="Enter Phone Number" type="tel" formControlName="mobileNumber" required/>
             <mat-error *ngIf="detailsForm.controls['mobileNumber'].invalid">
               {{ getErrorMessage('mobileNumber') }}
             </mat-error>

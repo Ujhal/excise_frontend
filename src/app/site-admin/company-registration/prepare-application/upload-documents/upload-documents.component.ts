@@ -1,22 +1,21 @@
-import { Component, EventEmitter, Output, OnInit, OnDestroy, signal, inject } from '@angular/core';
+import { Component, EventEmitter, Output, OnDestroy, signal, inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { merge, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SiteAdminService } from '../../../site-admin-service';
-import { PatternConstants, FormUtils } from '../../../../config/app.constants';
+import { PatternConstants } from '../../../../config/app.constants';
 import { MaterialModule } from '../../../../material.module';
 import { DatePipe } from '@angular/common';
+import { Company, CompanyDocuments } from '../../../../shared/models/company.model';
 
 @Component({
   selector: 'app-upload-documents',
   imports: [MaterialModule],
   templateUrl: './upload-documents.component.html',
   styleUrl: './upload-documents.component.scss',
-  providers: [DatePipe] // Provide DatePipe
+  providers: [DatePipe] 
 })
-export class UploadDocumentsComponent {
-  private datePipe = inject(DatePipe); // Inject DatePipe
-
+export class UploadDocumentsComponent implements OnDestroy{
   uploadDocumentsForm: FormGroup;
 
   @Output() readonly next = new EventEmitter<void>();
@@ -31,7 +30,16 @@ export class UploadDocumentsComponent {
     paymentRemarks: signal('')
   };
   
-  constructor(private fb: FormBuilder, private siteAdminService: SiteAdminService) {
+  displayedColumns: string[] = ['serialNo', 'docType', 'upload', 'view'];
+  documents = [
+    { key: 'undertaking', name: 'An Undertaking stating that they shall abide by the condition of the Certificate or registration and the provision of Sikkim Excise Act 1992 and rules, regulations and orders made thereunder', 
+      format: 'pdf, png, jpg', accept: '.pdf,.png,.jpg', required: true, file: null },
+  ];
+
+  constructor(
+    private fb: FormBuilder, 
+    private siteAdminService: SiteAdminService,
+    private datePipe: DatePipe) {
     const storedValues = this.getFromSessionStorage();
     
     this.uploadDocumentsForm = this.fb.group({
@@ -48,44 +56,27 @@ export class UploadDocumentsComponent {
   }
 
   ngOnDestroy() {
-    const storedDocuments = this.getStoredDocuments();
-    Object.values(storedDocuments).forEach((doc: any) => {
-      if (doc.fileUrl) {
-        URL.revokeObjectURL(doc.fileUrl);
-      }
-    });
+    this.clearStoredFileURLs();
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-
-  private getFromSessionStorage(): any {
+  private getFromSessionStorage(): Partial<Company> {
     const storedData = sessionStorage.getItem('paymentDetails');
-    const storedDocuments = this.getStoredDocuments();
-
-    // Restore file metadata
-    this.documents.forEach(doc => {
-      if (storedDocuments[doc.name]) {
-        doc.file = storedDocuments[doc.name]; // Restore file metadata
-      }
-    });
-    return storedData ? JSON.parse(storedData) : {};
+    return storedData ? JSON.parse(storedData) as Company : {};
   }
 
   private saveToSessionStorage() {
-    const formData = this.uploadDocumentsForm.getRawValue(); // Ensures all values are captured
+    const formData = this.uploadDocumentsForm.getRawValue();
+    const rawDate = new Date(formData.paymentDate as string);
+
+    if (!isNaN(rawDate.getTime())) {
+      formData.paymentDate = this.datePipe.transform(rawDate, 'yyyy-MM-dd')!;
+    }
     sessionStorage.setItem('paymentDetails', JSON.stringify(formData));
   }
 
-  formatDate(date: string | Date): string {
-    if (!date) return '';
-    // Convert string to Date object if needed
-    const parsedDate = typeof date === 'string' ? new Date(date) : date;
-    // Format as dd/MM/yyyy
-    return this.datePipe.transform(parsedDate, 'dd/MM/yyyy') || '';
-  }
-
-  updateErrorMessage(field: keyof typeof this.errorMessages) {
+  private updateErrorMessage(field: keyof typeof this.errorMessages) {
     const control = this.uploadDocumentsForm.get(field);
     if (control?.hasError('required')) {
       this.errorMessages[field].set('This field is required');
@@ -96,7 +87,7 @@ export class UploadDocumentsComponent {
     }
   }
 
-  updateAllErrorMessages() {
+  private updateAllErrorMessages() {
     Object.keys(this.errorMessages).forEach((field) => {
       this.updateErrorMessage(field as keyof typeof this.errorMessages);
     });
@@ -106,53 +97,48 @@ export class UploadDocumentsComponent {
     return this.errorMessages[field]();
   }
 
-  displayedColumns: string[] = ['serialNo', 'docType', 'upload', 'view'];
-
-  documents = [
-    { name: 'An Undertaking stating that they shall abide by the condition of the Certificate or registration and the provision of Sikkim Excise Act 1992 and rules, regulations and orders made thereunder', 
-      format: 'pdf, png, jpg', accept: '.pdf,.png,.jpg', required: true, file: null },
-  ];
 
   onFileSelect(event: any, document: any) {
     const file = event.target.files[0];
     if (file) {
       document.file = file;
-  
-      // Create a URL for the uploaded file
       const fileUrl = URL.createObjectURL(file);
-  
-      // Store file metadata + URL in sessionStorage
-      const storedDocuments = this.getStoredDocuments();
-      storedDocuments[document.name] = {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        fileUrl: fileUrl
-      };
-  
-      sessionStorage.setItem('companyDocuments', JSON.stringify(storedDocuments));
+      this.storeFileMetadata(document.key, file, fileUrl);
     }
   }
 
-  private getStoredDocuments(): any {
+  private storeFileMetadata(key: keyof CompanyDocuments, file: File, fileUrl: string) {
+    const storedDocuments = this.getStoredDocuments();
+    storedDocuments[key] = fileUrl;
+    sessionStorage.setItem('companyDocuments', JSON.stringify(storedDocuments));
+  }  
+
+  private getStoredDocuments(): Partial<Record<keyof CompanyDocuments, string>> {
     const storedDocs = sessionStorage.getItem('companyDocuments');
     return storedDocs ? JSON.parse(storedDocs) : {};
   }
 
-  viewFile(document: any) {
+  private clearStoredFileURLs() {
     const storedDocuments = this.getStoredDocuments();
-    const docInfo = storedDocuments[document.name];
-  
-    if (docInfo?.fileUrl) {
-      window.open(docInfo.fileUrl, '_blank');
-    } else {
-      console.warn("File not found in sessionStorage");
-    }
+    Object.values(storedDocuments).forEach((fileUrl: string) => {
+      if (fileUrl) {
+        URL.revokeObjectURL(fileUrl);
+      }
+    });
   }
 
-  areDocumentsUploaded(): boolean {
-    return this.documents.every(doc => !doc.required || this.getStoredDocuments()[doc.name]);
+  viewFile(document: any) {
+    const storedDocuments = this.getStoredDocuments();
+    const fileUrl = storedDocuments[document.key as keyof CompanyDocuments];
+    if (fileUrl) {
+      window.open(fileUrl, '_blank');
+    }
   }  
+
+  areDocumentsUploaded(): boolean {
+    const storedDocs = this.getStoredDocuments();
+    return this.documents.every(doc => !doc.required || !!storedDocs[doc.key as keyof CompanyDocuments]);
+  }
 
   goBack() {
     this.back.emit();
@@ -163,5 +149,9 @@ export class UploadDocumentsComponent {
     sessionStorage.clear();
   }
 
-  submit(){}
+  proceedToNext() {
+    if (this.uploadDocumentsForm.valid && this.areDocumentsUploaded()) {
+      this.next.emit();
+    }
+  }
 }

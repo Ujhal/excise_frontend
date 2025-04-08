@@ -17,7 +17,7 @@ import Swal from 'sweetalert2';
   styleUrl: './list-district.component.scss'
 })
 export class ListDistrictComponent extends BaseComponent implements OnInit {
-  displayedColumns: string[] = ['slNo', 'id', 'district', 'districtNameLL', 'districtCode', 'state', 'stateCode', 'actions'];
+  displayedColumns: string[] = ['id', 'district', 'districtNameLL', 'districtCode', 'state', 'stateCode', 'actions'];
   districtDataSource = new MatTableDataSource<District>();
 
   constructor(base: BaseDependency, private siteAdminService: SiteAdminService, private dialog: MatDialog) { 

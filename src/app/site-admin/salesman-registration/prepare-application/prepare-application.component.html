@@ -3,7 +3,7 @@
         <app-license (next)="stepper.next()"></app-license>
     </mat-step>
   
-    <mat-step [label]="modeofOperation === 'Barman' ? 'Barman Details' : (modeofOperation === 'Salesman' ? 'Salesman Details' : 'Details')">
+    <mat-step [label]="role === 'Barman' ? 'Barman Details' : (role === 'Salesman' ? 'Salesman Details' : 'Details')">
         <app-details (back)="stepper.previous()" (next)="stepper.next()"></app-details>
     </mat-step>    
   
@@ -12,7 +12,7 @@
     </mat-step>
 
     <mat-step label="Submit Application">
-        <app-submit-application (back)="stepper.previous()" (next)="stepper.next()"></app-submit-application>
+        <app-submit-application (back)="stepper.previous()"></app-submit-application>
     </mat-step>
 </mat-horizontal-stepper>
   

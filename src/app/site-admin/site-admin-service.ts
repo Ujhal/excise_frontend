@@ -9,6 +9,7 @@ import { LicenseCategory } from '../shared/models/license-category.model';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 import { Account } from '../shared/models/accounts';
+import { SalesmanBarman, SalesmanBarmanDocuments } from '../shared/models/salesman-barman.model';
 
 @Injectable({ providedIn: 'root' })
 export class SiteAdminService {
@@ -123,64 +124,36 @@ export class SiteAdminService {
   }
   createSalesmanBarman(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/salesmanbarman/create/`, data);
-  }
+  }  
   getSalesmanBarmanDetail(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/salesmanbarman/detail/${id}/`);
   }
-  updateSalesmanBarman(id: number, changes: Partial<any>): Observable<any> {
-    return this.http.put(`${this.apiUrl}/salesmanbarman/update/${id}/`, changes);
-  }
-  deleteSalesmanBarman(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/salesmanbarman/delete/${id}/`);
-  }
-  // Salesman Barman Documents
-  getSalesmanBarmanDocuments(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/salesmanbarman/document/list/`);
-  }
-  createSalesmanBarmanDocument(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/salesmanbarman/document/create/`, data);
-  }
-  getSalesmanBarmanDocumentDetail(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/salesmanbarman/document/detail/${id}/`);
-  }
-  updateSalesmanBarmanDocument(id: number, changes: Partial<any>): Observable<any> {
-    return this.http.put(`${this.apiUrl}/salesmanbarman/document/update/${id}/`, changes);
-  }
-  deleteSalesmanBarmanDocument(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/salesmanbarman/document/delete/${id}/`);
-  }
 
   // Company
-  getCompanies(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/companies/list/`);
+  getCompanyList(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/company/list/`);
   }
   createCompany(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/companies/create/`, data);
+    return this.http.post(`${this.apiUrl}/company/create/`, data);
   }
   getCompanyDetail(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/companies/detail/${id}/`);
-  }
-  updateCompany(id: number, changes: Partial<any>): Observable<any> {
-    return this.http.put(`${this.apiUrl}/companies/update/${id}/`, changes);
-  }
-  deleteCompany(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/companies/delete/${id}/`);
-  }
-  getDocuments(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/documents/list/`);
+    return this.http.get(`${this.apiUrl}/company/detail/${id}/`);
   }
 
-  //Documents
-  createDocument(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/documents/create/`, data);
+  //test
+  uploadedFiles: Record<string, File> = {};
+
+  setUploadedFile(key: string, file: File) {
+    this.uploadedFiles[key] = file;
   }
-  getDocumentDetail(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/documents/detail/${id}/`);
+
+  getUploadedFile(key: string): File | undefined {
+    return this.uploadedFiles[key];
   }
-  updateDocument(id: number, changes: Partial<any>): Observable<any> {
-    return this.http.put(`${this.apiUrl}/documents/update/${id}/`, changes);
+
+  getAllUploadedFiles(): Partial<Record<keyof SalesmanBarmanDocuments, File>> {
+    return this.uploadedFiles; // assuming this is where you stored the File objects
   }
-  deleteDocument(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/documents/delete/${id}/`);
-  }
+  
 }
+

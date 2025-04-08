@@ -10,11 +10,6 @@
 
       <div class="table-container">
         <mat-table [dataSource]="users">
-          <ng-container matColumnDef="slNo">
-            <mat-header-cell *matHeaderCellDef> Sl. No. </mat-header-cell>
-            <mat-cell *matCellDef="let user; let i=index"> {{i+1}} </mat-cell>
-          </ng-container>
-
           <ng-container matColumnDef="firstName">
             <mat-header-cell *matHeaderCellDef> First Name </mat-header-cell>
             <mat-cell *matCellDef="let user"> {{user.firstName}} </mat-cell>

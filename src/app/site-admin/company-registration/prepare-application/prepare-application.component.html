@@ -10,5 +10,9 @@
     <mat-step label="Upload Documents">
         <app-upload-documents (back)="stepper.previous()" (next)="stepper.next()"></app-upload-documents>
     </mat-step>
+
+    <mat-step label="Submit Application">
+        <app-submit-application (back)="stepper.previous()"></app-submit-application>
+    </mat-step>
 </mat-horizontal-stepper>
   

@@ -26,9 +26,11 @@ export class Company {
     paymentDate!: string;
     paymentAmount!: string;
     paymentRemarks!: string;
+}
 
-    //files
-    undertaking!: string; //(pdf, png, jpg)
+//documents
+export interface CompanyDocuments {
+    undertaking: string;
 }
   
     

@@ -18,7 +18,7 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrl: './list-policestation.component.scss'
 })
 export class ListPolicestationComponent extends BaseComponent implements OnInit{
-  displayedColumns: string[] = ['slNo', 'id', 'policeStationName', 'policeStationCode', 'subDivisionCode', 'actions'];
+  displayedColumns: string[] = ['id', 'policeStationName', 'policeStationCode', 'subDivisionCode', 'actions'];
   policeStationDataSource = new MatTableDataSource<PoliceStation>();
   subdivisions: SubDivision[] = [];
   allPoliceStations: PoliceStation[] = [];

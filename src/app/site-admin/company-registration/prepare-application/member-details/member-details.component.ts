@@ -1,9 +1,11 @@
 import { Component, EventEmitter, Output, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { merge, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { SiteAdminService } from '../../../site-admin-service';
 import { MaterialModule } from '../../../../material.module';
 import { PatternConstants } from '../../../../config/app.constants';
+import { Company } from '../../../../shared/models/company.model';
 
 @Component({
   selector: 'app-member-details',
@@ -11,7 +13,7 @@ import { PatternConstants } from '../../../../config/app.constants';
   templateUrl: './member-details.component.html',
   styleUrl: './member-details.component.scss'
 })
-export class MemberDetailsComponent {
+export class MemberDetailsComponent implements OnInit, OnDestroy{
   memberDetailsForm: FormGroup;
   
   @Output() readonly next = new EventEmitter<void>();
@@ -22,19 +24,19 @@ export class MemberDetailsComponent {
   errorMessages = {
     memberName: signal(''),
     memberDesignation: signal(''),
-    mobileNumber: signal(''),
-    emailId: signal(''),
+    memberMobileNumber: signal(''),
+    memberEmailId: signal(''),
     memberAddress: signal(''),
   };
   
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private siteAdminService: SiteAdminService) {
     const storedValues = this.getFromSessionStorage();
 
     this.memberDetailsForm = this.fb.group({
       memberName: new FormControl(storedValues.memberName, [Validators.required, Validators.pattern(PatternConstants.NAME)]),
       memberDesignation:new FormControl(storedValues.memberDesignation, [Validators.required, Validators.maxLength(100)]),
-      mobileNumber: new FormControl(storedValues.mobileNumber, [Validators.required, Validators.pattern(PatternConstants.MOBILE)]),
-      emailId: new FormControl(storedValues.emailId, [Validators.pattern(PatternConstants.EMAIL)]),
+      memberMobileNumber: new FormControl(storedValues.memberMobileNumber, [Validators.required, Validators.pattern(PatternConstants.MOBILE)]),
+      memberEmailId: new FormControl(storedValues.memberEmailId, [Validators.pattern(PatternConstants.EMAIL)]),
       memberAddress: new FormControl(storedValues.memberAddress, [Validators.required, Validators.maxLength(500)])
     });
 
@@ -51,13 +53,13 @@ export class MemberDetailsComponent {
     this.destroy$.complete();
   }  
 
-  private getFromSessionStorage(): any {
+  private getFromSessionStorage(): Partial<Company>{
     const storedData = sessionStorage.getItem('memberDetails');
-    return storedData ? JSON.parse(storedData) : {};
+    return storedData ? JSON.parse(storedData) as Company : {};
   }
 
   private saveToSessionStorage() {
-    const formData = this.memberDetailsForm.getRawValue();
+    const formData: Partial<Company> = this.memberDetailsForm.getRawValue();
     sessionStorage.setItem('memberDetails', JSON.stringify(formData));
   }
 

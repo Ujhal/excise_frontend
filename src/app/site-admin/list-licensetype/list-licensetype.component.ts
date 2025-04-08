@@ -17,7 +17,7 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrl: './list-licensetype.component.scss'
 })
 export class ListLicensetypeComponent extends BaseComponent implements OnInit{
-  displayedColumns: string[] = ['slNo', 'id', 'licenseType', 'actions'];
+  displayedColumns: string[] = ['id', 'licenseType', 'actions'];
   licenseTypeDataSource = new MatTableDataSource<LicenseType>();
 
   constructor(base: BaseDependency, private siteAdminService: SiteAdminService, private dialog: MatDialog) { 

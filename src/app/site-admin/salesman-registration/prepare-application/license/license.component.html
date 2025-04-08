@@ -8,10 +8,10 @@
       </mat-card-header>
   
       <mat-card-content>
-        <div class="form-field-container">
+        <div class="form-field-container"> 
             <mat-form-field appearance="outline">
                 <mat-label>Select Application Year</mat-label>
-                <mat-select formControlName="applicationYear">
+                <mat-select formControlName="applicationYear" required>
                     <mat-option *ngFor="let year of applicationYears" [value]="year">{{ year }}</mat-option>
                 </mat-select>
                 <mat-error *ngIf="licenseForm.controls['applicationYear'].invalid">
@@ -21,7 +21,7 @@
     
             <mat-form-field appearance="outline">
                 <mat-label>Application Id</mat-label>
-                <input matInput placeholder="Enter Application Id" type="number" formControlName="applicationId"/>
+                <input matInput placeholder="Enter Application Id" type="text" formControlName="applicationId" required/>
                 <mat-error *ngIf="licenseForm.controls['applicationId'].invalid">
                     {{ getErrorMessage('applicationId') }}
                 </mat-error>
@@ -29,14 +29,14 @@
 
             <mat-form-field appearance="outline">
                 <mat-label>Application Date</mat-label>
-                <input matInput [matDatepicker]="picker" formControlName="applicationDate" />
+                <input matInput [matDatepicker]="picker" formControlName="applicationDate" required/>
                 <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-datepicker #picker></mat-datepicker>
             </mat-form-field>
     
             <mat-form-field appearance="outline">
                 <mat-label>District</mat-label>
-                <mat-select formControlName="district">
+                <mat-select formControlName="district" required>
                     <mat-option *ngFor="let district of districts" [value]="district">{{ district }}</mat-option>
                 </mat-select>
                 <mat-error *ngIf="licenseForm.controls['district'].invalid">
@@ -46,7 +46,7 @@
     
             <mat-form-field appearance="outline">
                 <mat-label>Select License Category</mat-label>
-                <mat-select formControlName="licenseCategory">
+                <mat-select formControlName="licenseCategory" required>
                     <mat-option *ngFor="let category of licenseCategories" [value]="category">{{ category }}</mat-option>
                 </mat-select>
                 <mat-error *ngIf="licenseForm.controls['licenseCategory'].invalid">
@@ -56,7 +56,7 @@
     
             <mat-form-field appearance="outline">
                 <mat-label>Select License</mat-label>
-                <mat-select formControlName="license">
+                <mat-select formControlName="license" required>
                     <mat-option *ngFor="let license of licenses" [value]="license">{{ license }}</mat-option>
                 </mat-select>
                 <mat-error *ngIf="licenseForm.controls['license'].invalid">
@@ -66,11 +66,11 @@
     
             <mat-form-field appearance="outline">
                 <mat-label>Select Mode of Operation</mat-label>
-                <mat-select formControlName="modeofOperation">
-                    <mat-option *ngFor="let mode of modeofOperations" [value]="mode">{{ mode }}</mat-option>
+                <mat-select formControlName="role" required>
+                    <mat-option *ngFor="let role of roles" [value]="role">{{ role }}</mat-option>
                 </mat-select>
-                <mat-error *ngIf="licenseForm.controls['modeofOperation'].invalid">
-                    {{ getErrorMessage('modeofOperation') }}
+                <mat-error *ngIf="licenseForm.controls['role'].invalid">
+                    {{ getErrorMessage('role') }}
                 </mat-error>
             </mat-form-field>
         </div>

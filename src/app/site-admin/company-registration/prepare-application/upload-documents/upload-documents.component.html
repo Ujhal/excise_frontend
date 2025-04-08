@@ -106,7 +106,7 @@
       <mat-card-actions>
         <button mat-stroked-button (click)="goBack()">Back</button>
         <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
-        <button mat-flat-button (click)="submit()">Submit</button>
+        <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!uploadDocumentsForm.valid">Next</button>
       </mat-card-actions>
     </mat-card>
 </form>

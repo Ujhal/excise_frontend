@@ -130,17 +130,17 @@
           <div class="form-field-container">
             <mat-form-field appearance="outline">
               <mat-label>Mobile Number</mat-label>
-              <input matInput placeholder="Enter Mobile Number" type="number" formControlName="mobileNumber"/>
-              <mat-error *ngIf="companyDetailsForm.controls['mobileNumber'].invalid">
-                {{ getErrorMessage('mobileNumber') }}
+              <input matInput placeholder="Enter Company Mobile Number" type="number" formControlName="companyMobileNumber"/>
+              <mat-error *ngIf="companyDetailsForm.controls['companyMobileNumber'].invalid">
+                {{ getErrorMessage('companyMobileNumber') }}
               </mat-error>
             </mat-form-field>
       
             <mat-form-field appearance="outline">
               <mat-label>Email Id</mat-label>
-              <input matInput placeholder="Enter Email" type="email" formControlName="emailId"/>
-              <mat-error *ngIf="companyDetailsForm.controls['emailId'].invalid">
-                {{ getErrorMessage('emailId') }}
+              <input matInput placeholder="Enter Company Email" type="email" formControlName="companyEmailId"/>
+              <mat-error *ngIf="companyDetailsForm.controls['companyEmailId'].invalid">
+                {{ getErrorMessage('companyEmailId') }}
               </mat-error>
             </mat-form-field>
           </div>

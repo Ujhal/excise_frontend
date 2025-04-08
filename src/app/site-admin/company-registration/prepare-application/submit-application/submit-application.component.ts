@@ -1,86 +1,74 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { MaterialModule } from '../../../../material.module';
 import { SiteAdminService } from '../../../site-admin-service';
-import { SalesmanBarman, SalesmanBarmanDocuments } from '../../../../shared/models/salesman-barman.model';
+import { Company, CompanyDocuments } from '../../../../shared/models/company.model';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-submit-application',
-  standalone: true,
   imports: [MaterialModule],
   templateUrl: './submit-application.component.html',
   styleUrl: './submit-application.component.scss'
 })
 export class SubmitApplicationComponent {
-
-  readonly licenseLabels: Partial<Record<keyof SalesmanBarman, string>> = {
-    applicationYear: 'Application Year',
-    applicationId: 'Application ID',
-    applicationDate: 'Application Date',
-    district: 'District',
-    licenseCategory: 'License Category',
+  readonly companyRegistrationLabels: Partial<Record<keyof Company, string>> = {
+    brandType: 'Brand Type',
     license: 'License',
-    role: 'Mode of Operation',
-  };
-  
-  readonly personLabels: Partial<Record<keyof SalesmanBarman, string>> = {
-    firstName: 'First Name',
-    middleName: 'Middle Name',
-    lastName: 'Last Name',
-    fatherHusbandName: 'Father/Husband Name',
-    gender: 'Gender',
-    dob: 'Date of Birth',
-    nationality: 'Nationality',
-    address: 'Address',
+    applicationYear: 'Application Year',
+    companyName: 'Company Name',
     pan: 'PAN',
-    aadhaar: 'Aadhaar Number',
-    mobileNumber: 'Mobile Number',
-    emailId: 'Email',
-    sikkimSubject: 'Sikkim Subject',
+    officeAddress: 'Office Address',
+    country: 'Country',
+    state: 'State',
+    factoryAddress: 'Factory Address',
+    pinCode: 'PIN Code',
+    companyMobileNumber: 'Company Mobile Number',
+    companyEmailId: 'Company Email Id',
+
+    memberName: 'Member Name',
+    memberDesignation: 'Member Designation',
+    memberMobileNumber: 'Member Mobile Number',
+    memberEmailId: 'Member Email Id',
+    memberAddress: 'Member Address',
+
+    paymentId: 'Payment Id',
+    paymentDate: 'Payment Date',
+    paymentAmount: 'Payment Amount',
+    paymentRemarks: 'Payment Remarks'
   };  
   
-  readonly documentLabels: Partial<Record<keyof SalesmanBarmanDocuments, string>> = {
-    passPhoto: 'Passport Size Photo',
-    aadhaarCard: 'Aadhaar Card',
-    residentialCertificate: 'Residential Certificate',
-    dateofBirthProof: 'Date of Birth Proof',
+  readonly documentLabels: Partial<Record<keyof CompanyDocuments, string>> = {
+    undertaking: 'Undertaking',
   };  
 
   @Output() back = new EventEmitter<void>();
 
   constructor(private siteAdminService: SiteAdminService, private router: Router) {}
 
-  get licenseDetails() {
-    return this.getGroupedEntries<Partial<SalesmanBarman>>('licenseDetails', this.licenseLabels);
-  }
-  
-  get personDetails() {
-    return this.getGroupedEntries<Partial<SalesmanBarman>>('personDetails', this.personLabels);
+  get companyDetails() {
+    return this.getGroupedEntries<Partial<Company>>('companyDetails', this.companyRegistrationLabels);
+  } 
+  get memberDetails() {
+    return this.getGroupedEntries<Partial<Company>>('memberDetails', this.companyRegistrationLabels);
+  }  
+  get paymentDetails() {
+    return this.getGroupedEntries<Partial<Company>>('paymentDetails', this.companyRegistrationLabels);
   }  
 
-  get salesmanBarmanDocuments(): { key: keyof SalesmanBarmanDocuments; fileUrl: string }[] {
-    const storedDocs = sessionStorage.getItem('salesmanBarmanDocuments');
+  get companyDocuments(): { key: keyof CompanyDocuments; fileUrl: string }[] {
+    const storedDocs = sessionStorage.getItem('companyDocuments');
     if (!storedDocs) return [];
 
     try {
-      const parsedDocs: Record<keyof SalesmanBarmanDocuments, string> = JSON.parse(storedDocs);
+      const parsedDocs: Record<keyof CompanyDocuments, string> = JSON.parse(storedDocs);
       return Object.entries(parsedDocs).map(([key, fileUrl]) => ({
-        key: key as keyof SalesmanBarmanDocuments,
+        key: key as keyof CompanyDocuments,
         fileUrl: fileUrl || ''
       }));
     } catch (error) {
-      console.error("Error parsing salesmanBarmanDocuments:", error);
+      console.error("Error parsing companyDocuments:", error);
       return [];
-    }
-  }
-
-  get role(): SalesmanBarman['role'] | null {
-    const storedData = sessionStorage.getItem('licenseDetails');
-    try {
-      return storedData ? (JSON.parse(storedData) as SalesmanBarman).role : null;
-    } catch {
-      return null;
     }
   }
 
@@ -107,7 +95,6 @@ export class SubmitApplicationComponent {
     const response = await fetch(blobUrl);
     const blob = await response.blob();
     
-    // Determine file extension based on MIME type
     const mimeType = blob.type;
     let extension = '';
     
@@ -121,14 +108,7 @@ export class SubmitApplicationComponent {
       case 'image/png':
         extension = '.png';
         break;
-      case 'image/gif':
-        extension = '.gif';
-        break;
-      // Add more cases as needed
-      default:
-        extension = '.bin'; // Default binary file extension
     }
-  
     return new File([blob], `${filename}${extension}`, { type: mimeType });
   }   
 
@@ -147,18 +127,19 @@ export class SubmitApplicationComponent {
     }
   
     try {
-      const licenseDetails: Partial<SalesmanBarman> = JSON.parse(sessionStorage.getItem('licenseDetails') || '{}');
-      const personDetails: Partial<SalesmanBarman> = JSON.parse(sessionStorage.getItem('personDetails') || '{}');
-      const salesmanBarmanDocuments: Record<keyof SalesmanBarmanDocuments, string> =
-        JSON.parse(sessionStorage.getItem('salesmanBarmanDocuments') || '{}');
+      const companyDetails: Partial<Company> = JSON.parse(sessionStorage.getItem('companyDetails') || '{}');
+      const memberDetails: Partial<Company> = JSON.parse(sessionStorage.getItem('memberDetails') || '{}');
+      const paymentDetails: Partial<Company> = JSON.parse(sessionStorage.getItem('paymentDetails') || '{}');
+      const companyDocuments: Record<keyof CompanyDocuments, string> =
+        JSON.parse(sessionStorage.getItem('companyDocuments') || '{}');
   
-      if (!licenseDetails || !personDetails || !salesmanBarmanDocuments) {
+      if (!companyDetails || !memberDetails || !paymentDetails || !companyDocuments) {
         alert('Missing application data. Please complete the form.');
         return;
       }
   
       const formData = new FormData();
-      const combinedDetails = { ...licenseDetails, ...personDetails };
+      const combinedDetails = { ...companyDetails, ...memberDetails, ...paymentDetails };
   
       Object.entries(combinedDetails).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -166,12 +147,12 @@ export class SubmitApplicationComponent {
         }
       });
   
-      for (const [key, blobUrl] of Object.entries(salesmanBarmanDocuments)) {
+      for (const [key, blobUrl] of Object.entries(companyDocuments)) {
         const file = await this.blobUrlToFile(blobUrl, key);
         formData.append(key, file);
       }
   
-      this.siteAdminService.createSalesmanBarman(formData).subscribe({
+      this.siteAdminService.createCompany(formData).subscribe({
         next: (res) => {
           Swal.fire('Submitted!', 'Application submitted successfully!', 'success').then(() => {
             sessionStorage.clear();

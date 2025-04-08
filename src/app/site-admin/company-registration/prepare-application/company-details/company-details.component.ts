@@ -5,16 +5,17 @@ import { takeUntil } from 'rxjs/operators';
 import { SiteAdminService } from '../../../site-admin-service';
 import { MaterialModule } from '../../../../material.module';
 import { PatternConstants, FormUtils } from '../../../../config/app.constants';
+import { Company } from '../../../../shared/models/company.model';
 
 @Component({
   selector: 'app-company-details',
   imports: [MaterialModule],
   templateUrl: './company-details.component.html',
-  styleUrl: './company-details.component.scss'
+  styleUrl: './company-details.component.scss',
 })
 export class CompanyDetailsComponent implements OnInit, OnDestroy {
   companyDetailsForm: FormGroup;
-  licenses: string[] = ['New', 'A', 'B', 'C', 'D'];
+  licenses: string[] = ['New', 'License A', 'License B', 'License C'];
   applicationYears: string[] = ['2025-2026'];
   countries: string[] = ['India', 'Nepal', 'Bhutan', 'China'];
   states: string[] = ['Sikkim', 'West Bengal', 'Bihar', 'Assam'];
@@ -35,11 +36,12 @@ export class CompanyDetailsComponent implements OnInit, OnDestroy {
     state: signal(''),
     factoryAddress: signal(''),
     pinCode: signal(''),
-    mobileNumber: signal(''),
-    emailId: signal(''),
+    companyMobileNumber: signal(''),
+    companyEmailId: signal(''),
   };
 
-  constructor(private fb: FormBuilder, private siteAdminService: SiteAdminService) {
+  constructor(private fb: FormBuilder, 
+    private siteAdminService: SiteAdminService) {
     const storedValues = this.getFromSessionStorage();
 
     this.companyDetailsForm = this.fb.group({
@@ -53,8 +55,8 @@ export class CompanyDetailsComponent implements OnInit, OnDestroy {
       state: new FormControl(storedValues.state, [Validators.required]),
       factoryAddress: new FormControl(storedValues.factoryAddress, [Validators.required, Validators.maxLength(500)]),
       pinCode: new FormControl(storedValues.pinCode, [Validators.required, Validators.pattern(PatternConstants.PINCODE)]),
-      mobileNumber: new FormControl(storedValues.mobileNumber, [Validators.required, Validators.pattern(PatternConstants.MOBILE)]),
-      emailId: new FormControl(storedValues.emailId, [Validators.pattern(PatternConstants.EMAIL)])
+      companyMobileNumber: new FormControl(storedValues.companyMobileNumber, [Validators.required, Validators.pattern(PatternConstants.MOBILE)]),
+      companyEmailId: new FormControl(storedValues.companyEmailId, [Validators.pattern(PatternConstants.EMAIL)])
     });
 
     this.companyDetailsForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
@@ -72,13 +74,13 @@ export class CompanyDetailsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
   
-  private getFromSessionStorage(): any {
+  private getFromSessionStorage(): Partial<Company> {
     const storedData = sessionStorage.getItem('companyDetails');
-    return storedData ? JSON.parse(storedData) : {};
+    return storedData ? JSON.parse(storedData) as Company : {};
   }
 
   private saveToSessionStorage() {
-    const formData = this.companyDetailsForm.getRawValue();
+    const formData: Partial<Company> = this.companyDetailsForm.getRawValue();
     sessionStorage.setItem('companyDetails', JSON.stringify(formData));
   }
 

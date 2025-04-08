@@ -1,23 +1,26 @@
 import { Component, EventEmitter, Output, OnInit, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { merge, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SiteAdminService } from '../../../site-admin-service';
 import { MaterialModule } from '../../../../material.module';
+import { SalesmanBarman } from '../../../../shared/models/salesman-barman.model';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-license',
   imports: [MaterialModule],
   templateUrl: './license.component.html',
-  styleUrl: './license.component.scss'
+  styleUrl: './license.component.scss',
+  providers: [DatePipe]
 })
 export class LicenseComponent implements OnInit, OnDestroy {
   licenseForm: FormGroup;
   licenseCategories: string[] = [];
   districts: string[] = [];
   applicationYears: string[] = ['2025-2026'];
-  licenses: string[] = ['New', 'A', 'B', 'C', 'D'];
-  modeofOperations: string[] = ['Salesman', 'Barman'];
+  licenses: string[] = ['New', 'License A', 'License B', 'License C'];
+  roles: string[] = ['Salesman', 'Barman'];
 
   @Output() readonly next = new EventEmitter<void>();
   @Output() readonly back = new EventEmitter<void>();
@@ -31,10 +34,13 @@ export class LicenseComponent implements OnInit, OnDestroy {
     district: signal(''),
     licenseCategory: signal(''),
     license: signal(''),
-    modeofOperation: signal('')
+    role: signal('')
   };
 
-  constructor(private fb: FormBuilder, private siteAdminService: SiteAdminService) {
+  constructor(
+    private fb: FormBuilder, 
+    private siteAdminService: SiteAdminService, 
+    private datePipe: DatePipe) {
     const storedValues = this.getFromSessionStorage();
 
     this.licenseForm = this.fb.group({
@@ -44,13 +50,13 @@ export class LicenseComponent implements OnInit, OnDestroy {
       district: new FormControl(storedValues.district, [Validators.required]),
       licenseCategory: new FormControl(storedValues.licenseCategory, [Validators.required]),
       license: new FormControl(storedValues.license || 'New', [Validators.required]),
-      modeofOperation: new FormControl(storedValues.modeofOperation, [Validators.required])
+      role: new FormControl(storedValues.role, [Validators.required])
     });
 
     this.licenseForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
-        this.saveToSessionStorage();
-        this.updateAllErrorMessages();
-      });
+      this.saveToSessionStorage();
+      this.updateAllErrorMessages();
+    });
   }
 
   ngOnInit() {
@@ -74,13 +80,19 @@ export class LicenseComponent implements OnInit, OnDestroy {
     );
   }
 
-  private getFromSessionStorage(): any {
+  private getFromSessionStorage(): Partial<SalesmanBarman> {
     const storedData = sessionStorage.getItem('licenseDetails');
-    return storedData ? JSON.parse(storedData) : {};
+    return storedData ? JSON.parse(storedData) as SalesmanBarman : {};
   }
 
   private saveToSessionStorage() {
-    const formData = this.licenseForm.getRawValue();
+    const formData: Partial<SalesmanBarman> = this.licenseForm.getRawValue();
+    const rawDate = new Date(formData.applicationDate as string);
+
+    if (!isNaN(rawDate.getTime())) {
+      formData.applicationDate = this.datePipe.transform(rawDate, 'yyyy-MM-dd')!;
+    }
+    
     sessionStorage.setItem('licenseDetails', JSON.stringify(formData));
   }
 

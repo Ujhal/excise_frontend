@@ -12,8 +12,8 @@ import { SubmitApplicationComponent } from "./submit-application/submit-applicat
   styleUrl: './prepare-application.component.scss'
 })
 export class PrepareApplicationComponent {
-  get modeofOperation() {
+  get role() {
     const storedData = sessionStorage.getItem('licenseDetails');
-    return storedData ? JSON.parse(storedData).modeofOperation : null;
+    return storedData ? JSON.parse(storedData).role : null;
   }
 }

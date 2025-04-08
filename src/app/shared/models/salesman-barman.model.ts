@@ -18,16 +18,15 @@ export class SalesmanBarman {
 
     //license details
     applicationYear!: string;
-    applicationId!: number;
+    applicationId!: string;
     applicationDate!: string;
     district!: string;
     licenseCategory!: string;
-    license!: string;
-    modeofOperation!: string;    
+    license!: string;  
 }
   
 //documents
-export interface UploadedDocument {
+export interface SalesmanBarmanDocuments {
     passPhoto: string;
     aadhaarCard: string;
     residentialCertificate: string;

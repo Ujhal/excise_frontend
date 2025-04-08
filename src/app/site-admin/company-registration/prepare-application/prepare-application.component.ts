@@ -3,10 +3,11 @@ import { MaterialModule } from '../../../material.module';
 import { CompanyDetailsComponent } from "./company-details/company-details.component";
 import { MemberDetailsComponent } from './member-details/member-details.component';
 import { UploadDocumentsComponent } from "./upload-documents/upload-documents.component";
+import { SubmitApplicationComponent } from './submit-application/submit-application.component';
 
 @Component({
   selector: 'app-prepare-application',
-  imports: [MaterialModule, CompanyDetailsComponent, MemberDetailsComponent, UploadDocumentsComponent],
+  imports: [MaterialModule, CompanyDetailsComponent, MemberDetailsComponent, UploadDocumentsComponent, SubmitApplicationComponent],
   templateUrl: './prepare-application.component.html',
   styleUrl: './prepare-application.component.scss'
 })
