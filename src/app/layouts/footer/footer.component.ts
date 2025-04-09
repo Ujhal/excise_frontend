@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { MaterialModule } from '../../material.module';
+import { MaterialModule } from '../../shared/material.module';
 import { Router } from '@angular/router';
 import {MatMenuModule} from '@angular/material/menu';
 

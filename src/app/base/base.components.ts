@@ -3,9 +3,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { BaseDependency } from './dependency/base.dependendency';
-import { StateStorageService } from '../config/state-storage.service';
-import { AccountService } from '../services/account.service';
-import { ApiService } from '../services/api.service';
+import { StateStorageService } from '../core/config/state-storage.service';
+import { AccountService } from '../core/services/account.service';
+import { ApiService } from '../core/services/api.service';
 import Swal from 'sweetalert2';
 @Component({
   template: '',

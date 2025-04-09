@@ -1,41 +1,68 @@
 import { Routes } from '@angular/router';
-import { MainComponent } from './layouts/main/main.component';
-import { LoginComponent } from './login/login.component';
-import { Authority } from './config/authority.constants';
-import { UserRouteAccessService } from './config/user-route-access.service';
-import { LinkComponent } from './layouts/footer/link/link.component';
-import { MainLinksComponent } from './layouts/main/main-links/main-links.component';
+import { LoginComponent } from './features/login/login.component';
+import { Authority } from './shared/constants/authority.constants';
+import { UserRouteAccessService } from './core/config/user-route-access.service';
+import { HomeComponent } from './layouts/landing/home/home.component';
+import { HomeLinksComponent } from './layouts/landing/home/home-links/home-links.component';
+import { InfoPagesComponent } from './layouts/footer/info-pages/info-pages.component';
 
 export const routes: Routes = [
+  // Landing layout with nested children
   {
     path: '',
-    component: MainComponent,
-    data: { showCarousel: true },
+    children: [
+      {
+        path: '',
+        component: HomeComponent,
+        data: { showCarousel: true }
+      },
+      {
+        path: 'home/:page',
+        component: HomeLinksComponent
+      }
+    ]
   },
 
+  // Footer-related pages (about-us, contact-us, etc.)
+  {
+    path: 'footer',
+    children: [
+      {
+        path: ':page',
+        component: InfoPagesComponent
+      }
+    ]
+  },
+
+  // Login route
   {
     path: 'login',
-    component: LoginComponent,
+    component: LoginComponent
   },
 
-  { path: 'footer/:page', component: LinkComponent },
-  { path: 'main/:page', component: MainLinksComponent },
-  
+  // Protected site-admin feature module
   {
     path: 'site-admin',
-    data: {
-      authorities: [Authority.SITE_ADMIN],
-    },
     canActivate: [UserRouteAccessService],
-    loadChildren: () => import('./site-admin/site-admin-routes'),
+    data: {
+      authorities: [Authority.SITE_ADMIN]
+    },
+    loadChildren: () => import('./features/site-admin/site-admin-routes')
   },
+
+  // Licensee feature module
   {
     path: 'licensee',
-    loadChildren: () => import('./licensee/licensee.routes').then((m) => m.licenseeRoutes),
-  },  
-  { path: '**', redirectTo: '/', pathMatch: 'full' }
+    loadChildren: () =>
+      import('./features/licensee/licensee.routes').then((m) => m.licenseeRoutes)
+  },
+
+  // Wildcard fallback
+  {
+    path: '**',
+    redirectTo: '/',
+    pathMatch: 'full'
+  }
 ];
-
-
 
 export default routes;
