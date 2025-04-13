@@ -11,29 +11,36 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class LicenseeService {
+  // Base API URL from environment configuration
   private baseUrl = environment.baseUrl;
-  private apiUrl = `${this.baseUrl}/masters`
+
+  // Masters API path
+  private apiUrl = `${this.baseUrl}/masters`;
 
   constructor(private http: HttpClient) {}
 
+  // Fetch list of districts
   getDistrict(): Observable<District[]> {
     return this.http.get<District[]>(`${this.apiUrl}/districts/list`);
   }
 
+  // Fetch list of subdivisions
   getSubDivision(): Observable<SubDivision[]> {
     return this.http.get<SubDivision[]>(`${this.apiUrl}/subdivisions/list`);
   }
-  
-  getPoliceStations() {
+
+  // Fetch list of police stations
+  getPoliceStations(): Observable<PoliceStation[]> {
     return this.http.get<PoliceStation[]>(`${this.apiUrl}/policestations/list`);
   }
 
+  // Fetch list of license types
   getLicenseTypes(): Observable<LicenseType[]> {
     return this.http.get<LicenseType[]>(`${this.apiUrl}/licensetypes/list/`);
   }
 
+  // Fetch list of license categories
   getLicenseCategories(): Observable<LicenseCategory[]> {
     return this.http.get<LicenseCategory[]>(`${this.apiUrl}/licensecategories/list`);
   } 
-
 }

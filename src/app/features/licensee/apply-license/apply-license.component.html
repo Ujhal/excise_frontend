@@ -1,26 +1,36 @@
+<!-- Horizontal Stepper with linear navigation enabled -->
 <mat-horizontal-stepper [linear]="true" #stepper>
-    <mat-step label="Select License">
-      <app-select-license (next)="stepper.next()"></app-select-license>
-    </mat-step>
-  
-    <mat-step label="Key Info">
-      <app-key-info (back)="stepper.previous()" (next)="stepper.next()"></app-key-info>
-    </mat-step>
-  
-    <mat-step label="Address">
-      <app-address (back)="stepper.previous()" (next)="stepper.next()"></app-address>
-    </mat-step>
-  
-    <mat-step label="Unit Details" *ngIf="licenseType == 'Company'">
-      <app-unit-details (back)="stepper.previous()" (next)="stepper.next()"></app-unit-details>
-    </mat-step>
-  
-    <mat-step label="Member Details">
-      <app-member-details (back)="stepper.previous()" (next)="stepper.next()"></app-member-details>
-    </mat-step>
-  
-    <mat-step label="License">
-      <app-license (back)="stepper.previous()"></app-license>
-    </mat-step>
-  </mat-horizontal-stepper>
-  
+
+  <!-- Step 1: Select License -->
+  <mat-step label="Select License">
+    <!-- Custom component with output event to move to next step -->
+    <app-select-license (next)="stepper.next()"></app-select-license>
+  </mat-step>
+
+  <!-- Step 2: Key Information -->
+  <mat-step label="Key Info">
+    <!-- Custom component emits 'back' and 'next' events -->
+    <app-key-info (back)="stepper.previous()" (next)="stepper.next()"></app-key-info>
+  </mat-step>
+
+  <!-- Step 3: Address -->
+  <mat-step label="Address">
+    <app-address (back)="stepper.previous()" (next)="stepper.next()"></app-address>
+  </mat-step>
+
+  <!-- Step 4: Unit Details - Only visible if licenseType is 'Company' -->
+  <mat-step label="Unit Details" *ngIf="licenseType == 'Company'">
+    <app-unit-details (back)="stepper.previous()" (next)="stepper.next()"></app-unit-details>
+  </mat-step>
+
+  <!-- Step 5: Member Details -->
+  <mat-step label="Member Details">
+    <app-member-details (back)="stepper.previous()" (next)="stepper.next()"></app-member-details>
+  </mat-step>
+
+  <!-- Step 6: Final License Submission Step -->
+  <mat-step label="License">
+    <app-license (back)="stepper.previous()"></app-license>
+  </mat-step>
+
+</mat-horizontal-stepper>

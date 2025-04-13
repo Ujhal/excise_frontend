@@ -1,5 +1,7 @@
 <form [formGroup]="memberDetailsForm">
   <mat-card>
+
+    <!-- Form Header -->
     <mat-card-header>
       <div class="heading">Company Member Details</div>
       <div class="validation">
@@ -7,8 +9,11 @@
       </div>
     </mat-card-header>
 
+    <!-- Form Content -->
     <mat-card-content>
       <div class="form-field-container">
+
+        <!-- Status Dropdown -->
         <mat-form-field appearance="outline">
           <mat-label>Status</mat-label>
           <mat-select formControlName="status" required>
@@ -19,6 +24,7 @@
           </mat-error>
         </mat-form-field>
 
+        <!-- Member Name Input -->
         <mat-form-field appearance="outline">
           <mat-label>Member Name</mat-label>
           <input matInput placeholder="Enter Your Name" type="text" formControlName="memberName"/>
@@ -27,6 +33,7 @@
           </mat-error>
         </mat-form-field>
 
+        <!-- Father's / Husband's Name Input -->
         <mat-form-field appearance="outline">
           <mat-label>Father's / Husband's Name</mat-label>
           <input matInput placeholder="Enter Father's / Husband's Name" type="text" formControlName="fatherHusbandName"/>
@@ -35,6 +42,7 @@
           </mat-error>
         </mat-form-field>
 
+        <!-- Nationality Dropdown -->
         <mat-form-field appearance="outline">
           <mat-label>Nationality</mat-label>
           <mat-select formControlName="nationality" required>
@@ -45,6 +53,7 @@
           </mat-error>
         </mat-form-field>
 
+        <!-- Gender Radio Buttons -->
         <mat-radio-group aria-label="Gender" formControlName="gender" required>
           <mat-radio-button value="Male">Male</mat-radio-button>
           <mat-radio-button value="Female">Female</mat-radio-button>
@@ -53,6 +62,7 @@
           </mat-error>
         </mat-radio-group>
 
+        <!-- PAN Input -->
         <mat-form-field appearance="outline">
           <mat-label>PAN</mat-label>
           <input matInput placeholder="Enter PAN" type="text" formControlName="pan"/> 
@@ -61,6 +71,7 @@
           </mat-error>
         </mat-form-field>
 
+        <!-- Phone Number Input -->
         <mat-form-field appearance="outline">
           <mat-label>Enter Phone Number</mat-label>
           <input matInput placeholder="Enter Phone Number" type="number" formControlName="mobileNumber"/>
@@ -69,6 +80,7 @@
           </mat-error>
         </mat-form-field>
 
+        <!-- Email ID Input -->
         <mat-form-field appearance="outline">
           <mat-label>Email Id</mat-label>
           <input matInput placeholder="Enter Email" type="email" formControlName="emailId"/>
@@ -76,14 +88,16 @@
             {{ getErrorMessage('emailId') }}
           </mat-error>
         </mat-form-field>
+
       </div>
     </mat-card-content>  
-      
+
+    <!-- Form Actions -->
     <mat-card-actions>
       <button mat-stroked-button (click)="goBack()">Back</button>
       <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
       <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!memberDetailsForm.valid">Next</button>
     </mat-card-actions>
+
   </mat-card>
 </form>
-    

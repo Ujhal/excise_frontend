@@ -14,18 +14,25 @@ import { PatternConstants } from '../../../../../shared/constants/app.constants'
   templateUrl: './key-info.component.html',
   styleUrl: './key-info.component.scss',
 })
-export class KeyInfoComponent implements OnInit, OnDestroy{
+export class KeyInfoComponent implements OnInit, OnDestroy {
+
+  // Reactive form group
   keyInfoForm: FormGroup;
+
+  // Dropdown options
   licenseTypes: LicenseType[] = [];
   licenseNatures: string[] = ['Regular', 'Temporary', 'Seasonal', 'Special Event'];
   functioningStatuses: string[] = ['Yes', 'No'];
   modeofOperations: string[] = ['Self', 'Salesman', 'Barman'];
 
+  // Emit navigation events to parent component
   @Output() readonly next = new EventEmitter<void>();
   @Output() readonly back = new EventEmitter<void>();
 
+  // Used for unsubscribing from observables
   private destroy$ = new Subject<void>();
-  
+
+  // Signal-based error messages for reactive display
   errorMessages = {
     licenseType: signal(''),
     establishmentName: signal(''),
@@ -41,9 +48,14 @@ export class KeyInfoComponent implements OnInit, OnDestroy{
     modeofOperation: signal('')
   };
 
-  constructor(private fb: FormBuilder, private licenseeService: LicenseeService) {
+  constructor(
+    private fb: FormBuilder,
+    private licenseeService: LicenseeService
+  ) {
+    // Retrieve data from session storage if available
     const storedValues = this.getFromSessionStorage();
 
+    // Initialize reactive form with validation
     this.keyInfoForm = this.fb.group({
       licenseType: new FormControl(storedValues.licenseType, [Validators.required]),
       establishmentName: new FormControl(storedValues.establishmentName, [
@@ -51,51 +63,74 @@ export class KeyInfoComponent implements OnInit, OnDestroy{
         Validators.maxLength(150),
         Validators.pattern(PatternConstants.ORGANISATION_NAME),
       ]),
-      mobileNumber: new FormControl(storedValues.mobileNumber, [Validators.required, Validators.pattern(PatternConstants.MOBILE)]),
-      emailId: new FormControl(storedValues.emailId, [Validators.required, Validators.pattern(PatternConstants.EMAIL)]),
-      licenseNo: new FormControl(storedValues.licenseNo, [Validators.pattern(PatternConstants.CODE), Validators.maxLength(50)]),
+      mobileNumber: new FormControl(storedValues.mobileNumber, [
+        Validators.required,
+        Validators.pattern(PatternConstants.MOBILE)
+      ]),
+      emailId: new FormControl(storedValues.emailId, [
+        Validators.required,
+        Validators.pattern(PatternConstants.EMAIL)
+      ]),
+      licenseNo: new FormControl(storedValues.licenseNo, [
+        Validators.pattern(PatternConstants.CODE),
+        Validators.maxLength(50)
+      ]),
       initialGrantDate: new FormControl(storedValues.initialGrantDate),
       renewedFrom: new FormControl(storedValues.renewedFrom),
       validUpTo: new FormControl(storedValues.validUpTo),
-      yearlyFee: new FormControl(storedValues.yearlyFee,[Validators.pattern(PatternConstants.NUMBER)]),
+      yearlyFee: new FormControl(storedValues.yearlyFee, [
+        Validators.pattern(PatternConstants.NUMBER)
+      ]),
       licenseNature: new FormControl(storedValues.licenseNature, [Validators.required]),
       functioningStatus: new FormControl(storedValues.functioningStatus, [Validators.required]),
       modeofOperation: new FormControl(storedValues.modeofOperation, [Validators.required])
     });
 
-    this.keyInfoForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.saveToSessionStorage();
+    // Subscribe to form changes to update session storage and errors
+    this.keyInfoForm.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.saveToSessionStorage();
         this.updateAllErrorMessages();
       });
   }
 
   ngOnInit() {
+    // Load license type dropdown data on init
     this.loadDropdownData();
   }
 
   ngOnDestroy() {
+    // Cleanup observable subscription
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  private loadDropdownData(): void {    
-    this.licenseeService.getLicenseTypes().subscribe((data: LicenseType[]) => {
-      this.licenseTypes = data;
-      }, error => {
+  // Load data for License Type dropdown from service
+  private loadDropdownData(): void {
+    this.licenseeService.getLicenseTypes().subscribe(
+      (data: LicenseType[]) => {
+        this.licenseTypes = data;
+      },
+      error => {
         console.error('Failed to load license types.', error);
-    });
+      }
+    );
   }
 
+  // Fetch form values from session storage if available
   private getFromSessionStorage(): any {
     const storedData = sessionStorage.getItem('keyInfoDetails');
     return storedData ? JSON.parse(storedData) : {};
   }
 
+  // Save form values to session storage on change
   private saveToSessionStorage() {
-    const formData = this.keyInfoForm.getRawValue(); 
+    const formData = this.keyInfoForm.getRawValue();
     sessionStorage.setItem('keyInfoDetails', JSON.stringify(formData));
   }
 
+  // Update the error message of a specific form control
   private updateErrorMessage(field: keyof typeof this.errorMessages) {
     const control = this.keyInfoForm.get(field);
     if (control?.hasError('required')) {
@@ -107,27 +142,32 @@ export class KeyInfoComponent implements OnInit, OnDestroy{
     }
   }
 
+  // Update all error messages for all form fields
   updateAllErrorMessages() {
     Object.keys(this.errorMessages).forEach((field) => {
       this.updateErrorMessage(field as keyof typeof this.errorMessages);
     });
   }
 
+  // Retrieve error message for a specific field
   getErrorMessage(field: keyof typeof this.errorMessages) {
     return this.errorMessages[field]();
   }
 
+  // Emit event to proceed to next step if form is valid
   proceedToNext() {
     if (this.keyInfoForm.valid) {
       this.next.emit();
     }
   }
 
+  // Reset form and remove session data
   resetForm() {
     this.keyInfoForm.reset();
     sessionStorage.removeItem('keyInfoDetails');
   }
 
+  // Emit event to go back to the previous step
   goBack() {
     this.back.emit();
   }

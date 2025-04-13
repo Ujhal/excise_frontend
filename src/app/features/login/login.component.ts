@@ -14,35 +14,41 @@ import { NgOtpInputModule } from 'ng-otp-input';
   styleUrl: './login.component.scss'
 })
 export class LoginComponent extends BaseComponent {
-  loginForm: FormGroup;
-  isPasswordMode: boolean = true;
-  hidePassword = true;
-  otpSent: boolean = false; // Tracks OTP request status
-  otpIndex: string | null = null; // Stores index received from OTP request
+  loginForm: FormGroup;              // Reactive form group for login
+  isPasswordMode: boolean = true;    // Toggle between password and OTP login modes
+  hidePassword = true;               // Toggles password visibility
+  otpSent: boolean = false;          // Tracks whether OTP has been sent
+  otpIndex: string | null = null;    // Placeholder for OTP index if backend returns it
 
-  constructor(protected override baseDependency: BaseDependency, protected override apiService: ApiService, private fb: FormBuilder) {
+  constructor(
+    protected override baseDependency: BaseDependency,
+    protected override apiService: ApiService,
+    private fb: FormBuilder
+  ) {
     super(baseDependency);
+
+    // Initialize form controls with default validators
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
       password: [''],
       otp: [''],
-      response: ['', Validators.required], // Captcha response
-      hashkey: ['', Validators.required], // Captcha hashkey
+      response: ['', Validators.required],   // Captcha response value
+      hashkey: ['', Validators.required],    // Captcha hashkey
     });
 
-    this.setValidators(); // Set initial validation rules
+    this.setValidators(); // Apply initial validation rules
   }
 
-  /** Toggles between Password & OTP Login */
+  /** Toggle between password and OTP-based login modes */
   toggleMode(isPassword: boolean): void {
     this.isPasswordMode = isPassword;
     this.otpSent = false;
     this.otpIndex = null;
-    this.loginForm.reset(); // Reset form when switching modes
-    this.setValidators(); // Update validation rules dynamically
+    this.loginForm.reset(); // Clear form fields
+    this.setValidators();   // Adjust validators depending on mode
   }
 
-  /** Updates Form Validation Based on Login Mode */
+  /** Apply validators based on current login mode */
   private setValidators(): void {
     if (this.isPasswordMode) {
       this.loginForm.controls['password'].setValidators(Validators.required);
@@ -51,14 +57,17 @@ export class LoginComponent extends BaseComponent {
       this.loginForm.controls['password'].clearValidators();
       this.loginForm.controls['otp'].setValidators(Validators.required);
     }
+
     this.loginForm.controls['password'].updateValueAndValidity();
     this.loginForm.controls['otp'].updateValueAndValidity();
   }
 
-  togglePasswordVisibility() {
+  /** Toggle password field visibility */
+  togglePasswordVisibility(): void {
     this.hidePassword = !this.hidePassword;
   }
 
+  /** Sends OTP to the user's phone number */
   sendOtp(): void {
     if (this.loginForm.controls['username'].invalid) {
       alert('Please enter a valid phone number.');
@@ -75,6 +84,7 @@ export class LoginComponent extends BaseComponent {
       next: (response) => {
         console.log('✅ OTP API Response:', response);
         this.otpSent = true;
+        // Optionally capture response.otpIndex if returned from backend.
       },
       error: (err) => {
         console.error('❌ Error sending OTP:', err);
@@ -83,26 +93,30 @@ export class LoginComponent extends BaseComponent {
     });
   }
 
+  /** Getter for OTP form control (used with OTP input component) */
   get otpControl(): FormControl {
     return this.loginForm.get('otp') as FormControl;
-  }  
+  }
 
+  /** Handles login form submission */
   onLogin(): void {
     if (this.isPasswordMode) {
       this.loginWithPassword();
     } else {
       if (!this.otpSent) {
-        this.sendOtp();
+        this.sendOtp(); // Trigger OTP if not already sent
       } else {
-        this.verifyOtp();
+        this.verifyOtp(); // Attempt OTP verification
       }
     }
   }
 
-  goToApplyLicense() {
+  /** Navigate to license registration page */
+  goToApplyLicense(): void {
     this.router.navigate(['/licensee/apply-license']);
   }
 
+  /** Handles password-based login logic */
   private loginWithPassword(): void {
     if (this.loginForm.invalid) {
       alert("Please fill in all fields correctly.");
@@ -120,10 +134,12 @@ export class LoginComponent extends BaseComponent {
     });
   }
 
+  /** Updates OTP value as user types into the OTP input */
   onOtpChange(otp: string): void {
     this.loginForm.controls['otp'].setValue(otp);
-  }  
+  }
 
+  /** Verifies the entered OTP with the backend */
   private verifyOtp(): void {
     if (!this.loginForm.value.otp) {
       alert('Please enter the OTP.');
@@ -152,6 +168,7 @@ export class LoginComponent extends BaseComponent {
     });
   }
 
+  /** Stores tokens and navigates to dashboard after successful login */
   private handleAuthResponse(res: any): void {
     if (res.authenticated_user?.access && res.authenticated_user?.refresh) {
       localStorage.setItem('access', res.authenticated_user.access);
@@ -162,9 +179,10 @@ export class LoginComponent extends BaseComponent {
     }
   }
 
+  /** Resets phone number and form state (used when switching numbers) */
   resetPhoneNumber(): void {
     this.otpSent = false;
     this.loginForm.reset();
-    this.setValidators(); // Reset validation rules
+    this.setValidators(); // Re-apply validators after reset
   }
 }

@@ -1,14 +1,20 @@
+<!-- Angular Reactive Form for Unit Details -->
 <form [formGroup]="unitDetailsForm">
+  
+  <!-- Card wrapper for the form -->
   <mat-card>
+
+    <!-- Card Header with title and mandatory note -->
     <mat-card-header>
       <div class="heading">Company Form</div>
-      <div class="validation">
-        * Marked Fields Are Mandatory
-      </div>
+      <div class="validation">* Marked Fields Are Mandatory</div>
     </mat-card-header>
-  
+
+    <!-- Form Content Section -->
     <mat-card-content>
       <div class="form-field-container">
+
+        <!-- Company Name Field -->
         <mat-form-field appearance="outline">
           <mat-label>Company Name</mat-label>
           <input matInput placeholder="Enter Company Name" type="text" formControlName="companyName" required/>
@@ -17,6 +23,7 @@
           </mat-error>
         </mat-form-field>
 
+        <!-- Company Address (Textarea) -->
         <mat-form-field appearance="outline">
           <mat-label>Registered Office Address</mat-label>
           <textarea matInput
@@ -33,6 +40,7 @@
           </mat-error>
         </mat-form-field>
 
+        <!-- PAN Field -->
         <mat-form-field appearance="outline">
           <mat-label>PAN</mat-label>
           <input matInput placeholder="Enter Company PAN" type="text" formControlName="companyPan" required/>
@@ -41,6 +49,7 @@
           </mat-error>
         </mat-form-field>
 
+        <!-- CIN Field -->
         <mat-form-field appearance="outline">
           <mat-label>CIN Number</mat-label>
           <input matInput placeholder="Enter Company CIN" type="text" formControlName="companyCin" required/>
@@ -49,6 +58,7 @@
           </mat-error>
         </mat-form-field>
 
+        <!-- Incorporation Date Field with Date Picker -->
         <mat-form-field appearance="outline">
           <mat-label>Incorporation Date</mat-label>
           <input matInput [matDatepicker]="incorporationDate" formControlName="incorporationDate" required>
@@ -59,6 +69,7 @@
           </mat-error>
         </mat-form-field>
 
+        <!-- Phone Number Field -->
         <mat-form-field appearance="outline">
           <mat-label>Phone Number</mat-label>
           <input matInput placeholder="Enter Phone Number" type="tel" formControlName="companyPhoneNumber" required />
@@ -67,6 +78,7 @@
           </mat-error>
         </mat-form-field>
 
+        <!-- Email Field -->
         <mat-form-field appearance="outline">
           <mat-label>Email Id</mat-label>
           <input matInput placeholder="Enter Email Id" type="email" formControlName="emailId" required/>
@@ -74,13 +86,21 @@
             {{ getErrorMessage('emailId') }}
           </mat-error>
         </mat-form-field>
+
       </div>
     </mat-card-content>
-    
+
+    <!-- Action Buttons -->
     <mat-card-actions>
+      <!-- Go back to previous step -->
       <button mat-stroked-button (click)="goBack()">Back</button>
+      
+      <!-- Proceed to next step, disabled if form is invalid -->
       <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!unitDetailsForm.valid">Next</button>
+
+      <!-- Reset form values -->
       <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
     </mat-card-actions>
+
   </mat-card> 
-</form>   
+</form>

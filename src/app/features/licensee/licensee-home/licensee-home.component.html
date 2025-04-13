@@ -1,37 +1,63 @@
+<!-- Main container for the sidenav layout with elevation and minimum height -->
 <mat-sidenav-container class="mat-elevation-z8" style="padding: 0; min-height: 800px" *ngIf="loaded">
-    <mat-sidenav #sidenav mode="side" [opened]="false">
-      <div class="sidenav-header">
-        <button mat-icon-button (click)="snavToggle(sidenav)" color="primary">
-          <mat-icon style="font-size: 27px">close</mat-icon>
-        </button>
-      </div>
-      <div class="sidebar-content">
-        <div class="profile">
-          <div class="username">
-            {{userName}}
-          </div>
-          <button mat-raised-button class="view-profile" (click)="viewProfile()" type="button">
-            View Profile
-          </button>          
-        </div>
-        <mat-divider class="profile-divider"></mat-divider>
-          <mat-nav-list>
-            <mat-list-item routerLink="dashboard" routerLinkActive="active-link">
-              <span class="nav-header-cus">Dashboard</span>
-            </mat-list-item>
+  
+  <!-- Sidebar (sidenav) section -->
+  <mat-sidenav #sidenav mode="side" [opened]="false">
+    
+    <!-- Header section of the sidebar with a close button -->
+    <div class="sidenav-header">
+      <button mat-icon-button (click)="snavToggle(sidenav)" color="primary">
+        <mat-icon style="font-size: 27px">close</mat-icon>
+      </button>
+    </div>
 
-            <mat-list-item routerLink="apply-license" routerLinkActive="active-link">
-              <span class="nav-header-cus">Apply For License</span>
-            </mat-list-item>
-          </mat-nav-list>
+    <!-- Content inside the sidebar -->
+    <div class="sidebar-content">
+      
+      <!-- User profile section -->
+      <div class="profile">
+        <div class="username">
+          {{userName}} <!-- Displays the user's name -->
+        </div>
+
+        <!-- Button to view the user's profile -->
+        <button mat-raised-button class="view-profile" (click)="viewProfile()" type="button">
+          View Profile
+        </button>          
       </div>
-    </mat-sidenav>
-    <mat-sidenav-content>
-      <div class="toggle-btn">
-        <button mat-icon-button (click)="snavToggle(sidenav)" *ngIf="!sidenav.opened" color="primary">
-          <mat-icon style="font-size: 27px">menu</mat-icon>
-        </button>
-      </div>
-      <router-outlet></router-outlet>
-    </mat-sidenav-content>
-  </mat-sidenav-container>
+
+      <!-- Divider line below the profile section -->
+      <mat-divider class="profile-divider"></mat-divider>
+
+      <!-- Navigation links -->
+      <mat-nav-list>
+
+        <!-- Dashboard link -->
+        <mat-list-item routerLink="dashboard" routerLinkActive="active-link">
+          <span class="nav-header-cus">Dashboard</span>
+        </mat-list-item>
+
+        <!-- Apply License link -->
+        <mat-list-item routerLink="apply-license" routerLinkActive="active-link">
+          <span class="nav-header-cus">Apply For License</span>
+        </mat-list-item>
+
+      </mat-nav-list>
+    </div>
+  </mat-sidenav>
+
+  <!-- Main content section -->
+  <mat-sidenav-content>
+    
+    <!-- Toggle button to open the sidenav when it's closed -->
+    <div class="toggle-btn">
+      <button mat-icon-button (click)="snavToggle(sidenav)" *ngIf="!sidenav.opened" color="primary">
+        <mat-icon style="font-size: 27px">menu</mat-icon>
+      </button>
+    </div>
+
+    <!-- Router outlet to display routed components -->
+    <router-outlet></router-outlet>
+    
+  </mat-sidenav-content>
+</mat-sidenav-container>

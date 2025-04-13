@@ -13,7 +13,7 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  // Get CAPTCHA
+  // Fetch CAPTCHA image or data from the backend
   getCaptcha(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/get_captcha/`).pipe(
       catchError((error) => {
@@ -23,7 +23,7 @@ export class ApiService {
     );
   }
 
-  // Login API
+  // Login request to authenticate user
   login(data: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.post<any>(`${this.apiUrl}/user/login/`, data, { headers }).pipe(
@@ -34,7 +34,7 @@ export class ApiService {
     );
   }
 
-  // Send OTP Request
+  // Send OTP to user's registered contact (email/phone)
   sendOtp(formData: FormData): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/user/otp/get/`, formData).pipe(
       catchError((error) => {
@@ -43,27 +43,23 @@ export class ApiService {
       })
     );
   }
-  
 
-// Verify OTP
-verifyOtp(username: string, otp: string, index: number): Observable<any> {
-  const formData = new FormData();
-  formData.append('username', username);
-  formData.append('otp', otp);
-  formData.append('index', index.toString()); // Convert index to string to prevent issues
+  // Verify the received OTP for login
+  verifyOtp(username: string, otp: string, index: number): Observable<any> {
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('otp', otp);
+    formData.append('index', index.toString()); // Ensure index is sent as a string
 
-  return this.http.post(`${this.apiUrl}/user/otp/login/`, formData).pipe(
-    catchError((error) => {
-      console.error('❌ OTP verification error:', error);
-      return throwError(() => new Error('Failed to verify OTP.'));
-    })
-  );
-}
+    return this.http.post(`${this.apiUrl}/user/otp/login/`, formData).pipe(
+      catchError((error) => {
+        console.error('❌ OTP verification error:', error);
+        return throwError(() => new Error('Failed to verify OTP.'));
+      })
+    );
+  }
 
-
-
-
-  // Logout API
+  // Logout the user and invalidate refresh token
   logout(): Observable<any> {
     const refresh = localStorage.getItem('refresh');
     const access = localStorage.getItem('access');
@@ -72,9 +68,10 @@ verifyOtp(username: string, otp: string, index: number): Observable<any> {
       console.error("No token found for logout.");
       return throwError(() => new Error("No token found"));
     }
-  
+
+    // Include access token in Authorization header
     const headers = {
-      'Authorization': `Bearer ${access}`, // Send access token
+      'Authorization': `Bearer ${access}`,
       'Content-Type': 'application/json'
     };
   
@@ -85,10 +82,8 @@ verifyOtp(username: string, otp: string, index: number): Observable<any> {
       })
     );
   }
-  
-  
 
-  // Refresh Token API (with Fix)
+  // Refresh access token using the refresh token
   refreshToken(): Observable<any> {
     const refreshToken = localStorage.getItem('refresh');
 
@@ -106,7 +101,7 @@ verifyOtp(username: string, otp: string, index: number): Observable<any> {
     );
   }
 
-  // Get Chart Data
+  // Get statistical/chart data from the backend
   getChart(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/count/`).pipe(
       catchError((error) => {
