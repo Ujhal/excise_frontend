@@ -13,7 +13,7 @@
         <div class="row mb-3">
           <div class="col-xl-4 col-lg-4 col-md-4">
             <!-- First Name Input -->
-            <mat-form-field class="my-form-full-width" appearance="outline">
+            <mat-form-field class="my-form-full-width" appearance="outline" required> 
               <mat-label>First Name</mat-label>
               <input matInput [(ngModel)]="user.firstName" name="firstName" placeholder="Enter First Name" required />
             </mat-form-field>
@@ -29,7 +29,7 @@
 
           <div class="col-xl-4 col-lg-4 col-md-4">
             <!-- Last Name Input -->
-            <mat-form-field class="my-form-full-width" appearance="outline">
+            <mat-form-field class="my-form-full-width" appearance="outline" required>
               <mat-label>Last Name</mat-label>
               <input matInput [(ngModel)]="user.lastName" name="lastName" placeholder="Enter Last Name" required />
             </mat-form-field>
@@ -40,7 +40,7 @@
         <div class="row mb-3">
           <div class="col-xl-4 col-lg-4 col-md-4">
             <!-- Email Input -->
-            <mat-form-field class="my-form-full-width" appearance="outline">
+            <mat-form-field class="my-form-full-width" appearance="outline" required>
               <mat-label>Email</mat-label>
               <input matInput [(ngModel)]="user.email" name="email" placeholder="Enter Email" type="email" required />
             </mat-form-field>
@@ -48,7 +48,7 @@
 
           <div class="col-xl-4 col-lg-4 col-md-4">
             <!-- Phone Number Input -->
-            <mat-form-field class="my-form-full-width" appearance="outline">
+            <mat-form-field class="my-form-full-width" appearance="outline" required>
               <mat-label>Phone Number</mat-label>
               <input matInput [(ngModel)]="user.phoneNumber" name="phonenumber" placeholder="Enter Phone Number" required pattern="^\d{10}$" />
             </mat-form-field>
@@ -82,8 +82,30 @@
           </div>
 
           <div class="col-xl-4 col-lg-4 col-md-4">
-            <!-- Password Input -->
+            <!-- Role Dropdown -->
             <mat-form-field class="my-form-full-width" appearance="outline">
+              <mat-label>Role</mat-label>
+              <mat-select [(ngModel)]="user.role" name="role" required>
+                <mat-option *ngFor="let role of roles" [value]="role.key">
+                  {{ role.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-4 col-lg-4 col-md-4">
+            <!-- Address Input (as textarea) -->
+            <mat-form-field class="my-form-full-width" appearance="outline">
+              <mat-label>Address</mat-label>
+              <textarea matInput [(ngModel)]="user.address" name="address" placeholder="Enter Address" rows="3"></textarea>
+            </mat-form-field>
+          </div>  
+            
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-xl-4 col-lg-4 col-md-4">
+            <!-- Password Input -->
+            <mat-form-field class="my-form-full-width" appearance="outline" required>
               <mat-label>Password</mat-label>
               <input matInput type="password" [(ngModel)]="user.password" name="password" placeholder="Enter Password" required minlength="8" />
             </mat-form-field>
@@ -91,7 +113,7 @@
 
           <div class="col-xl-4 col-lg-4 col-md-4">
             <!-- Confirm Password Input -->
-            <mat-form-field class="my-form-full-width" appearance="outline">
+            <mat-form-field class="my-form-full-width" appearance="outline" required>
               <mat-label>Confirm Password</mat-label>
               <input matInput type="password" [(ngModel)]="user.confirmPassword" name="confirmPassword" placeholder="Confirm Password" required />
             </mat-form-field>

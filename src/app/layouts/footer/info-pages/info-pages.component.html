@@ -401,6 +401,30 @@
   
       <div *ngIf="contactsTab === 3" class="grievance-redressal-officer">
         <mat-card-content>
+          <div class="filters">
+            <mat-form-field appearance="outline">
+              <mat-label>Office Level</mat-label>
+              <mat-select [(value)]="selectedOfficeLevel" (selectionChange)="applyFilters()">
+                <mat-option value="">All</mat-option>
+                <mat-option value="Excise Head Office">Excise Head Office</mat-option>
+                <mat-option value="District">District</mat-option>
+                <mat-option value="Subdivision">Subdivision</mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Office Sub Level</mat-label>
+              <mat-select [(value)]="selectedOfficeSubLevel" (selectionChange)="applyFilters()">
+                <mat-option value="">All</mat-option>
+                <mat-option value="Head Quarter">Head Quarter</mat-option>
+                <mat-option value="Permit Section">Permit Section</mat-option>
+                <mat-option value="Administration Section">Administration Section</mat-option>
+                <mat-option value="Accounts Section">Accounts Section</mat-option>
+                <mat-option value="IT Cell">IT Cell</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
           <table mat-table [dataSource]="grievanceRedressalOfficerData" class="mat-elevation-z8">
 
             <ng-container matColumnDef="id">

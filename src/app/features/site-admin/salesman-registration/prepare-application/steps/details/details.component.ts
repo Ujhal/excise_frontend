@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SiteAdminService } from '../../../../site-admin-service';
-import { PatternConstants } from '../../../../../../shared/constants/app.constants';
+import { PatternConstants } from '../../../../../../shared/constants/pattern.constants';
 import { FormUtils } from '../../../../../../shared/utils/pan.util';
 import { MaterialModule } from '../../../../../../shared/material.module';
 import { SalesmanBarman, SalesmanBarmanDocuments } from '../../../../../../core/models/salesman-barman.model';

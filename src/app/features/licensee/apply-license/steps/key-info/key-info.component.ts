@@ -5,7 +5,7 @@ import { takeUntil } from 'rxjs/operators';
 import { LicenseeService } from '../../../licensee.services';
 import { MaterialModule } from '../../../../../shared/material.module';
 import { LicenseType } from '../../../../../core/models/license-type.model';
-import { PatternConstants } from '../../../../../shared/constants/app.constants';
+import { PatternConstants } from '../../../../../shared/constants/pattern.constants';
 
 @Component({
   selector: 'app-key-info',

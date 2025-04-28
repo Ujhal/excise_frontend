@@ -41,6 +41,12 @@
     }
 }
 
+.grievance-redressal-officer{
+    .filters{display: flex;
+        gap: 10px;
+    }
+}
+
 .organisational-structure{
     mat-card-content{
         background-color: #ffffff;

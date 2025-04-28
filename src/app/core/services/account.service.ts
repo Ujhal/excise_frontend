@@ -73,13 +73,20 @@ export class AccountService {
   }
 
   // Checks if the user has a specific role
-  hasAnyRole(role: string): boolean {
-    if (!this.userIdentity) {
+  hasAnyRole(roles: string[] | string): boolean {
+    if (!this.userIdentity || !this.userIdentity.role) {
       return false;
     }
-
-    return (this.userIdentity.role === role);
+  
+    const userRole = this.userIdentity.role.toLowerCase().trim();
+  
+    if (Array.isArray(roles)) {
+      return roles.some(role => role.toLowerCase().trim() === userRole);
+    }
+  
+    return roles.toLowerCase().trim() === userRole;
   }
+  
 
   // Fetches the user identity, with caching and optional force refresh
   identity(force?: boolean): Observable<Account | null> {

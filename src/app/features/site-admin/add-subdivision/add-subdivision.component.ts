@@ -6,7 +6,7 @@ import { BaseDependency } from '../../../base/dependency/base.dependendency';
 import { District } from '../../../core/models/district.model';
 import { SiteAdminService } from '../site-admin-service';
 import { State } from '../../../core/models/state.model';
-import { PatternConstants } from '../../../shared/constants/app.constants';
+import { PatternConstants } from '../../../shared/constants/pattern.constants';
 import { SubDivision } from '../../../core/models/subdivision.model';
 import Swal from 'sweetalert2';
 

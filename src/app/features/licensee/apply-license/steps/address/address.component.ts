@@ -6,7 +6,7 @@ import { LicenseeService } from '../../../licensee.services';
 import { SubDivision } from '../../../../../core/models/subdivision.model';
 import { PoliceStation } from '../../../../../core/models/policestation.model';
 import { MaterialModule } from '../../../../../shared/material.module';
-import { PatternConstants } from '../../../../../shared/constants/app.constants';
+import { PatternConstants } from '../../../../../shared/constants/pattern.constants';
 
 @Component({
   selector: 'app-address',

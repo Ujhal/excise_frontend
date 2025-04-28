@@ -168,14 +168,42 @@ export class LoginComponent extends BaseComponent {
     });
   }
 
-  /** Stores tokens and navigates to dashboard after successful login */
+  /** Stores tokens and navigates to the appropriate dashboard after successful login */
   private handleAuthResponse(res: any): void {
     if (res.authenticated_user?.access && res.authenticated_user?.refresh) {
       localStorage.setItem('access', res.authenticated_user.access);
       localStorage.setItem('refresh', res.authenticated_user.refresh);
-      this.router.navigate(['/site-admin/dashboard']);
+      
+      // Fetch user identity (which includes the role) and redirect based on role
+      this.accountService.identity(true).subscribe({
+        next: (user) => {
+          if (user) {
+            this.redirectBasedOnRole(user.role); // Redirect to role-based dashboard
+          } else {
+            alert('Failed to fetch user details. Please log in again.');
+          }
+        },
+      });
     } else {
       alert('Authentication failed.');
+    }
+  }
+
+  /** Redirects user to appropriate dashboard based on their role */
+  private redirectBasedOnRole(role: string): void {
+    switch (role) {
+      case 'site_admin':
+        this.router.navigate(['site-admin/dashboard']);
+        break;
+      case 'commissioner':
+        this.router.navigate(['site-admin/dashboard']); // Assuming both 'site_admin' and 'officer' go to the same dashboard
+        break;
+      case 'joint_commissioner':
+        this.router.navigate(['site-admin/dashboard']); // Assuming both 'site_admin' and 'officer' go to the same dashboard
+        break;
+      case '2':
+        this.router.navigate(['licensee/dashboard']);
+        break;
     }
   }
 

@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common'; // Importing the CommonModule for common Angular directives
 import { MaterialModule } from '../../../shared/material.module'; // Importing MaterialModule for Angular Material components
+import { BaseComponent } from '../../../base/base.components'; // Import BaseComponent
+import { BaseDependency } from '../../../base/dependency/base.dependendency'; // Import BaseDependency
 
 // Interface to define the structure for the license statistics data
 export interface LicenseStatistics {
@@ -32,7 +34,12 @@ const LICENSE_DATA: LicenseStatistics[] = [
   templateUrl: './dashboard.component.html', // Path to the HTML template for this component
   styleUrls: ['./dashboard.component.scss'], // Path to the CSS file for styling this component
 })
-export class DashboardComponent {
+export class DashboardComponent extends BaseComponent{
+
+  constructor(public baseDependancy: BaseDependency) { 
+    super(baseDependancy);
+  }
+  
   // Columns to be displayed in the table, matching the properties of LicenseStatistics
   displayedColumns: string[] = ['slNo', 'serviceName', 'rejected', 'approved', 'executed', 'pending', 'pendingWithMe'];
 

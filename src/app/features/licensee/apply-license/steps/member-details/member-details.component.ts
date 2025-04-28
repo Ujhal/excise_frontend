@@ -7,7 +7,7 @@ import { takeUntil } from 'rxjs/operators';
 // Services and shared modules
 import { LicenseeService } from '../../../licensee.services';
 import { MaterialModule } from '../../../../../shared/material.module';
-import { PatternConstants } from '../../../../../shared/constants/app.constants';
+import { PatternConstants } from '../../../../../shared/constants/pattern.constants';
 import { FormUtils } from '../../../../../shared/utils/pan.util';
 
 @Component({

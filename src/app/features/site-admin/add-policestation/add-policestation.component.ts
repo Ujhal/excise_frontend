@@ -5,7 +5,7 @@ import { BaseComponent } from '../../../base/base.components';  // Import base c
 import { BaseDependency } from '../../../base/dependency/base.dependendency';  // Import base dependency class
 import { SubDivision } from '../../../core/models/subdivision.model';  // Import SubDivision model
 import { SiteAdminService } from '../site-admin-service';  // Import SiteAdminService for API calls
-import { PatternConstants } from '../../../shared/constants/app.constants';  // Import constant patterns
+import { PatternConstants } from '../../../shared/constants/pattern.constants';  // Import constant patterns
 import { PoliceStation } from '../../../core/models/policestation.model';  // Import PoliceStation model
 import Swal from 'sweetalert2';  // Import Swal for sweetalert2 dialog
 

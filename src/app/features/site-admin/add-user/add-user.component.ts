@@ -18,6 +18,11 @@ export class AddUserComponent extends BaseComponent implements OnInit {
   districts: District[] = []; // Array to hold all districts
   subdivisons: SubDivision[] = []; // Array to hold all subdivisions
   filteredSubdivisions: SubDivision[] = []; // Array to hold filtered subdivisions based on district
+  roles = [
+    { key: 'site_admin', label: 'Site Admin' },
+    { key: 'officer', label: 'Officer' },
+    { key: 'licensee', label: 'Licensee' }
+  ];
 
   constructor(base: BaseDependency, private siteAdminService: SiteAdminService) {
     super(base); // Call parent constructor

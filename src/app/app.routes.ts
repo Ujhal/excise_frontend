@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './features/login/login.component';
-import { Authority } from './shared/constants/authority.constants';
+import { Authority } from './shared/constants/authority.enum';
 import { UserRouteAccessService } from './core/config/user-route-access.service';
 import { HomeComponent } from './layouts/landing/home/home.component';
 import { HomeLinksComponent } from './layouts/landing/home/home-links/home-links.component';
@@ -40,12 +40,12 @@ export const routes: Routes = [
     component: LoginComponent
   },
 
-  // Protected site-admin feature module
+  // Role Protected modules
   {
     path: 'site-admin',
     canActivate: [UserRouteAccessService],
     data: {
-      authorities: [Authority.SITE_ADMIN]
+      authorities: [Authority.SITE_ADMIN, Authority.COMMISSIONER, Authority.JOINT_COMMISSIONER] // Allow both site_admin and commissioner roles
     },
     loadChildren: () => import('./features/site-admin/site-admin-routes')
   },

@@ -4,7 +4,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SiteAdminService } from '../../../../site-admin-service';
 import { MaterialModule } from '../../../../../../shared/material.module';
-import { PatternConstants } from '../../../../../../shared/constants/app.constants';
+import { PatternConstants } from '../../../../../../shared/constants/pattern.constants';
 import { Company } from '../../../../../../core/models/company.model';
 
 @Component({

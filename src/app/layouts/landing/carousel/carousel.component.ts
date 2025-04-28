@@ -66,5 +66,11 @@ export class CarouselComponent implements OnInit{
       title: 'State Excise',
       subtitle: 'Ensuring Public Health through Regulation and Intelligence, Enforcement Measures'
     };
+    this.slides[7] = {
+      id: 7,
+      src: './assets/images/carousel/carousel8.jpg',
+      title: 'State Excise',
+      subtitle: 'Ensuring Public Health through Regulation and Intelligence, Enforcement Measures'
+    };
   }
 }

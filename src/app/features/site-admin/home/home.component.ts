@@ -4,7 +4,6 @@ import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { BaseComponent } from '../../../base/base.components';
-import { AccountService } from '../../../core/services/account.service';
 import { BaseDependency } from '../../../base/dependency/base.dependendency';
 import { Account } from '../../../core/models/accounts';
 

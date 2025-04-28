@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SiteAdminService } from '../../../../site-admin-service';
-import { PatternConstants } from '../../../../../../shared/constants/app.constants';
+import { PatternConstants } from '../../../../../../shared/constants/pattern.constants';
 import { MaterialModule } from '../../../../../../shared/material.module';
 import { DatePipe } from '@angular/common';
 import { Company, CompanyDocuments } from '../../../../../../core/models/company.model';

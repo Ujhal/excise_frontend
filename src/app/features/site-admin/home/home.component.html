@@ -29,64 +29,69 @@
 
       <!-- Navigation Links -->
       <mat-nav-list>
-
         <!-- Static Navigation Links -->
-        <mat-list-item routerLink="dashboard" routerLinkActive="active-link">
-          <span class="nav-header-cus">Home</span>
-        </mat-list-item>
+        <ng-container *ngIf="accountService.hasAnyRole(['site_admin', 'commissioner', 'joint_commissioner'])">
+          <mat-list-item routerLink="dashboard" routerLinkActive="active-link">
+            <span class="nav-header-cus">Home</span>
+          </mat-list-item>
+        </ng-container>
+        
+        <ng-container *ngIf="accountService.hasAnyRole('site_admin')">
+          <mat-list-item routerLink="list-user" routerLinkActive="active-link">
+            <span class="nav-header-cus">User</span>
+          </mat-list-item>
 
-        <mat-list-item routerLink="list-user" routerLinkActive="active-link">
-          <span class="nav-header-cus">User</span>
-        </mat-list-item>
+          <mat-list-item routerLink="list-district" routerLinkActive="active-link">
+            <span class="nav-header-cus">District</span>
+          </mat-list-item>
 
-        <mat-list-item routerLink="list-district" routerLinkActive="active-link">
-          <span class="nav-header-cus">District</span>
-        </mat-list-item>
+          <mat-list-item routerLink="list-subdivision" routerLinkActive="active-link">
+            <span class="nav-header-cus">Sub Division</span>
+          </mat-list-item>
 
-        <mat-list-item routerLink="list-subdivision" routerLinkActive="active-link">
-          <span class="nav-header-cus">Sub Division</span>
-        </mat-list-item>
+          <mat-list-item routerLink="list-policestation" routerLinkActive="active-link">
+            <span class="nav-header-cus">Police Station</span>
+          </mat-list-item>
 
-        <mat-list-item routerLink="list-policestation" routerLinkActive="active-link">
-          <span class="nav-header-cus">Police Station</span>
-        </mat-list-item>
+          <mat-list-item routerLink="list-licensetype" routerLinkActive="active-link">
+            <span class="nav-header-cus">License Type</span>
+          </mat-list-item>
 
-        <mat-list-item routerLink="list-licensetype" routerLinkActive="active-link">
-          <span class="nav-header-cus">License Type</span>
-        </mat-list-item>
+          <mat-list-item routerLink="list-licensecategory" routerLinkActive="active-link"> 
+            <span class="nav-header-cus">License Category</span>
+          </mat-list-item>
+        </ng-container>
 
-        <mat-list-item routerLink="list-licensecategory" routerLinkActive="active-link"> 
-          <span class="nav-header-cus">License Category</span>
-        </mat-list-item>
+        <ng-container *ngIf="accountService.hasAnyRole(['commissioner', 'joint_commissioner'])">
+          <!-- Accordion Menu for Company Registration -->
+          <mat-accordion>
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>
+                Company Registration
+              </mat-expansion-panel-header>
+              <div class="button-column">
+                <button mat-menu-item routerLink="company-registration/prepare-company-application" routerLinkActive="active-link">Prepare Application</button>
+                <button mat-menu-item routerLink="company-registration/act-on-application" routerLinkActive="active-link">Act On Application</button>
+                <button mat-menu-item routerLink="company-registration/print-company-certificate" routerLinkActive="active-link">Print Certificate</button>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
 
-        <!-- Accordion Menu for Company Registration -->
-        <mat-accordion>
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              Company Registration
-            </mat-expansion-panel-header>
-            <div class="button-column">
-              <button mat-menu-item routerLink="company-registration/prepare-company-application" routerLinkActive="active-link">Prepare Application</button>
-              <button mat-menu-item routerLink="company-registration/act-on-application" routerLinkActive="active-link">Act On Application</button>
-              <button mat-menu-item routerLink="company-registration/print-company-certificate" routerLinkActive="active-link">Print Certificate</button>
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
-
-        <!-- Accordion Menu for Salesman/Barman Registration -->
-        <mat-accordion>
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              Salesman/Barman Registration
-            </mat-expansion-panel-header>
-            <div class="button-column">
-              <button mat-menu-item routerLink="salesman-registration/prepare-salesman-application" routerLinkActive="active-link">Prepare Application</button>
-              <button mat-menu-item routerLink="salesman-registration/act-on-draft-application" routerLinkActive="active-link">Act On Draft Application</button>
-              <button mat-menu-item routerLink="salesman-registration/print-salesman-certificate" routerLinkActive="active-link">Print Certificate</button>
-              <button mat-menu-item routerLink="salesman-registration/application-status" routerLinkActive="active-link">Application Status</button>
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
+          <!-- Accordion Menu for Salesman/Barman Registration -->
+          <mat-accordion>
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>
+                Salesman/Barman Registration
+              </mat-expansion-panel-header>
+              <div class="button-column">
+                <button mat-menu-item routerLink="salesman-registration/prepare-salesman-application" routerLinkActive="active-link">Prepare Application</button>
+                <button mat-menu-item routerLink="salesman-registration/act-on-draft-application" routerLinkActive="active-link">Act On Draft Application</button>
+                <button mat-menu-item routerLink="salesman-registration/print-salesman-certificate" routerLinkActive="active-link">Print Certificate</button>
+                <button mat-menu-item routerLink="salesman-registration/application-status" routerLinkActive="active-link">Application Status</button>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </ng-container>
 
       </mat-nav-list>
     </div>  
