@@ -11,7 +11,7 @@ import { throwError } from 'rxjs';
   providedIn: 'root',
 })
 export class AccountService {
-  private baseUrl = environment.baseUrl;
+  private baseUrl = `${environment.apiBaseUrl}`; // Base URL for the API
 
   // Stores the currently authenticated user's identity
   private userIdentity: Account | null = null;
@@ -31,7 +31,7 @@ export class AccountService {
 
   // Fetches all user details from the API
   getUserDetails(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/api/user/list/`, {});
+    return this.http.get<any>(`${this.baseUrl}/user/list/`, {});
   }
 
   // Logs out the user and clears local storage

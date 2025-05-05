@@ -7,6 +7,7 @@ import { SubDivision } from '../../../../../core/models/subdivision.model';
 import { PoliceStation } from '../../../../../core/models/policestation.model';
 import { MaterialModule } from '../../../../../shared/material.module';
 import { PatternConstants } from '../../../../../shared/constants/pattern.constants';
+import { LicenseApplication } from '../../../../../core/models/license-application.model';
 
 @Component({
   selector: 'app-address',
@@ -93,9 +94,7 @@ export class AddressComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * Fetches dropdown data from backend service
-   */
+  // Fetches dropdown data from backend service
   private loadDropdownData(): void {
     this.licenseeService.getSubDivision().subscribe((data: SubDivision[]) => {
       this.siteSubDivisions = data;
@@ -119,20 +118,16 @@ export class AddressComponent implements OnInit, OnDestroy {
     console.log('Filtered police station:', this.sitePoliceStations);
   }
 
-  /**
-   * Retrieves form data from session storage
-   */
-  private getFromSessionStorage(): any {
-    const storedData = sessionStorage.getItem('addressDetails');
-    return storedData ? JSON.parse(storedData) : {};
+  // Retrieves form data from session storage
+  private getFromSessionStorage(): Partial<LicenseApplication> {
+    const storedData = sessionStorage.getItem('addressData');
+    return storedData ? JSON.parse(storedData) as LicenseApplication : {};
   }
 
-  /**
-   * Saves current form data to session storage
-   */
+  // Saves current form data to session storage
   private saveToSessionStorage() {
-    const formData = this.addressForm.getRawValue();
-    sessionStorage.setItem('addressDetails', JSON.stringify(formData));
+    const formData: Partial<LicenseApplication> = this.addressForm.getRawValue();
+    sessionStorage.setItem('addressData', JSON.stringify(formData));
   }
 
   /**
@@ -155,10 +150,8 @@ export class AddressComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Updates all error messages on the form
-   */
-  updateAllErrorMessages() {
+  // Updates all error messages on the form
+  private updateAllErrorMessages() {
     Object.keys(this.errorMessages).forEach((field) => {
       this.updateErrorMessage(field as keyof typeof this.errorMessages);
     });
@@ -172,26 +165,20 @@ export class AddressComponent implements OnInit, OnDestroy {
     return this.errorMessages[field]();
   }
 
-  /**
-   * Emits 'next' event if form is valid
-   */
+  // Emits 'next' event if form is valid
   proceedToNext() {
     if (this.addressForm.valid) {
       this.next.emit();
     }
   }
 
-  /**
-   * Clears the form and session storage
-   */
+  // Clears the form and session storage
   resetForm() {
     this.addressForm.reset();
-    sessionStorage.removeItem('addressDetails');
+    sessionStorage.removeItem('addressData');
   }
 
-  /**
-   * Emits 'back' event to navigate to the previous step
-   */
+  // Emits 'back' event to navigate to the previous step
   goBack() {
     this.back.emit();
   }

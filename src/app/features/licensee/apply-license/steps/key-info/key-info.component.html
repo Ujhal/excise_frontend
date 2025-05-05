@@ -106,10 +106,10 @@
         <!-- Yearly License Fee -->
         <mat-form-field floatLabel="always" appearance="outline">
           <mat-label>Yearly License Fee (Rs.)</mat-label>
-          <input matInput type="number" class="example-right-align" formControlName="yearlyFee" placeholder="0" />
+          <input matInput type="number" class="example-right-align" formControlName="yearlyLicenseFee" placeholder="0" />
           <span matTextPrefix>₹&nbsp;</span>
-          <mat-error *ngIf="keyInfoForm.controls['yearlyFee'].invalid">
-            {{ getErrorMessage('yearlyFee') }}
+          <mat-error *ngIf="keyInfoForm.controls['yearlyLicenseFee'].invalid">
+            {{ getErrorMessage('yearlyLicenseFee') }}
           </mat-error>
         </mat-form-field>
 

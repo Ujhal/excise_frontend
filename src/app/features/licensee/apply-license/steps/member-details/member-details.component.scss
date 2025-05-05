@@ -33,6 +33,10 @@ mat-card{
             mat-radio-group{
                 width: 100%;
             }
+            .upload-section span{
+                font-style: italic;
+                color: #ff1313;
+            }
         }
     }
     mat-card-actions{

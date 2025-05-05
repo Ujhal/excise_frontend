@@ -4,6 +4,9 @@
   <!-- Card header displaying the title -->
   <mat-card-header>
     User Profile
+    <button mat-icon-button (click)="closeDialog()">
+      <mat-icon style="color: white;">close</mat-icon>
+    </button>
   </mat-card-header>
   
   <!-- Card content is shown only if the user object exists -->
@@ -48,10 +51,4 @@
       </tr>
     </table>
   </mat-card-content>
-
-  <!-- Action button to close the dialog -->
-  <mat-card-actions>
-    <button mat-stroked-button color="primary" (click)="closeDialog()">Close</button>
-  </mat-card-actions>
-
 </mat-card>

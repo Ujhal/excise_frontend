@@ -1,58 +1,82 @@
 .dashboard-container{
     display: flex;
     flex-direction: column;
-    gap: 40px;
-    padding: 30px;
+    padding: 20px;
 }
 
-.stats-container{
+.stats-container {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 150px;
-    gap: 10px 20px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    .stat-card {
+        background-color: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+        display: flex;
+        align-items: center;
+        margin-top: 0;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        &:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+            cursor: pointer;
+        }
+        .circle-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            img {
+                width: 28px;
+                height: 28px;
+            }
+        }
+        .blue-bg {
+            background-color: rgba(0, 153, 255, 0.1);
+        }
+        
+        .purple-bg {
+            background-color: rgba(128, 0, 255, 0.1);
+        }
+        
+        .yellow-bg {
+            background-color: rgba(231, 184, 0, 0.18);
+        } 
+        .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1c1c1c;
+        }
+        .label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 6px;
+        }
+    }
 }
+
 
 mat-card{
-    gap: 10px;
+    background-color: #fff;
+    border-radius: 12px;
+    margin-top: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
     mat-card-header{
-        padding: 12px;
-        background-color: #1C2B78;
-        color: #ffffff;
-        border-radius: 8px 13px 0 0;
         font-size: 20px;
         font-weight: 500;
+        color: #ffffff;
+        padding: 16px;
+        background-color: #1C2B78;
+        border-radius: 8px 8px 0 0;
+        justify-content: center;
     }
     mat-card-content{
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px;
-        img{
-            width: 50px;
-        }
-        .count{
-            font-size: 30px;
-            font-weight: 600;
-        }
-    }
-}
-
-table{
-    ::ng-deep thead{
-        background-color: #1C2B78;
-        tr{
-            color: #ffffff;
-        } 
-
-    }
-    ::ng-deep tbody{
-        tr:nth-child(even) {
-            background-color: #ececec;
-          }
-        .mat-column-pendingWithMe{
-            color: red;
-        }    
+        padding: 15px;
     }
 }
 
@@ -60,7 +84,7 @@ table{
     .stats-container{
         grid-template-columns: 1fr 1fr;
     }
-    .table-container{
+    mat-card-content{
         overflow-x: scroll;
     }
 }

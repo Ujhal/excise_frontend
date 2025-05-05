@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { MaterialModule } from '../../../shared/material.module'; // Shared Angular Material components
 
 // Importing step components for the multi-step license application form
@@ -6,8 +6,9 @@ import { KeyInfoComponent } from './steps/key-info/key-info.component';
 import { AddressComponent } from './steps/address/address.component';
 import { UnitDetailsComponent } from './steps/unit-details/unit-details.component';
 import { MemberDetailsComponent } from './steps/member-details/member-details.component';
-import { LicenseComponent } from './steps/license/license.component';
+import { SubmitApplicationComponent } from './steps/submit-application/submit-application.component';
 import { SelectLicenseComponent } from './steps/select-license/select-license.component';
+import { MatStepper } from '@angular/material/stepper';
 
 @Component({
   selector: 'app-apply-license', // Selector for the component
@@ -19,7 +20,7 @@ import { SelectLicenseComponent } from './steps/select-license/select-license.co
     AddressComponent,           // Step 3: Address details
     UnitDetailsComponent,       // Step 4: Unit details
     MemberDetailsComponent,     // Step 5: Member details
-    LicenseComponent            // Step 6: Final license info and submission
+    SubmitApplicationComponent            // Step 6: Final license info and submission
   ],
   templateUrl: './apply-license.component.html', // Template for rendering UI
   styleUrl: './apply-license.component.scss'     // Styling for the component
@@ -28,7 +29,7 @@ export class ApplyLicenseComponent {
 
   // Getter to retrieve the selected license type from session storage
   get licenseType() {
-    const storedData = sessionStorage.getItem('keyInfoDetails'); // Fetching saved key info
+    const storedData = sessionStorage.getItem('keyInfoData'); // Fetching saved key info
     return storedData ? JSON.parse(storedData).licenseType : null; // Return licenseType if exists
   }
 }

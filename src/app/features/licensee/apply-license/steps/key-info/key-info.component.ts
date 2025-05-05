@@ -6,6 +6,8 @@ import { LicenseeService } from '../../../licensee.services';
 import { MaterialModule } from '../../../../../shared/material.module';
 import { LicenseType } from '../../../../../core/models/license-type.model';
 import { PatternConstants } from '../../../../../shared/constants/pattern.constants';
+import { LicenseApplication } from '../../../../../core/models/license-application.model';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-key-info',
@@ -13,6 +15,7 @@ import { PatternConstants } from '../../../../../shared/constants/pattern.consta
   imports: [MaterialModule],
   templateUrl: './key-info.component.html',
   styleUrl: './key-info.component.scss',
+  providers: [DatePipe]
 })
 export class KeyInfoComponent implements OnInit, OnDestroy {
 
@@ -42,7 +45,7 @@ export class KeyInfoComponent implements OnInit, OnDestroy {
     initialGrantDate: signal(''),
     renewedFrom: signal(''),
     validUpTo: signal(''),
-    yearlyFee: signal(''),
+    yearlyLicenseFee: signal(''),
     licenseNature: signal(''),
     functioningStatus: signal(''),
     modeofOperation: signal('')
@@ -50,7 +53,8 @@ export class KeyInfoComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private licenseeService: LicenseeService
+    private licenseeService: LicenseeService,
+    private datePipe: DatePipe
   ) {
     // Retrieve data from session storage if available
     const storedValues = this.getFromSessionStorage();
@@ -78,7 +82,7 @@ export class KeyInfoComponent implements OnInit, OnDestroy {
       initialGrantDate: new FormControl(storedValues.initialGrantDate),
       renewedFrom: new FormControl(storedValues.renewedFrom),
       validUpTo: new FormControl(storedValues.validUpTo),
-      yearlyFee: new FormControl(storedValues.yearlyFee, [
+      yearlyLicenseFee: new FormControl(storedValues.yearlyLicenseFee, [
         Validators.pattern(PatternConstants.NUMBER)
       ]),
       licenseNature: new FormControl(storedValues.licenseNature, [Validators.required]),
@@ -119,15 +123,29 @@ export class KeyInfoComponent implements OnInit, OnDestroy {
   }
 
   // Fetch form values from session storage if available
-  private getFromSessionStorage(): any {
-    const storedData = sessionStorage.getItem('keyInfoDetails');
-    return storedData ? JSON.parse(storedData) : {};
+  private getFromSessionStorage(): Partial<LicenseApplication> {
+    const storedData = sessionStorage.getItem('keyInfoData');
+    return storedData ? JSON.parse(storedData) as LicenseApplication : {};
   }
 
   // Save form values to session storage on change
   private saveToSessionStorage() {
-    const formData = this.keyInfoForm.getRawValue();
-    sessionStorage.setItem('keyInfoDetails', JSON.stringify(formData));
+    const formData: Partial<LicenseApplication> = this.keyInfoForm.getRawValue();
+    const rawInitialGrantDate = new Date(formData.initialGrantDate as string);
+    const rawRenewedFrom = new Date(formData.renewedFrom as string);
+    const rawValidUpTo = new Date(formData.validUpTo as string);
+
+    if (!isNaN(rawInitialGrantDate.getTime())) {
+      formData.initialGrantDate = this.datePipe.transform(rawInitialGrantDate, 'yyyy-MM-dd')!;
+    }
+    if (!isNaN(rawRenewedFrom.getTime())) {
+      formData.renewedFrom = this.datePipe.transform(rawRenewedFrom, 'yyyy-MM-dd')!;
+    }
+    if (!isNaN(rawValidUpTo.getTime())) {
+      formData.validUpTo = this.datePipe.transform(rawValidUpTo, 'yyyy-MM-dd')!;
+    }
+    
+    sessionStorage.setItem('keyInfoData', JSON.stringify(formData));
   }
 
   // Update the error message of a specific form control
@@ -143,7 +161,7 @@ export class KeyInfoComponent implements OnInit, OnDestroy {
   }
 
   // Update all error messages for all form fields
-  updateAllErrorMessages() {
+  private updateAllErrorMessages() {
     Object.keys(this.errorMessages).forEach((field) => {
       this.updateErrorMessage(field as keyof typeof this.errorMessages);
     });
@@ -164,7 +182,7 @@ export class KeyInfoComponent implements OnInit, OnDestroy {
   // Reset form and remove session data
   resetForm() {
     this.keyInfoForm.reset();
-    sessionStorage.removeItem('keyInfoDetails');
+    sessionStorage.removeItem('keyInfoData');
   }
 
   // Emit event to go back to the previous step

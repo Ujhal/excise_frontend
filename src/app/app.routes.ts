@@ -45,7 +45,7 @@ export const routes: Routes = [
     path: 'site-admin',
     canActivate: [UserRouteAccessService],
     data: {
-      authorities: [Authority.SITE_ADMIN, Authority.COMMISSIONER, Authority.JOINT_COMMISSIONER] // Allow both site_admin and commissioner roles
+      authorities: [Authority.SITE_ADMIN, Authority.COMMISSIONER, Authority.JOINT_COMMISSIONER, Authority.PERMIT_SECTION]
     },
     loadChildren: () => import('./features/site-admin/site-admin-routes')
   },
@@ -53,8 +53,13 @@ export const routes: Routes = [
   // Licensee feature module
   {
     path: 'licensee',
+    canActivate: [UserRouteAccessService],
+    data: {
+      authorities: [Authority.LICENSEE]
+    },
     loadChildren: () =>
       import('./features/licensee/licensee.routes').then((m) => m.licenseeRoutes)
+    
   },
 
   // Wildcard fallback

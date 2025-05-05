@@ -26,9 +26,9 @@ export class SalesmanBarman {
 }
   
 //documents
-export interface SalesmanBarmanDocuments {
-    passPhoto: string;
-    aadhaarCard: string;
-    residentialCertificate: string;
-    dateofBirthProof: string;
+export class SalesmanBarmanDocuments {
+    passPhoto!: File;
+    aadhaarCard!: File;
+    residentialCertificate!: File;
+    dateofBirthProof!: File;
 }

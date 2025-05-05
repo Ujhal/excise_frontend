@@ -15,7 +15,7 @@ export class CaptchaComponent implements OnInit {
 
   captchaImageUrl: string = '';
   captchaKey: string = '';
-  private captchaUrl = environment.captchaUrl;
+  private baseUrl = `${environment.apiBaseUrl}`; // Base URL for the API
 
   constructor(private captchaService: ApiService) {}
 
@@ -37,7 +37,7 @@ export class CaptchaComponent implements OnInit {
   loadCaptcha(): void {
     this.captchaService.getCaptcha().subscribe({
       next: (data: { key: string; image_url: string }) => {
-        this.captchaImageUrl = `${this.captchaUrl}${data.image_url}`;
+        this.captchaImageUrl = `${this.baseUrl}${data.image_url}`;
         this.captchaKey = data.key;
         this.formGroup.patchValue({ hashkey: this.captchaKey });
       },

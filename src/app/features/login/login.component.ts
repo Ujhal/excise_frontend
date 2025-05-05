@@ -201,7 +201,10 @@ export class LoginComponent extends BaseComponent {
       case 'joint_commissioner':
         this.router.navigate(['site-admin/dashboard']); // Assuming both 'site_admin' and 'officer' go to the same dashboard
         break;
-      case '2':
+      case 'permit_section':
+        this.router.navigate(['site-admin/dashboard']); // Assuming both 'site_admin' and 'officer' go to the same dashboard
+        break;
+      case 'licensee':
         this.router.navigate(['licensee/dashboard']);
         break;
     }

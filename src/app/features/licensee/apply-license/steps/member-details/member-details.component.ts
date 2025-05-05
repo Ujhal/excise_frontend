@@ -8,7 +8,8 @@ import { takeUntil } from 'rxjs/operators';
 import { LicenseeService } from '../../../licensee.services';
 import { MaterialModule } from '../../../../../shared/material.module';
 import { PatternConstants } from '../../../../../shared/constants/pattern.constants';
-import { FormUtils } from '../../../../../shared/utils/pan.util';
+import { FormUtils } from '../../../../../shared/utils/capitalize.util';
+import { LicenseApplication } from '../../../../../core/models/license-application.model';
 
 @Component({
   selector: 'app-member-details',
@@ -28,10 +29,10 @@ export class MemberDetailsComponent implements OnInit, OnDestroy {
   // Event emitters for navigation
   @Output() readonly next = new EventEmitter<void>();
   @Output() readonly back = new EventEmitter<void>();
-
+  
   // Subject for unsubscribing observables
   private destroy$ = new Subject<void>();
-
+  
   // Signal-based error messages for each form control
   errorMessages = {
     status: signal(''),
@@ -40,9 +41,14 @@ export class MemberDetailsComponent implements OnInit, OnDestroy {
     nationality: signal(''),
     gender: signal(''),
     pan: signal(''),
-    mobileNumber: signal(''),
-    emailId: signal(''),
+    memberMobileNumber: signal(''),
+    memberEmailId: signal(''),
     photo: signal('')
+  };
+  
+  photo = {
+    file: null as File | null,
+    fileUrl: ''
   };
 
   constructor(private fb: FormBuilder, private licenseeService: LicenseeService) {
@@ -57,9 +63,8 @@ export class MemberDetailsComponent implements OnInit, OnDestroy {
       nationality: new FormControl(storedValues.nationality, [Validators.required]),
       gender: new FormControl(storedValues.gender, [Validators.required]),
       pan: new FormControl(storedValues.pan, [Validators.required, Validators.pattern(PatternConstants.PAN)]),
-      mobileNumber: new FormControl(storedValues.mobileNumber, [Validators.required, Validators.pattern(PatternConstants.MOBILE)]),
-      emailId: new FormControl(storedValues.emailId, [Validators.required, Validators.pattern(PatternConstants.EMAIL)]),
-      photo: new FormControl(storedValues.photo),
+      memberMobileNumber: new FormControl(storedValues.memberMobileNumber, [Validators.required, Validators.pattern(PatternConstants.MOBILE)]),
+      memberEmailId: new FormControl(storedValues.memberEmailId, [Validators.required, Validators.pattern(PatternConstants.EMAIL)]),
     });
 
     // Subscribe to form value changes to update error messages and save form data to sessionStorage
@@ -73,25 +78,59 @@ export class MemberDetailsComponent implements OnInit, OnDestroy {
 
   // Initialize PAN formatting utility on component load
   ngOnInit() {
-    FormUtils.capitalizePAN(this.memberDetailsForm.get('pan')!, this.destroy$);
+    FormUtils.capitalize(this.memberDetailsForm.get('pan')!, this.destroy$);
   }
 
   // Clean up observables on component destroy
   ngOnDestroy() {
+    this.clearPhotoUrl();
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   // Retrieve stored form data from sessionStorage
-  private getFromSessionStorage(): any {
-    const storedData = sessionStorage.getItem('memberDetails');
-    return storedData ? JSON.parse(storedData) : {};
+  private getFromSessionStorage(): Partial<LicenseApplication> {
+    const storedData = sessionStorage.getItem('memberDetailsData');
+    return storedData ? JSON.parse(storedData) as LicenseApplication : {};
   }
 
   // Save current form data to sessionStorage
   private saveToSessionStorage() {
-    const formData = this.memberDetailsForm.getRawValue(); 
-    sessionStorage.setItem('memberDetails', JSON.stringify(formData));
+    const formData: Partial<LicenseApplication> = this.memberDetailsForm.getRawValue(); 
+    sessionStorage.setItem('memberDetailsData', JSON.stringify(formData));
+  }
+
+  onPhotoSelect(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+  
+    if (file) {
+      this.photo.file = file;
+      this.photo.fileUrl = URL.createObjectURL(file);
+  
+      // Store the file in the service
+      this.licenseeService.setLicenseApplicationDocuments({
+        photo: file
+      });
+    }
+  }
+
+  viewPhoto() {
+    if (this.photo.fileUrl) {
+      window.open(this.photo.fileUrl, '_blank');
+    }
+  }
+
+  // Check if required documents are uploaded
+  isPhotoUploaded(): boolean {
+    return !!this.photo.file;
+  }
+
+  clearPhotoUrl() {
+    if (this.photo.fileUrl) {
+      URL.revokeObjectURL(this.photo.fileUrl);
+      this.photo.fileUrl = '';
+    }
   }
 
   // Set error messages based on control validation errors
@@ -109,7 +148,7 @@ export class MemberDetailsComponent implements OnInit, OnDestroy {
   }
 
   // Update all error messages at once (called on value changes)
-  updateAllErrorMessages() {
+  private updateAllErrorMessages() {
     Object.keys(this.errorMessages).forEach((field) => {
       this.updateErrorMessage(field as keyof typeof this.errorMessages);
     });
@@ -122,7 +161,7 @@ export class MemberDetailsComponent implements OnInit, OnDestroy {
 
   // Proceed to next step if the form is valid
   proceedToNext() {
-    if (this.memberDetailsForm.valid) {
+    if (this.memberDetailsForm.valid  && this.isPhotoUploaded()) {
       this.next.emit();
     }
   }
@@ -130,7 +169,7 @@ export class MemberDetailsComponent implements OnInit, OnDestroy {
   // Reset the form and clear saved session data
   resetForm() {
     this.memberDetailsForm.reset();
-    sessionStorage.removeItem('memberDetails');
+    sessionStorage.removeItem('memberDetailsData');
   }
 
   // Go back to the previous step

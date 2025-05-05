@@ -8,14 +8,14 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = environment.baseUrl;
+  private baseUrl = `${environment.apiBaseUrl}`; // Base URL for the API
   private apiUrl = `${this.baseUrl}/api`;
 
   constructor(private http: HttpClient) {}
 
   // Fetch CAPTCHA image or data from the backend
   getCaptcha(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/get_captcha/`).pipe(
+    return this.http.get<any>(`${this.baseUrl}/user/get_captcha/`).pipe(
       catchError((error) => {
         console.error('Error fetching CAPTCHA:', error);
         return throwError(() => error);
@@ -26,7 +26,7 @@ export class ApiService {
   // Login request to authenticate user
   login(data: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post<any>(`${this.apiUrl}/user/login/`, data, { headers }).pipe(
+    return this.http.post<any>(`${this.baseUrl}/user/login/`, data, { headers }).pipe(
       catchError((error) => {
         console.error('Login failed:', error);
         return throwError(() => error);
@@ -36,7 +36,7 @@ export class ApiService {
 
   // Send OTP to user's registered contact (email/phone)
   sendOtp(formData: FormData): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/user/otp/get/`, formData).pipe(
+    return this.http.post<any>(`${this.baseUrl}/user/otp/get/`, formData).pipe(
       catchError((error) => {
         console.error('Error sending OTP:', error);
         return throwError(() => error);
@@ -51,7 +51,7 @@ export class ApiService {
     formData.append('otp', otp);
     formData.append('index', index.toString()); // Ensure index is sent as a string
 
-    return this.http.post(`${this.apiUrl}/user/otp/login/`, formData).pipe(
+    return this.http.post(`${this.baseUrl}/user/otp/login/`, formData).pipe(
       catchError((error) => {
         console.error('❌ OTP verification error:', error);
         return throwError(() => new Error('Failed to verify OTP.'));
@@ -75,7 +75,7 @@ export class ApiService {
       'Content-Type': 'application/json'
     };
   
-    return this.http.post(`${this.apiUrl}/user/logout/`, { refresh }, { headers }).pipe(
+    return this.http.post(`${this.baseUrl}/user/logout/`, { refresh }, { headers }).pipe(
       catchError((error) => {
         console.error('Logout failed:', error);
         return throwError(() => error);
@@ -93,7 +93,7 @@ export class ApiService {
     }
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post(`${this.apiUrl}/token/refresh/`, { refresh: refreshToken }, { headers }).pipe(
+    return this.http.post(`${this.baseUrl}/token/refresh/`, { refresh: refreshToken }, { headers }).pipe(
       catchError((error) => {
         console.error('Token refresh failed:', error);
         return throwError(() => error);

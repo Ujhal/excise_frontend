@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { MaterialModule } from '../../../../shared/material.module';
 import { MatDialogRef } from '@angular/material/dialog';
+import { AccountService } from '../../../../core/services/account.service';
 
 @Component({
   selector: 'app-user-profile', // Component selector used if included in templates
@@ -9,25 +10,25 @@ import { MatDialogRef } from '@angular/material/dialog';
   styleUrl: './user-profile.component.scss' // External SCSS stylesheet for the component
 })
 export class UserProfileComponent {
-  // Flag to indicate if the data/component has fully loaded
-  loaded = true;
-
-  // Sample user data object to display in the UI (static for now)
-  user = {
-    firstName: 'FirstName',
-    lastName: 'LastName',
-    username: 'firstnamelastname',
-    email: 'firstnamelastname@example.com',
-    phoneNumber: '123-456-7890',
-    role: 'User',
-    district: 'Gangtok',
-    subDivision: 'Ranka',
-    address: 'Down from the Left',
-    createdBy: 'Admin'
-  };
+  user: any;        // Stores the currently authenticated user's data
+  loaded = true;    // Flag to indicate if the data/component has fully loaded
 
   // Injecting reference to the dialog instance so we can close it programmatically
-  constructor(public dialogRef: MatDialogRef<UserProfileComponent>) {}
+  constructor(
+    public dialogRef: MatDialogRef<UserProfileComponent>,
+    private accountService: AccountService
+  ) {}
+
+  // Angular lifecycle hook, runs after component initializes
+  ngOnInit(): void {
+    // Subscribing to the authentication state to get user info
+    this.accountService.getAuthenticationState().subscribe(acc => {
+      if (acc !== null) {
+        this.user = acc; // Assign user data if account is authenticated
+      }
+      this.loaded = true; // Mark the loading complete whether user is null or not
+    });
+  }
 
   // Method to close the dialog when the "Close" button is clicked
   closeDialog(): void {

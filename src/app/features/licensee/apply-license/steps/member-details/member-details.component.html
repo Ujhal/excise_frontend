@@ -74,20 +74,33 @@
         <!-- Phone Number Input -->
         <mat-form-field appearance="outline">
           <mat-label>Enter Phone Number</mat-label>
-          <input matInput placeholder="Enter Phone Number" type="number" formControlName="mobileNumber"/>
-          <mat-error *ngIf="memberDetailsForm.controls['mobileNumber'].invalid">
-            {{ getErrorMessage('mobileNumber') }}
+          <input matInput placeholder="Enter Phone Number" type="number" formControlName="memberMobileNumber"/>
+          <mat-error *ngIf="memberDetailsForm.controls['memberMobileNumber'].invalid">
+            {{ getErrorMessage('memberMobileNumber') }}
           </mat-error>
         </mat-form-field>
 
         <!-- Email ID Input -->
         <mat-form-field appearance="outline">
           <mat-label>Email Id</mat-label>
-          <input matInput placeholder="Enter Email" type="email" formControlName="emailId"/>
-          <mat-error *ngIf="memberDetailsForm.controls['emailId'].invalid">
-            {{ getErrorMessage('emailId') }}
+          <input matInput placeholder="Enter Email" type="email" formControlName="memberEmailId"/>
+          <mat-error *ngIf="memberDetailsForm.controls['memberEmailId'].invalid">
+            {{ getErrorMessage('memberEmailId') }}
           </mat-error>
         </mat-form-field>
+
+        <div class="upload-section">
+          <label for="photoUpload">Passport Size Photo <span>(png, jpg)</span></label>
+          <input
+            type="file"
+            id="photoUpload"
+            (change)="onPhotoSelect($event)"
+            accept=".png,.jpg,.jpeg"/>
+        
+          <button mat-icon-button *ngIf="photo.fileUrl" (click)="viewPhoto()" aria-label="View Uploaded Photo">
+            <mat-icon>visibility</mat-icon>
+          </button>
+        </div>
 
       </div>
     </mat-card-content>  
@@ -96,7 +109,7 @@
     <mat-card-actions>
       <button mat-stroked-button (click)="goBack()">Back</button>
       <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
-      <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!memberDetailsForm.valid">Next</button>
+      <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!memberDetailsForm.valid || !isPhotoUploaded()">Next</button>
     </mat-card-actions>
 
   </mat-card>

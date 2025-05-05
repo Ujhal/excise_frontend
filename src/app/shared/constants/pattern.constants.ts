@@ -3,6 +3,7 @@ export enum PatternConstants {
   LOGIN_REGEX = "^[_'.@A-Za-z0-9-]*$",
   NAME = '^[a-z A-Z\\.]*$',
   PAN = '^[A-Z]{5}[0-9]{4}[A-Z]{1}$',
+  CIN = '^[ULF]{1}[0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}$',
   CERTIFICATE_NUMBER = '^[A-Za-z0-9 \\.#/_-]*$',
   SIMPLETEXT = '^[a-z A-Z0-9 ,\\.:()]*$',
   STRING_SIMPLE_STRING_WITH_ENTER = '[a-zA-Z,& :\\.0-9\\n]+$',

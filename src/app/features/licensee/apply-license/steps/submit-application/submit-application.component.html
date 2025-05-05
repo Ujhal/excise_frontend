@@ -1,0 +1,70 @@
+<mat-card>
+  <mat-card-header>
+      <div class="heading">Submit Application</div>
+  </mat-card-header>
+
+  <mat-card-content>
+    <!-- LICENSE DETAILS Section -->
+    <div *ngIf="selectLicenseData.length > 0" class="info-section">
+      <div class="section-header">License Details</div>
+      <div class="entries" *ngFor="let item of selectLicenseData">
+        <div class="key">{{ item.key }}</div>
+        <div class="value">{{ item.value }}</div>
+      </div>
+    </div>
+
+    <!-- KEY INFO Section -->
+    <div *ngIf="keyInfoData.length > 0" class="info-section">
+      <div class="section-header">Key Info</div>
+      <div class="entries" *ngFor="let item of keyInfoData">
+        <div class="key">{{ item.key }}</div>
+        <div class="value">{{ item.value }}</div>
+      </div>
+    </div>
+
+    <!-- ADDRESS Section -->
+    <div *ngIf="addressData.length > 0" class="info-section">
+      <div class="section-header">Address</div>
+      <div class="entries" *ngFor="let item of addressData">
+        <div class="key">{{ item.key }}</div>
+        <div class="value">{{ item.value }}</div>
+      </div>
+    </div>
+
+    <!-- UNIT DETAILS Section -->
+    <div *ngIf="unitDetailsData.length > 0 && licenseType === 'Company'" class="info-section">
+      <div class="section-header">Unit Details</div>
+      <div class="entries" *ngFor="let item of unitDetailsData">
+        <div class="key">{{ item.key }}</div>
+        <div class="value">{{ item.value }}</div>
+      </div>
+    </div>
+
+    <!-- MEMBER DETAILS Section -->
+    <div *ngIf="memberDetailsData.length > 0" class="info-section">
+      <div class="section-header">Member Details</div>
+      <div class="entries" *ngFor="let item of memberDetailsData">
+        <div class="key">{{ item.key }}</div>
+        <div class="value">{{ item.value }}</div>
+      </div>
+    </div>
+
+    <!-- UPLOADED DOCUMENTS Section -->
+    <div *ngIf="licenseApplicationDocuments.length > 0" class="info-section">
+      <div class="section-header">Uploaded dOCUMENTS</div>
+      <div class="entries" *ngFor="let doc of licenseApplicationDocuments">
+        <div class="key">{{ documentLabels[doc.key] || doc.key }}:</div>
+        <div class="value">
+          {{ doc.file.name }}
+          <a [href]="doc.fileUrl" target="_blank">View</a>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+
+  <!-- Buttons -->
+  <mat-card-actions>
+    <button mat-stroked-button (click)="goBack()">Back</button>
+    <button mat-flat-button color="primary" (click)="submit()">Submit</button>
+  </mat-card-actions>
+</mat-card>

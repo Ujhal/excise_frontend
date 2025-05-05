@@ -13,7 +13,7 @@ const routes: Routes = [
         loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
         canActivate: [UserRouteAccessService], // Protect with role check
         data: {
-          authorities: [Authority.SITE_ADMIN, Authority.COMMISSIONER, Authority.JOINT_COMMISSIONER]
+          authorities: [Authority.SITE_ADMIN, Authority.COMMISSIONER, Authority.JOINT_COMMISSIONER, Authority.PERMIT_SECTION]
         },
       },
       {
@@ -120,72 +120,6 @@ const routes: Routes = [
           authorities: [Authority.SITE_ADMIN]
         },
       },
-      {
-        path: 'company-registration',
-        children: [
-          {
-            path: 'prepare-company-application',
-            loadComponent: () => import('./company-registration/prepare-application/prepare-application.component').then(m => m.PrepareApplicationComponent),
-            canActivate: [UserRouteAccessService],
-            data: {
-              authorities: [Authority.COMMISSIONER, Authority.JOINT_COMMISSIONER]
-            },
-          },
-          {
-            path: 'act-on-application',
-            loadComponent: () => import('./company-registration/act-on-application/act-on-application.component').then(m => m.ActOnApplicationComponent),
-            canActivate: [UserRouteAccessService],
-            data: {
-              authorities: [Authority.COMMISSIONER, Authority.JOINT_COMMISSIONER]
-            },
-          },
-          {
-            path: 'print-company-certificate',
-            loadComponent: () => import('./company-registration/print-certificate/print-certificate.component').then(m => m.PrintCertificateComponent),
-            canActivate: [UserRouteAccessService],
-            data: {
-              authorities: [Authority.COMMISSIONER, Authority.JOINT_COMMISSIONER]
-            },
-          },
-        ]
-      },
-      {
-        path: 'salesman-registration',
-        children: [
-          {
-            path: 'prepare-salesman-application',
-            loadComponent: () => import('./salesman-registration/prepare-application/prepare-application.component').then(m => m.PrepareApplicationComponent),
-            canActivate: [UserRouteAccessService],
-            data: {
-              authorities: [Authority.COMMISSIONER, Authority.JOINT_COMMISSIONER]
-            },
-          },
-          {
-            path: 'act-on-draft-application',
-            loadComponent: () => import('./salesman-registration/act-on-draft-application/act-on-draft-application.component').then(m => m.ActOnDraftApplicationComponent),
-            canActivate: [UserRouteAccessService],
-            data: {
-              authorities: [Authority.COMMISSIONER, Authority.JOINT_COMMISSIONER]
-            },
-          },
-          {
-            path: 'print-salesman-certificate',
-            loadComponent: () => import('./salesman-registration/print-certificate/print-certificate.component').then(m => m.PrintCertificateComponent),
-            canActivate: [UserRouteAccessService],
-            data: {
-              authorities: [Authority.COMMISSIONER, Authority.JOINT_COMMISSIONER]
-            },
-          },
-          {
-            path: 'application-status',
-            loadComponent: () => import('./salesman-registration/application-status/application-status.component').then(m => m.ApplicationStatusComponent),
-            canActivate: [UserRouteAccessService],
-            data: {
-              authorities: [Authority.COMMISSIONER, Authority.JOINT_COMMISSIONER]
-            },
-          }
-        ]
-      }
     ],
   },
 ];

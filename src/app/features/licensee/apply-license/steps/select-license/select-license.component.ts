@@ -11,6 +11,7 @@ import { MaterialModule } from '../../../../../shared/material.module';
 import { District } from '../../../../../core/models/district.model';
 import { SubDivision } from '../../../../../core/models/subdivision.model';
 import { LicenseCategory } from '../../../../../core/models/license-category.model';
+import { LicenseApplication } from '../../../../../core/models/license-application.model';
 
 @Component({
   selector: 'app-select-license',
@@ -101,15 +102,15 @@ export class SelectLicenseComponent implements OnInit, OnDestroy {
   }
 
   // Read form data from session storage
-  private getFromSessionStorage(): any {
-    const storedData = sessionStorage.getItem('selectLicenseDetails');
-    return storedData ? JSON.parse(storedData) : {};
+  private getFromSessionStorage(): Partial<LicenseApplication> {
+    const storedData = sessionStorage.getItem('selectLicenseData');
+    return storedData ? JSON.parse(storedData) as LicenseApplication : {};
   }
 
   // Save form data to session storage
   private saveToSessionStorage() {
-    const formData = this.selectLicenseForm.getRawValue(); 
-    sessionStorage.setItem('selectLicenseDetails', JSON.stringify(formData));
+    const formData: Partial<LicenseApplication> = this.selectLicenseForm.getRawValue(); 
+    sessionStorage.setItem('selectLicenseData', JSON.stringify(formData));
   }
 
   // Update specific field error message
@@ -123,7 +124,7 @@ export class SelectLicenseComponent implements OnInit, OnDestroy {
   }
 
   // Update all field error messages
-  updateAllErrorMessages() {
+  private updateAllErrorMessages() {
     Object.keys(this.errorMessages).forEach((field) => {
       this.updateErrorMessage(field as keyof typeof this.errorMessages);
     });
@@ -144,7 +145,7 @@ export class SelectLicenseComponent implements OnInit, OnDestroy {
   // Reset form and remove saved session data
   resetForm() {
     this.selectLicenseForm.reset();
-    sessionStorage.removeItem('selectLicenseDetails');
+    sessionStorage.removeItem('selectLicenseData');
   }
 
   // Emit back navigation

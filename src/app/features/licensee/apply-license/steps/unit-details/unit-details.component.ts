@@ -4,14 +4,17 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MaterialModule } from '../../../../../shared/material.module';
 import { PatternConstants } from '../../../../../shared/constants/pattern.constants';
-import { FormUtils } from '../../../../../shared/utils/pan.util';
+import { FormUtils } from '../../../../../shared/utils/capitalize.util';
+import { LicenseApplication } from '../../../../../core/models/license-application.model';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-unit-details',
   standalone: true,
   imports: [MaterialModule],
   templateUrl: './unit-details.component.html',
-  styleUrl: './unit-details.component.scss'
+  styleUrl: './unit-details.component.scss',
+  providers: [DatePipe]
 })
 export class UnitDetailsComponent implements OnInit, OnDestroy {
   
@@ -33,10 +36,10 @@ export class UnitDetailsComponent implements OnInit, OnDestroy {
     companyCin: signal(''),
     incorporationDate: signal(''),
     companyPhoneNumber: signal(''),
-    emailId: signal(''),
+    companyEmailId: signal(''),
   };
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private datePipe: DatePipe) {
     // Retrieve session-stored form data if available
     const storedValues = this.getFromSessionStorage();
     
@@ -45,10 +48,10 @@ export class UnitDetailsComponent implements OnInit, OnDestroy {
       companyName: new FormControl(storedValues.companyName, [Validators.required, Validators.pattern(PatternConstants.NAME)]),
       companyAddress: new FormControl(storedValues.companyAddress, [Validators.required]),
       companyPan: new FormControl(storedValues.companyPan, [Validators.required, Validators.pattern(PatternConstants.PAN)]),
-      companyCin: new FormControl(storedValues.companyCin, [Validators.required]),
+      companyCin: new FormControl(storedValues.companyCin, [Validators.required, Validators.pattern(PatternConstants.CIN)]),
       incorporationDate: new FormControl(storedValues.incorporationDate, [Validators.required]),
       companyPhoneNumber: new FormControl(storedValues.companyPhoneNumber, [Validators.required, Validators.pattern(PatternConstants.MOBILE)]),
-      emailId: new FormControl(storedValues.emailId, [Validators.required, Validators.pattern(PatternConstants.EMAIL)])
+      companyEmailId: new FormControl(storedValues.companyEmailId, [Validators.required, Validators.pattern(PatternConstants.EMAIL)])
     });
 
     // Save to session storage and update error messages on form change
@@ -61,7 +64,8 @@ export class UnitDetailsComponent implements OnInit, OnDestroy {
   // Lifecycle hook to perform operations after component loads
   ngOnInit() {
     // Automatically capitalize PAN field value as user types
-    FormUtils.capitalizePAN(this.unitDetailsForm.get('companyPan')!, this.destroy$);
+    FormUtils.capitalize(this.unitDetailsForm.get('companyPan')!, this.destroy$);
+    FormUtils.capitalize(this.unitDetailsForm.get('companyCin')!, this.destroy$);
   }
 
   // Lifecycle hook to clean up subscriptions
@@ -71,15 +75,21 @@ export class UnitDetailsComponent implements OnInit, OnDestroy {
   }
 
   // Retrieves stored form values from sessionStorage
-  private getFromSessionStorage(): any {
-    const storedData = sessionStorage.getItem('unitDetails');
-    return storedData ? JSON.parse(storedData) : {};
+  private getFromSessionStorage(): Partial<LicenseApplication> {
+    const storedData = sessionStorage.getItem('unitDetailsData');
+    return storedData ? JSON.parse(storedData) as LicenseApplication : {};
   }
 
   // Stores current form data into sessionStorage
   private saveToSessionStorage() {
-    const formData = this.unitDetailsForm.getRawValue(); 
-    sessionStorage.setItem('unitDetails', JSON.stringify(formData));
+    const formData: Partial<LicenseApplication> = this.unitDetailsForm.getRawValue(); 
+    const rawDate = new Date(formData.incorporationDate as string);
+
+    if (!isNaN(rawDate.getTime())) {
+      formData.incorporationDate = this.datePipe.transform(rawDate, 'yyyy-MM-dd')!;
+    }
+
+    sessionStorage.setItem('unitDetailsData', JSON.stringify(formData));
   }
 
   // Sets an error message for a specific field based on its validation state
@@ -95,7 +105,7 @@ export class UnitDetailsComponent implements OnInit, OnDestroy {
   }
 
   // Updates all error messages for all form fields
-  updateAllErrorMessages() {
+  private updateAllErrorMessages() {
     Object.keys(this.errorMessages).forEach((field) => {
       this.updateErrorMessage(field as keyof typeof this.errorMessages);
     });
@@ -116,7 +126,7 @@ export class UnitDetailsComponent implements OnInit, OnDestroy {
   // Resets the form and clears session data
   resetForm() {
     this.unitDetailsForm.reset();
-    sessionStorage.removeItem('unitDetails');
+    sessionStorage.removeItem('unitDetailsData');
   }
 
   // Emits the back event

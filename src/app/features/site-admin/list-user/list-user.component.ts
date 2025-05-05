@@ -22,9 +22,6 @@ export class ListUserComponent extends BaseComponent implements OnInit {
   
   // MatTableDataSource is used to handle the data for the table
   users = new MatTableDataSource<Account>();
-  
-  // Holds all the users fetched from the server
-  allUsers: Account[] = [];
 
   constructor(
     // Dependency injection for base class and services

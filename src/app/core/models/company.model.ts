@@ -30,7 +30,7 @@ export class Company {
 
 //documents
 export class CompanyDocuments {
-    undertaking!: string;
+    undertaking!: File;
 }
   
     

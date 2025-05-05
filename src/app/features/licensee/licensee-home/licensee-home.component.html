@@ -30,7 +30,7 @@
       <mat-divider class="profile-divider"></mat-divider>
 
       <!-- Navigation links -->
-      <mat-nav-list>
+      <mat-nav-list *ngIf="accountService.hasAnyRole(['licensee'])">
 
         <!-- Dashboard link -->
         <mat-list-item routerLink="dashboard" routerLinkActive="active-link">
@@ -42,6 +42,34 @@
           <span class="nav-header-cus">Apply For License</span>
         </mat-list-item>
 
+        <!-- Accordion Menu for Company Registration -->
+        <mat-accordion>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              Company Registration
+            </mat-expansion-panel-header>
+            <div class="button-column">
+              <button mat-menu-item routerLink="company-registration/prepare-company-application" routerLinkActive="active-link">Prepare Application</button>
+              <button mat-menu-item routerLink="company-registration/act-on-application" routerLinkActive="active-link">Act On Application</button>
+              <button mat-menu-item routerLink="company-registration/print-company-certificate" routerLinkActive="active-link">Print Certificate</button>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+
+        <!-- Accordion Menu for Salesman/Barman Registration -->
+        <mat-accordion>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              Salesman/Barman Registration
+            </mat-expansion-panel-header>
+            <div class="button-column">
+              <button mat-menu-item routerLink="salesman-registration/prepare-salesman-application" routerLinkActive="active-link">Prepare Application</button>
+              <button mat-menu-item routerLink="salesman-registration/act-on-draft-application" routerLinkActive="active-link">Act On Draft Application</button>
+              <button mat-menu-item routerLink="salesman-registration/print-salesman-certificate" routerLinkActive="active-link">Print Certificate</button>
+              <button mat-menu-item routerLink="salesman-registration/application-status" routerLinkActive="active-link">Application Status</button>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
       </mat-nav-list>
     </div>
   </mat-sidenav>
@@ -51,7 +79,7 @@
     
     <!-- Toggle button to open the sidenav when it's closed -->
     <div class="toggle-btn">
-      <button mat-icon-button (click)="snavToggle(sidenav)" *ngIf="!sidenav.opened" color="primary">
+      <button mat-icon-button [class.hidden]="isSidenavOpen" (click)="snavToggle(sidenav)" color="primary">
         <mat-icon style="font-size: 27px">menu</mat-icon>
       </button>
     </div>

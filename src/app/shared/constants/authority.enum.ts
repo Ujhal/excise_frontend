@@ -2,5 +2,6 @@ export enum Authority {
     SITE_ADMIN = 'site_admin',
     COMMISSIONER = 'commissioner', 
     JOINT_COMMISSIONER = 'joint_commissioner',
-    LICENSEE = '2',
+    PERMIT_SECTION = 'permit_section',
+    LICENSEE = 'licensee',
 }
