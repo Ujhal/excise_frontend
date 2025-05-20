@@ -1,5 +1,6 @@
 export class LicenseApplication {
   //select license
+  id!: number;
   exciseDistrict!: string;
   licenseCategory!: string;
   exciseSubDivision!: string;
@@ -49,6 +50,9 @@ export class LicenseApplication {
   pan!: number;
   memberMobileNumber!: number;
   memberEmailId!: string;
+
+  current_stage!: string;
+  is_approved!: boolean;
 }
 
 //documents

@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Dashboard } from '../../core/models/dashboard.model';
 import { District } from '../../core/models/district.model';
 import { SubDivision } from '../../core/models/subdivision.model';
 import { PoliceStation } from '../../core/models/policestation.model';

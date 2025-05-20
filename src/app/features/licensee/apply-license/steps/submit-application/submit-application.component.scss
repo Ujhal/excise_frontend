@@ -2,42 +2,77 @@ mat-card {
   padding: 0;
   border: 1px solid #ddd;
   border-radius: 10px;
-  box-shadow: none;
   background-color: #fff;
-  mat-card-header{
+
+  mat-card-header {
     background-color: #1C2B78;
-    color: #ffffff;
+    color: #fff;
     font-weight: 500;
     font-size: 24px;
     padding: 12px 20px;
-    align-items: center;
-    justify-content: center; 
+    text-align: center;
   }
+
   mat-card-content {
-    padding: 20px;
-    .section-header {
-      font-size: 17px;
+    .section-title {
+      font-size: 18px;
       font-weight: 600;
-      text-transform: uppercase;
-      color: #555;
-      margin-bottom: 16px;
+      color: #333;
+      margin-top: 30px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
     }
-    .entries {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+    .section-table, .left-section {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 4px 12px;
+    }
+
+    .row {
+      display: contents;
+
       .key {
-        font-size: 14px;
-        color: #888;
+        font-weight: 500;
+        color: #555;
+        font-size: 15px;
+        padding: 0;
       }
+
       .value {
-        font-size: 17px;
-        font-weight: 400;
         color: #000;
-        margin-bottom: 15px;
+        font-size: 15px;
+      }
+    }
+
+    .details-with-photo {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+
+      .left-section {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 4px 12px;
+      }
+
+      .photo-section {
+        width: 120px;
+        flex-shrink: 0;
+
+        .profile-photo {
+          width: 100%;
+          height: auto;
+          object-fit: cover;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+        }
       }
     }
   }
+
   mat-card-actions {
     padding: 16px;
     display: flex;

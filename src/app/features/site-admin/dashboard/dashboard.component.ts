@@ -1,37 +1,23 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Importing the CommonModule for common Angular directives
-import { MaterialModule } from '../../../shared/material.module'; // Importing MaterialModule for Angular Material components
-import { BaseComponent } from '../../../base/base.components'; // Import BaseComponent
-import { BaseDependency } from '../../../base/dependency/base.dependendency'; // Import BaseDependency
+import { CommonModule } from '@angular/common';
+import { MaterialModule } from '../../../shared/material.module';
+import { BaseComponent } from '../../../base/base.components';
+import { BaseDependency } from '../../../base/dependency/base.dependendency';
 import Swal from 'sweetalert2';
+import { SiteAdminService } from '../site-admin-service';
+import { ApplicationStage, DashboardCount } from '../../../core/models/dashboard.model';
+import { MatTableDataSource } from '@angular/material/table';
+import { LicenseApplicationService } from '../../../core/services/license-application.service';
 
-// Interface to define the structure for the license statistics data
-export interface Applied {
-  applicationId: number;   
-  status: string;        
-  remarks: string;        
-}
-
-export interface Approved {
-  applicationId: number;   
-  status: string;        
-  remarks: string;        
-}
-
-export interface Pending {
-  applicationId: number;   
-  status: string;        
-  remarks: string;        
-}
-
+// Interface for license statistics
 export interface LicenseStatistics {
-  slNo: number;            // Serial number for each record
-  serviceName: string;     // Name of the service (e.g., New License Application)
-  applied: string;         // Number of applications for the service
-  rejected: number;        // Number of rejected applications
-  approved: number;        // Number of approved applications
-  executed: string;        // Number of executed services
-  pending: number;         // Number of pending applications
+  slNo: number;           
+  serviceName: string;   
+  applied: string;       
+  rejected: number;
+  approved: number;       
+  executed: string;      
+  pending: number;        
 }
 
 // Sample data for LicenseStatistics, representing different services
@@ -44,93 +30,172 @@ const LICENSE_DATA: LicenseStatistics[] = [
   {slNo: 6, serviceName: 'Import Packaged Foreign Liquor from Custom Station', applied: '0', rejected: 0, approved: 0, executed: '0', pending: 0},
 ];
 
-const APPLIED_DATA: Applied[] = [
-  {applicationId: 202500001, status: 'With Permit Section', remarks: 'N/A'},
-  {applicationId: 202500002, status: 'With Permit Section', remarks: 'N/A'},
-  {applicationId: 202500003, status: 'With Permit Section', remarks: 'N/A'},
-  {applicationId: 202500004, status: 'With Permit Section', remarks: 'N/A'},
-  {applicationId: 202500005, status: 'With Permit Section', remarks: 'N/A'},
-];
-
-const APPROVED_DATA: Approved[] = [
-  {applicationId: 202500001, status: 'License Approved', remarks: 'N/A'},
-  {applicationId: 202500002, status: 'License Approved', remarks: 'N/A'},
-  {applicationId: 202500003, status: 'License Approved', remarks: 'N/A'},
-  {applicationId: 202500004, status: 'License Approved', remarks: 'N/A'},
-  {applicationId: 202500005, status: 'License Approved', remarks: 'N/A'},
-];
-
-const PENDING_DATA: Pending[] = [
-  {applicationId: 202500001, status: 'Forwarded to Commissioner', remarks: 'N/A'},
-  {applicationId: 202500002, status: 'Forwarded to Commissioner', remarks: 'N/A'},
-  {applicationId: 202500003, status: 'Forwarded to Commissioner', remarks: 'N/A'},
-  {applicationId: 202500004, status: 'Forwarded to Commissioner', remarks: 'N/A'},
-  {applicationId: 202500005, status: 'Forwarded to Commissioner', remarks: 'N/A'},
-];
-
-// The DashboardComponent handles displaying the license statistics in a table
 @Component({
-  selector: 'app-dashboard', // The selector used to render this component in HTML
-  standalone: true,          // Indicates that this is a standalone component (can be used independently)
-  imports: [CommonModule, MaterialModule], // Import necessary modules (CommonModule for basic Angular directives and MaterialModule for Material components)
-  templateUrl: './dashboard.component.html', // Path to the HTML template for this component
-  styleUrls: ['./dashboard.component.scss'], // Path to the CSS file for styling this component
+  selector: 'app-dashboard', 
+  standalone: true,         
+  imports: [CommonModule, MaterialModule], 
+  templateUrl: './dashboard.component.html', 
+  styleUrls: ['./dashboard.component.scss'], 
 })
-export class DashboardComponent extends BaseComponent{
+export class DashboardComponent extends BaseComponent {
+  // Dashboard counts for pending, approved, and rejected applications
+  dashboardCounts: DashboardCount = { pending: 0, approved: 0, rejected: 0 };
 
-  constructor(public baseDependancy: BaseDependency) { 
-    super(baseDependancy);
+  // Arrays to store applications 
+  pendingApplications: ApplicationStage[] = [];
+  approvedApplications: ApplicationStage[] = [];
+  rejectedApplications: ApplicationStage[] = [];
+
+  constructor(
+    public baseDependancy: BaseDependency, 
+    protected licenseApplicationService: LicenseApplicationService 
+  ) { 
+    super(baseDependancy); // Calling the parent class constructor
   }
+
+  // Table Data Sources
+  statsDataSource = LICENSE_DATA; // Data source for license statistics
+  pendingDataSource = new MatTableDataSource<ApplicationStage>(); // Data source for pending applications
+  approvedDataSource = new MatTableDataSource<ApplicationStage>(); // Data source for approved applications
+  rejectedDataSource = new MatTableDataSource<ApplicationStage>(); // Data source for rejected applications
   
   // Columns to be displayed in the tables
   statsColumns: string[] = ['slNo', 'serviceName', 'rejected', 'approved', 'executed', 'pending'];
-  appliedColumns: string[] = ['applicationId', 'status', 'remarks', 'actions'];
-  approvedColumns: string[] = ['applicationId', 'status', 'remarks'];
-  pendingColumns: string[] = ['applicationId', 'status', 'remarks'];
+  pendingColumns: string[] = ['id', 'currentStage', 'remarks', 'isApproved', 'performedBy',  'timestamp', 'actions'];
+  approvedColumns: string[] = ['id', 'currentStage', 'remarks', 'isApproved', 'performedBy', 'timestamp', 'actions'];
+  rejectedColumns: string[] = ['id', 'currentStage', 'remarks', 'isApproved', 'performedBy', 'timestamp', 'actions'];
 
-  // Data source for the tables
-  statsDataSource = LICENSE_DATA;
-  appliedDataSource = APPLIED_DATA;
-  approvedDataSource = APPROVED_DATA;
-  pendingDataSource = PENDING_DATA;
+  // Active table to display
+  activeTable: 'stats' | 'pending' | 'approved' | 'rejected' = 'stats';
 
-  activeTable: 'stats' | 'applied' | 'approved' | 'pending' = 'stats';
-
-  showTable(table: 'applied' | 'approved' | 'pending') {
+  // Method to switch to a specific table
+  showTable(table: 'pending' | 'approved' | 'rejected') {
     this.activeTable = table;
   }
 
+  // Method to go back to the statistics table
   goBackToStats() {
     this.activeTable = 'stats';
   }
 
-  onView(application: Applied): void {
-    Swal.fire({
-      title: `Application ID: ${application.applicationId}`,
-      html: `
-        <div style="text-align: left;">
-          <p><strong>Status:</strong> ${application.status}</p>
-          <p><strong>Remarks:</strong> ${application.remarks}</p>
-        </div>
-      `,
-      showCancelButton: true,
-      confirmButtonText: 'Accept',
-      cancelButtonText: 'Reject',
-      showCloseButton: true,
-    }).then(result => {
-      if (result.isConfirmed) {
-        this.onAccept(application);
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        this.onReject(application);
+  // Lifecycle hook to initialize data
+  ngOnInit(): void {
+    // Fetch dashboard counts
+    this.licenseApplicationService.getDashboardCounts().subscribe({
+      next: (res) => {
+        this.dashboardCounts = res; // Update dashboard counts
+      },
+      error: (err) => {
+        console.error('Failed to fetch dashboard counts', err); // Log error
       }
     });
-  }  
 
-  onAccept(application: Applied): void {
-    this.acceptStep1_review(application);
+    // Fetch applications by stage
+    this.licenseApplicationService.getApplicationsByStatus().subscribe(res => {
+      this.pendingDataSource.data = res.pending; 
+      this.approvedDataSource.data = res.approved; 
+      this.rejectedDataSource.data = res.rejected;
+      console.log(this.pendingDataSource.data);
+    }, error => {
+      console.error('Error fetching applications:', error); // Log error
+    });
   }
-  
-  acceptStep1_review(application: Applied): void {
+
+  // Mapping for displaying current stage
+  stageDisplayMapping: { [key: string]: string } = {
+    permit_section: 'Under Review by Permit Section',
+    commissioner: 'Under Review by Commissioner',
+    joint_commissioner: 'Under Review by Joint Commissioner',
+    approved: 'Application Approved',
+    rejected_by_permit_section: 'Rejected by Permit Section',
+    rejected_by_commissioner: 'Application Rejected',
+    rejected_by_joint_commissioner: 'Application Rejected',
+  };
+
+  // Mapping for displaying roles
+  roleDisplayMapping: { [key: string]: string } = {
+    permit_section: 'Permit Section',
+    commissioner: 'Commissioner',
+    joint_commissioner: 'Joint Commissioner',
+    licensee: 'Licensee',
+  };
+
+  // Method to view application details
+  onView(application: any): void {
+    const photoUrl = application.photo 
+      ? `http://127.0.0.1:8000/${application.photo}` 
+      : null;
+
+    const details = `
+      <div style="text-align: left; max-height: 400px; overflow-y: auto; font-size: 14px;">
+        <p><strong>Establishment Name:</strong> ${application.establishmentName || 'N/A'}</p>
+        <p><strong>License:</strong> ${application.license || 'N/A'}</p>
+        <p><strong>License No:</strong> ${application.licenseNo || 'N/A'}</p>
+        <p><strong>License Type:</strong> ${application.licenseType || 'N/A'}</p>
+        <p><strong>License Nature:</strong> ${application.licenseNature || 'N/A'}</p>
+        <p><strong>License Category:</strong> ${application.licenseCategory || 'N/A'}</p>
+        <p><strong>Functioning Status:</strong> ${application.functioningStatus || 'N/A'}</p>
+        <p><strong>Location Category:</strong> ${application.locationCategory || 'N/A'}</p>
+        <p><strong>Location Name:</strong> ${application.locationName || 'N/A'}</p>
+        <p><strong>Excise District:</strong> ${application.exciseDistrict || 'N/A'}</p>
+        <p><strong>Excise Sub-Division:</strong> ${application.exciseSubDivision || 'N/A'}</p>
+        <p><strong>Site Sub-Division:</strong> ${application.siteSubDivision || 'N/A'}</p>
+        <p><strong>Police Station:</strong> ${application.policeStation || 'N/A'}</p>
+        <p><strong>Ward Name:</strong> ${application.wardName || 'N/A'}</p>
+        <p><strong>Road Name:</strong> ${application.roadName || 'N/A'}</p>
+        <p><strong>Pin Code:</strong> ${application.pinCode || 'N/A'}</p>
+        <p><strong>Mode of Operation:</strong> ${application.modeofOperation || 'N/A'}</p>
+        <p><strong>Status:</strong> ${application.status || 'N/A'}</p>
+        <p><strong>Gender:</strong> ${application.gender || 'N/A'}</p>
+        <p><strong>Father/Husband Name:</strong> ${application.fatherHusbandName || 'N/A'}</p>
+        <p><strong>Nationality:</strong> ${application.nationality || 'N/A'}</p>
+        <p><strong>Email ID:</strong> ${application.emailId || 'N/A'}</p>
+        <p><strong>Mobile Number:</strong> ${application.mobileNumber || 'N/A'}</p>
+        <p><strong>Member Name:</strong> ${application.memberName || 'N/A'}</p>
+        <p><strong>Member Email ID:</strong> ${application.memberEmailId || 'N/A'}</p>
+        <p><strong>Member Mobile Number:</strong> ${application.memberMobileNumber || 'N/A'}</p>
+        <p><strong>PAN:</strong> ${application.pan || 'N/A'}</p>
+        <p><strong>Company Name:</strong> ${application.companyName || 'N/A'}</p>
+        <p><strong>Company Email:</strong> ${application.companyEmailId || 'N/A'}</p>
+        <p><strong>Company CIN:</strong> ${application.companyCin || 'N/A'}</p>
+        <p><strong>Company PAN:</strong> ${application.companyPan || 'N/A'}</p>
+        <p><strong>Company Phone:</strong> ${application.companyPhoneNumber || 'N/A'}</p>
+        <p><strong>Business Address:</strong> ${application.businessAddress || 'N/A'}</p>
+        <p><strong>Company Address:</strong> ${application.companyAddress || 'N/A'}</p>
+        <p><strong>Incorporation Date:</strong> ${application.incorporationDate || 'N/A'}</p>
+        <p><strong>Initial Grant Date:</strong> ${application.initialGrantDate || 'N/A'}</p>
+        <p><strong>Valid Up To:</strong> ${application.validUpTo || 'N/A'}</p>
+        <p><strong>Latitude:</strong> ${application.latitude || 'N/A'}</p>
+        <p><strong>Longitude:</strong> ${application.longitude || 'N/A'}</p>
+        <p><strong>Current Stage:</strong> ${application.current_stage || 'N/A'}</p>
+        <p><strong>Approved:</strong> ${application.is_approved ? 'Yes' : 'No'}</p>
+        ${photoUrl ? `<p><strong>Photo:</strong><br><img src="${photoUrl}" alt="Applicant Photo" style="max-width: 100%; height: auto; border: 1px solid #ccc; margin-bottom: 10px;" /></p>` : ''}    </div> 
+    `;
+
+    Swal.fire({
+      title: `Application Id: ${application.id}`,
+      html: details,
+      showCancelButton: true,
+      confirmButtonText: 'Approve',
+      cancelButtonText: 'Reject',
+      showCloseButton: true,
+      width: 500,
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.onApprove(application); // Handle application approval
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        this.onReject(application); // Handle application rejection
+      }
+    });
+  }
+
+  // Method to handle application approval
+  onApprove(application: ApplicationStage): void {
+    this.approveStep1_review(application); // Start approval process
+  }
+
+  // Step 1: Review remarks for acceptance
+  approveStep1_review(application: ApplicationStage): void {
     Swal.fire({
       title: 'Step 1: Review Remarks',
       input: 'textarea',
@@ -144,24 +209,36 @@ export class DashboardComponent extends BaseComponent{
       confirmButtonText: 'Next',
       denyButtonText: 'Back',
       showCloseButton: true,
-      inputValue: '', // Optional: keep previous input
+      inputValue: '', // Optional: to prefill on revisit
+      inputValidator: (value) => {
+        if (!value) {
+          return 'Remarks are required to proceed.';
+        }
+        return null;
+      }
     }).then(result => {
       if (result.isConfirmed) {
-        const remarks = result.value || '';
-        this.acceptStep2_forward(application, remarks);
+        const remarks = result.value || ''; // Get remarks
+        const currentRole = localStorage.getItem('role'); // Get current user role
+        if (currentRole === 'permit_section') {
+          this.approveStep2_forward(application, remarks); // Forward to next role
+        } else {
+          this.approveStep3_confirm(application, remarks); // Skip forward step
+        }
       } else if (result.isDenied) {
-        this.onView(application); // Go back to application view
+        this.onView(application); // Go back to view dialog
       }
     });
   }
-  
-  acceptStep2_forward(application: Applied, reviewRemarks: string): void {
+
+  // Step 2: Forward application to another role
+  approveStep2_forward(application: ApplicationStage, remarks: string): void {
     Swal.fire({
       title: 'Step 2: Forward To',
       input: 'select',
       inputOptions: {
         commissioner: 'Commissioner',
-        jointCommissioner: 'Joint Commissioner'
+        joint_commissioner: 'Joint Commissioner'
       },
       inputPlaceholder: 'Select role to forward to',
       showDenyButton: true,
@@ -169,24 +246,35 @@ export class DashboardComponent extends BaseComponent{
       confirmButtonText: 'Next',
       denyButtonText: 'Back',
       showCloseButton: true,
+      inputValidator: (value) => {
+        if (!value) {
+          return 'You must select a role to proceed.';
+        }
+        return null;
+      }
     }).then(result => {
       if (result.isConfirmed) {
-        const forwardTo = result.value;
-        this.acceptStep3_confirm(application, reviewRemarks, forwardTo);
+        const forwardTo = result.value; // Get selected role
+        this.approveStep3_confirm(application, remarks, forwardTo); // Proceed to confirmation
       } else if (result.isDenied) {
-        this.acceptStep1_review(application); // Go back to review step
+        this.approveStep1_review(application); // Go back to review step
       }
     });
   }
-  
-  acceptStep3_confirm(application: Applied, reviewRemarks: string, forwardTo: string): void {
-    const roleLabel = forwardTo === 'commissioner' ? 'Commissioner' : 'Joint Commissioner';
-  
+
+  // Step 3: Confirm application approval
+  approveStep3_confirm(application: any, remarks: string, forwardTo?: string): void {  
+    let action: string;
+    if (forwardTo === 'commissioner' || forwardTo === 'joint_commissioner') {
+      action = `forward_${forwardTo}`;
+    }
+    else{
+      action = 'approve';
+    }
     Swal.fire({
-      title: 'Step 3: Confirm Forwarding',
+      title: 'Step 3: Confirm Approval',
       html: `
-        <p><strong>Remarks:</strong> ${reviewRemarks}</p>
-        <p><strong>Forward To:</strong> ${roleLabel}</p>
+        <p><strong>Remarks:</strong> ${remarks}</p><p>${action}</p>
       `,
       icon: 'question',
       showDenyButton: true,
@@ -196,26 +284,37 @@ export class DashboardComponent extends BaseComponent{
       showCloseButton: true,
     }).then(result => {
       if (result.isConfirmed) {
-        // Replace with your API call
-        console.log('Submitted:', {
-          applicationId: application.applicationId,
-          reviewRemarks,
-          forwardTo
+        // Call API to approve application
+        this.licenseApplicationService.advanceApplication(application.id, action, remarks).subscribe({
+          next: () => {
+            Swal.fire('Approved!', 'The application was approved successfully.', 'success')
+            .then(() => {
+              location.reload(); // Refresh the page after showing success
+            });
+          },
+          error: (error) => {
+            Swal.fire('Error', error.error?.detail || 'Failed to approve application.', 'error')
+          }
         });
-  
-        Swal.fire('Success!', `Application forwarded to ${roleLabel}.`, 'success');
       } else if (result.isDenied) {
-        this.acceptStep2_forward(application, reviewRemarks); // Go back to forward step
+        if (action === 'commissioner' || forwardTo === 'joint_commissioner') {
+          // Go back to Step 2
+          this.approveStep2_forward(application, remarks);
+        } else {
+          // Go back to Step 1
+          this.approveStep1_review(application);
+        }
       }
     });
-  }  
-  
-  
-  onReject(application: Applied): void {
-    this.rejectStep1_review(application);
   }
   
-  rejectStep1_review(application: Applied): void {
+  // Method to handle application rejection
+  onReject(application: ApplicationStage): void {
+    this.rejectStep1_review(application); // Start rejection process
+  }
+  
+  // Step 1: Review remarks for rejection
+  rejectStep1_review(application: ApplicationStage): void {
     Swal.fire({
       title: 'Step 1: Rejection Remarks',
       input: 'textarea',
@@ -229,39 +328,53 @@ export class DashboardComponent extends BaseComponent{
       confirmButtonText: 'Next',
       denyButtonText: 'Back',
       showCloseButton: true,
+      inputValidator: (value) => {
+        if (!value) {
+          return 'Remarks are required to proceed.';
+        }
+        return null;
+      }
     }).then(result => {
       if (result.isConfirmed) {
-        const remarks = result.value || '';
-        this.rejectStep2_confirm(application, remarks);
+        const remarks = result.value; // Guaranteed non-empty now
+        this.rejectStep2_confirm(application, remarks); // Proceed to confirmation
       } else if (result.isDenied) {
-        this.onView(application); // Go back to View dialog
+        this.onView(application); // Go back to view dialog
       }
     });
   }
   
-  rejectStep2_confirm(application: Applied, remarks: string): void {
+  // Step 2: Confirm application rejection
+  rejectStep2_confirm(application: ApplicationStage, remarks: string): void {
     Swal.fire({
       title: 'Step 2: Confirm Rejection',
       html: `
-        <p><strong>Application ID:</strong> ${application.applicationId}</p>
+        <p><strong>Application ID:</strong> ${application.id}</p>
         <p><strong>Remarks:</strong> ${remarks}</p>
       `,
       icon: 'warning',
       showDenyButton: true,
       showCancelButton: false,
-      confirmButtonText: 'Confirm Reject',
+      confirmButtonText: 'Confirm Reject',  
       denyButtonText: 'Back',
       showCloseButton: true,
     }).then(result => {
       if (result.isConfirmed) {
-        // Perform rejection logic
-        console.log('Rejected:', application, 'Remarks:', remarks);
-  
-        Swal.fire('Rejected!', 'The application was rejected successfully.', 'success');
+        // Call API to reject application
+        this.licenseApplicationService.advanceApplication(application.id, 'reject', remarks).subscribe({
+          next: () => {
+            Swal.fire('Rejected!', 'The application was rejected successfully.', 'success')
+            .then(() => {
+              location.reload(); // Refresh the page after showing success
+            });
+          },
+          error: (error) => {
+            Swal.fire('Error', error.error?.detail || 'Failed to reject application.', 'error');
+          }
+        });
       } else if (result.isDenied) {
-        this.rejectStep1_review(application);
+        this.rejectStep1_review(application); // Go back to review step
       }
     });
   }
-  
 }

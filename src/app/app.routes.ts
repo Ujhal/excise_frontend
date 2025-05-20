@@ -23,12 +23,12 @@ export const routes: Routes = [
     ]
   },
 
-  // Footer-related pages (about-us, contact-us, etc.)
+  // Information pages (about-us, contact-us, etc.)
   {
-    path: 'footer',
+    path: 'info',
     children: [
       {
-        path: ':page',
+        path: ':page', // Dynamic info pages
         component: InfoPagesComponent
       }
     ]
@@ -42,7 +42,7 @@ export const routes: Routes = [
 
   // Role Protected modules
   {
-    path: 'site-admin',
+    path: 'admin',
     canActivate: [UserRouteAccessService],
     data: {
       authorities: [Authority.SITE_ADMIN, Authority.COMMISSIONER, Authority.JOINT_COMMISSIONER, Authority.PERMIT_SECTION]

@@ -21,9 +21,9 @@
         </div>
 
         <!-- Button to view the user's profile -->
-        <button mat-raised-button class="view-profile" (click)="viewProfile()" type="button">
-          View Profile
-        </button>          
+        <button mat-mini-fab class="view-profile" (click)="viewProfile()" type="button">
+          <mat-icon>account_circle</mat-icon>
+        </button>
       </div>
 
       <!-- Divider line below the profile section -->
@@ -49,9 +49,9 @@
               Company Registration
             </mat-expansion-panel-header>
             <div class="button-column">
-              <button mat-menu-item routerLink="company-registration/prepare-company-application" routerLinkActive="active-link">Prepare Application</button>
-              <button mat-menu-item routerLink="company-registration/act-on-application" routerLinkActive="active-link">Act On Application</button>
-              <button mat-menu-item routerLink="company-registration/print-company-certificate" routerLinkActive="active-link">Print Certificate</button>
+              <button mat-menu-item routerLink="company/prepare-application" routerLinkActive="active-link">Prepare Application</button>
+              <button mat-menu-item routerLink="company/application-action" routerLinkActive="active-link">Act On Application</button>
+              <button mat-menu-item routerLink="company/print-certificate" routerLinkActive="active-link">Print Certificate</button>
             </div>
           </mat-expansion-panel>
         </mat-accordion>
@@ -63,10 +63,10 @@
               Salesman/Barman Registration
             </mat-expansion-panel-header>
             <div class="button-column">
-              <button mat-menu-item routerLink="salesman-registration/prepare-salesman-application" routerLinkActive="active-link">Prepare Application</button>
-              <button mat-menu-item routerLink="salesman-registration/act-on-draft-application" routerLinkActive="active-link">Act On Draft Application</button>
-              <button mat-menu-item routerLink="salesman-registration/print-salesman-certificate" routerLinkActive="active-link">Print Certificate</button>
-              <button mat-menu-item routerLink="salesman-registration/application-status" routerLinkActive="active-link">Application Status</button>
+              <button mat-menu-item routerLink="salesman-barman/prepare-application" routerLinkActive="active-link">Prepare Application</button>
+              <button mat-menu-item routerLink="salesman-barman/application-action" routerLinkActive="active-link">Act On Draft Application</button>
+              <button mat-menu-item routerLink="salesman-barman/print-certificate" routerLinkActive="active-link">Print Certificate</button>
+              <button mat-menu-item routerLink="salesman-barman/application-status" routerLinkActive="active-link">Application Status</button>
             </div>
           </mat-expansion-panel>
         </mat-accordion>

@@ -45,9 +45,9 @@ export class ApiService {
   }
 
   // Verify the received OTP for login
-  verifyOtp(username: string, otp: string, index: number): Observable<any> {
+  verifyOtp(phonenumber: string, otp: string, index: number): Observable<any> {
     const formData = new FormData();
-    formData.append('username', username);
+    formData.append('phonenumber', phonenumber);
     formData.append('otp', otp);
     formData.append('index', index.toString()); // Ensure index is sent as a string
 

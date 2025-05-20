@@ -11,13 +11,13 @@ const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
-        canActivate: [UserRouteAccessService], // Protect with role check
+        canActivate: [UserRouteAccessService],
         data: {
           authorities: [Authority.SITE_ADMIN, Authority.COMMISSIONER, Authority.JOINT_COMMISSIONER, Authority.PERMIT_SECTION]
         },
       },
       {
-        path: 'new-district',
+        path: 'district/new',
         loadComponent: () => import('./add-district/add-district.component').then(m => m.AddDistrictComponent),
         canActivate: [UserRouteAccessService],
         data: {
@@ -25,7 +25,7 @@ const routes: Routes = [
         },
       },
       {
-        path: 'list-district',
+        path: 'districts',
         loadComponent: () => import('./list-district/list-district.component').then(m => m.ListDistrictComponent),
         canActivate: [UserRouteAccessService],
         data: {
@@ -33,7 +33,7 @@ const routes: Routes = [
         },
       },
       {
-        path: 'add-subdivision',
+        path: 'subdivision/new',
         loadComponent: () => import('./add-subdivision/add-subdivision.component').then(m => m.AddSubdivisionComponent),
         canActivate: [UserRouteAccessService],
         data: {
@@ -41,7 +41,7 @@ const routes: Routes = [
         },
       },
       {
-        path: 'list-subdivision',
+        path: 'subdivisions',
         loadComponent: () => import('./list-subdivision/list-subdivision.component').then(m => m.ListSubdivisionComponent),
         canActivate: [UserRouteAccessService],
         data: {
@@ -49,7 +49,7 @@ const routes: Routes = [
         },
       },
       {
-        path: 'add-user',
+        path: 'user/new',
         loadComponent: () => import('./add-user/add-user.component').then(m => m.AddUserComponent),
         canActivate: [UserRouteAccessService],
         data: {
@@ -57,7 +57,7 @@ const routes: Routes = [
         },
       },
       {
-        path: 'list-user',
+        path: 'users',
         loadComponent: () => import('./list-user/list-user.component').then(m => m.ListUserComponent),
         canActivate: [UserRouteAccessService],
         data: {
@@ -65,7 +65,7 @@ const routes: Routes = [
         },
       },
       {
-        path: 'add-policestation',
+        path: 'policestation/new',
         loadComponent: () => import('./add-policestation/add-policestation.component').then(m => m.AddPolicestationComponent),
         canActivate: [UserRouteAccessService],
         data: {
@@ -73,15 +73,7 @@ const routes: Routes = [
         },
       },
       {
-        path: 'site-admin/edit-policestation/:id',
-        loadComponent: () => import('./add-policestation/add-policestation.component').then(m => m.AddPolicestationComponent),
-        canActivate: [UserRouteAccessService],
-        data: {
-          authorities: [Authority.SITE_ADMIN]
-        },
-      },
-      {
-        path: 'list-policestation',
+        path: 'policestations',
         loadComponent: () => import('./list-policestation/list-policestation.component').then(m => m.ListPolicestationComponent),
         canActivate: [UserRouteAccessService],
         data: {
@@ -89,7 +81,7 @@ const routes: Routes = [
         },
       },
       {
-        path: 'add-licensetype',
+        path: 'licensetype/new',
         loadComponent: () => import('./add-licensetype/add-licensetype.component').then(m => m.AddLicensetypeComponent),
         canActivate: [UserRouteAccessService],
         data: {
@@ -97,7 +89,7 @@ const routes: Routes = [
         },
       },
       {
-        path: 'list-licensetype',
+        path: 'licensetypes',
         loadComponent: () => import('./list-licensetype/list-licensetype.component').then(m => m.ListLicensetypeComponent),
         canActivate: [UserRouteAccessService],
         data: {
@@ -105,7 +97,7 @@ const routes: Routes = [
         },
       },
       {
-        path: 'add-licensecategory',
+        path: 'licensecategory/new',
         loadComponent: () => import('./add-licensecategory/add-licensecategory.component').then(m => m.AddLicensecategoryComponent),
         canActivate: [UserRouteAccessService],
         data: {
@@ -113,7 +105,7 @@ const routes: Routes = [
         },
       },
       {
-        path: 'list-licensecategory',
+        path: 'licensecategories',
         loadComponent: () => import('./list-licensecategory/list-licensecategory.component').then(m => m.ListLicensecategoryComponent),
         canActivate: [UserRouteAccessService],
         data: {

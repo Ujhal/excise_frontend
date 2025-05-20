@@ -31,6 +31,7 @@ export class LoginComponent extends BaseComponent {
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
       password: [''],
+      phonenumber: [''], 
       otp: [''],
       response: ['', Validators.required],   // Captcha response value
       hashkey: ['', Validators.required],    // Captcha hashkey
@@ -69,16 +70,16 @@ export class LoginComponent extends BaseComponent {
 
   /** Sends OTP to the user's phone number */
   sendOtp(): void {
-    if (this.loginForm.controls['username'].invalid) {
+    if (this.loginForm.controls['phonenumber'].invalid) {
       alert('Please enter a valid phone number.');
       return;
     }
 
-    const username = this.loginForm.value.username;
-    console.log('🔹 Sending OTP request for:', username);
+    const phonenumber = this.loginForm.value.phonenumber;
+    console.log('🔹 Sending OTP request for:', phonenumber);
 
     const formData = new FormData();
-    formData.append('username', username);
+    formData.append('phonenumber', phonenumber);
 
     this.apiService.sendOtp(formData).subscribe({
       next: (response) => {
@@ -125,6 +126,7 @@ export class LoginComponent extends BaseComponent {
 
     this.apiService.login(this.loginForm.value).subscribe({
       next: (res: any) => {
+        console.log(res); // 👈 Print the token
         this.handleAuthResponse(res);
       },
       error: (err) => {
@@ -152,12 +154,12 @@ export class LoginComponent extends BaseComponent {
     }
 
     const requestData = {
-      username: this.loginForm.value.username,
+      phonenumber: this.loginForm.value.phonenumber,
       otp: this.loginForm.value.otp,
       index: Number(this.otpIndex)
     };
 
-    this.apiService.verifyOtp(requestData.username, requestData.otp, requestData.index).subscribe({
+    this.apiService.verifyOtp(requestData.phonenumber, requestData.otp, requestData.index).subscribe({
       next: (res: any) => {
         this.handleAuthResponse(res);
       },
@@ -193,16 +195,16 @@ export class LoginComponent extends BaseComponent {
   private redirectBasedOnRole(role: string): void {
     switch (role) {
       case 'site_admin':
-        this.router.navigate(['site-admin/dashboard']);
+        this.router.navigate(['admin/dashboard']);
         break;
       case 'commissioner':
-        this.router.navigate(['site-admin/dashboard']); // Assuming both 'site_admin' and 'officer' go to the same dashboard
+        this.router.navigate(['admin/dashboard']); // Assuming both 'site_admin' and 'officer' go to the same dashboard
         break;
       case 'joint_commissioner':
-        this.router.navigate(['site-admin/dashboard']); // Assuming both 'site_admin' and 'officer' go to the same dashboard
+        this.router.navigate(['admin/dashboard']); // Assuming both 'site_admin' and 'officer' go to the same dashboard
         break;
       case 'permit_section':
-        this.router.navigate(['site-admin/dashboard']); // Assuming both 'site_admin' and 'officer' go to the same dashboard
+        this.router.navigate(['admin/dashboard']); // Assuming both 'site_admin' and 'officer' go to the same dashboard
         break;
       case 'licensee':
         this.router.navigate(['licensee/dashboard']);

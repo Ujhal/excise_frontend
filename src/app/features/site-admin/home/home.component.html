@@ -19,9 +19,11 @@
         <div class="username">
           {{userName}}
         </div>
-        <button mat-raised-button class="view-profile" (click)="viewProfile()" type="button">
-          View Profile
-        </button>          
+        
+        <!-- Button to view the user's profile -->
+        <button mat-mini-fab class="view-profile" (click)="viewProfile()" type="button">
+          <mat-icon>account_circle</mat-icon>
+        </button>        
       </div>
 
       <!-- Divider below profile -->
@@ -37,27 +39,27 @@
         </ng-container>
         
         <ng-container *ngIf="accountService.hasAnyRole('site_admin')">
-          <mat-list-item routerLink="list-user" routerLinkActive="active-link">
+          <mat-list-item routerLink="users" routerLinkActive="active-link">
             <span class="nav-header-cus">User</span>
           </mat-list-item>
 
-          <mat-list-item routerLink="list-district" routerLinkActive="active-link">
+          <mat-list-item routerLink="districts" routerLinkActive="active-link">
             <span class="nav-header-cus">District</span>
           </mat-list-item>
 
-          <mat-list-item routerLink="list-subdivision" routerLinkActive="active-link">
+          <mat-list-item routerLink="subdivisions" routerLinkActive="active-link">
             <span class="nav-header-cus">Sub Division</span>
           </mat-list-item>
 
-          <mat-list-item routerLink="list-policestation" routerLinkActive="active-link">
+          <mat-list-item routerLink="policestations" routerLinkActive="active-link">
             <span class="nav-header-cus">Police Station</span>
           </mat-list-item>
 
-          <mat-list-item routerLink="list-licensetype" routerLinkActive="active-link">
+          <mat-list-item routerLink="licensetypes" routerLinkActive="active-link">
             <span class="nav-header-cus">License Type</span>
           </mat-list-item>
 
-          <mat-list-item routerLink="list-licensecategory" routerLinkActive="active-link"> 
+          <mat-list-item routerLink="licensecategories" routerLinkActive="active-link"> 
             <span class="nav-header-cus">License Category</span>
           </mat-list-item>
         </ng-container>

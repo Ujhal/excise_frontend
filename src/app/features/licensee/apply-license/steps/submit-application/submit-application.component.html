@@ -1,63 +1,60 @@
 <mat-card>
   <mat-card-header>
-      <div class="heading">Submit Application</div>
+    <div class="heading">Submit Application</div>
   </mat-card-header>
 
   <mat-card-content>
-    <!-- LICENSE DETAILS Section -->
-    <div *ngIf="selectLicenseData.length > 0" class="info-section">
-      <div class="section-header">License Details</div>
-      <div class="entries" *ngFor="let item of selectLicenseData">
+    <!-- License Details -->
+    <div class="section-title">License Details</div>
+    <div class="section-table">
+      <div class="row" *ngFor="let item of selectLicenseData">
         <div class="key">{{ item.key }}</div>
         <div class="value">{{ item.value }}</div>
       </div>
     </div>
 
-    <!-- KEY INFO Section -->
-    <div *ngIf="keyInfoData.length > 0" class="info-section">
-      <div class="section-header">Key Info</div>
-      <div class="entries" *ngFor="let item of keyInfoData">
+    <!-- Member Details with Photo -->
+    <div class="section-title">Member Details</div>
+    <div class="details-with-photo">
+      <div class="left-section">
+      <div class="row" *ngFor="let item of memberDetailsData">
+        <div class="key">{{ item.key }}</div>
+        <div class="value">{{ item.value }}</div>
+      </div>
+      </div>
+      <div class="photo-section" *ngIf="licenseApplicationDocuments.length > 0">
+        <img
+          class="profile-photo"
+          [src]="licenseApplicationDocuments[0].fileUrl"
+          alt="Applicant Photo"
+        />
+      </div>
+    </div>
+
+    <!-- Key Info -->
+    <div class="section-title">Key Info</div>
+    <div class="section-table">
+      <div class="row" *ngFor="let item of keyInfoData">
         <div class="key">{{ item.key }}</div>
         <div class="value">{{ item.value }}</div>
       </div>
     </div>
 
-    <!-- ADDRESS Section -->
-    <div *ngIf="addressData.length > 0" class="info-section">
-      <div class="section-header">Address</div>
-      <div class="entries" *ngFor="let item of addressData">
+    <!-- Unit Details -->
+    <div class="section-title">Unit Details</div>
+    <div class="section-table">
+      <div class="row" *ngFor="let item of unitDetailsData">
         <div class="key">{{ item.key }}</div>
         <div class="value">{{ item.value }}</div>
       </div>
     </div>
 
-    <!-- UNIT DETAILS Section -->
-    <div *ngIf="unitDetailsData.length > 0 && licenseType === 'Company'" class="info-section">
-      <div class="section-header">Unit Details</div>
-      <div class="entries" *ngFor="let item of unitDetailsData">
+    <!-- Address Details -->
+    <div class="section-title">Address Details</div>
+    <div class="section-table">
+      <div class="row" *ngFor="let item of addressData">
         <div class="key">{{ item.key }}</div>
         <div class="value">{{ item.value }}</div>
-      </div>
-    </div>
-
-    <!-- MEMBER DETAILS Section -->
-    <div *ngIf="memberDetailsData.length > 0" class="info-section">
-      <div class="section-header">Member Details</div>
-      <div class="entries" *ngFor="let item of memberDetailsData">
-        <div class="key">{{ item.key }}</div>
-        <div class="value">{{ item.value }}</div>
-      </div>
-    </div>
-
-    <!-- UPLOADED DOCUMENTS Section -->
-    <div *ngIf="licenseApplicationDocuments.length > 0" class="info-section">
-      <div class="section-header">Uploaded dOCUMENTS</div>
-      <div class="entries" *ngFor="let doc of licenseApplicationDocuments">
-        <div class="key">{{ documentLabels[doc.key] || doc.key }}:</div>
-        <div class="value">
-          {{ doc.file.name }}
-          <a [href]="doc.fileUrl" target="_blank">View</a>
-        </div>
       </div>
     </div>
   </mat-card-content>

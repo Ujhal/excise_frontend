@@ -5,97 +5,81 @@ import { ApplyLicenseComponent } from './apply-license/apply-license.component';
 import { UserRouteAccessService } from '../../core/config/user-route-access.service';
 import { Authority } from '../../shared/constants/authority.enum';
 
-// Define the routes for the Licensee module
 export const licenseeRoutes: Routes = [
   {
     path: '',
-    component: LicenseeHomeComponent, // Acts as a layout or wrapper component
+    component: LicenseeHomeComponent, // Wrapper/layout component
     children: [
       {
         path: 'dashboard',
-        component: LicenseeDashboardComponent, // Route for licensee dashboard
+        component: LicenseeDashboardComponent,
         canActivate: [UserRouteAccessService],
-        data: {
-          authorities: [Authority.LICENSEE]
-        },
+        data: { authorities: [Authority.LICENSEE] },
       },
       {
         path: 'apply-license',
-        component: ApplyLicenseComponent, // Route for applying for a license
+        component: ApplyLicenseComponent,
         canActivate: [UserRouteAccessService],
-        data: {
-          authorities: [Authority.LICENSEE]
-        },
+        data: { authorities: [Authority.LICENSEE] },
       },
+      // Company Registration Flow
       {
-        path: 'company-registration',
+        path: 'company',
         children: [
           {
-            path: 'prepare-company-application',
+            path: 'prepare-application',
             loadComponent: () => import('./company-registration/prepare-application/prepare-application.component').then(m => m.PrepareApplicationComponent),
             canActivate: [UserRouteAccessService],
-            data: {
-              authorities: [Authority.LICENSEE]            
-            },
+            data: { authorities: [Authority.LICENSEE] },
           },
           {
-            path: 'act-on-application',
+            path: 'application-action',
             loadComponent: () => import('./company-registration/act-on-application/act-on-application.component').then(m => m.ActOnApplicationComponent),
             canActivate: [UserRouteAccessService],
-            data: {
-              authorities: [Authority.LICENSEE]            
-            },
+            data: { authorities: [Authority.LICENSEE] },
           },
           {
-            path: 'print-company-certificate',
+            path: 'print-certificate',
             loadComponent: () => import('./company-registration/print-certificate/print-certificate.component').then(m => m.PrintCertificateComponent),
             canActivate: [UserRouteAccessService],
-            data: {
-              authorities: [Authority.LICENSEE]            
-            },
+            data: { authorities: [Authority.LICENSEE] },
           },
         ]
       },
+      // Salesman Registration Flow
       {
-        path: 'salesman-registration',
+        path: 'salesman-barman',
         children: [
           {
-            path: 'prepare-salesman-application',
+            path: 'prepare-application',
             loadComponent: () => import('./salesman-registration/prepare-application/prepare-application.component').then(m => m.PrepareApplicationComponent),
             canActivate: [UserRouteAccessService],
-            data: {
-              authorities: [Authority.LICENSEE]            
-            },
+            data: { authorities: [Authority.LICENSEE] },
           },
           {
-            path: 'act-on-draft-application',
+            path: 'application-action',
             loadComponent: () => import('./salesman-registration/act-on-draft-application/act-on-draft-application.component').then(m => m.ActOnDraftApplicationComponent),
             canActivate: [UserRouteAccessService],
-            data: {
-              authorities: [Authority.LICENSEE]            
-            },
+            data: { authorities: [Authority.LICENSEE] },
           },
           {
-            path: 'print-salesman-certificate',
+            path: 'print-certificate',
             loadComponent: () => import('./salesman-registration/print-certificate/print-certificate.component').then(m => m.PrintCertificateComponent),
             canActivate: [UserRouteAccessService],
-            data: {
-              authorities: [Authority.LICENSEE]            
-            },
+            data: { authorities: [Authority.LICENSEE] },
           },
           {
             path: 'application-status',
             loadComponent: () => import('./salesman-registration/application-status/application-status.component').then(m => m.ApplicationStatusComponent),
             canActivate: [UserRouteAccessService],
-            data: {
-              authorities: [Authority.LICENSEE]            
-            },
+            data: { authorities: [Authority.LICENSEE] },
           }
         ]
       },
+      // Default Redirect to Dashboard
       {
         path: '',
-        redirectTo: '/licensee/dashboard', // Redirect to dashboard if no child path is provided
+        redirectTo: 'dashboard',
         pathMatch: 'full'
       },
     ],

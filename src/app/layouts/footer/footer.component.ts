@@ -16,6 +16,6 @@ export class FooterComponent {
   constructor(private router: Router) {}
 
   navigateTo(page: string) {
-    this.router.navigate(['/footer', page]);
+    this.router.navigate(['/info', page]);
   }
 }
