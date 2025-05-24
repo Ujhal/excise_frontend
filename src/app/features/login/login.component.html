@@ -57,12 +57,12 @@
 			<!-- Phone number input (shown if OTP not sent yet) -->
 			<mat-form-field appearance="outline" *ngIf="!otpSent">
 			  <mat-label>Phone Number</mat-label>
-			  <input matInput formControlName="username" placeholder="Enter your Phone Number" type="tel" />
+			  <input matInput formControlName="phonenumber" placeholder="Enter your Phone Number"/>
 			</mat-form-field>
   
 			<!-- Send OTP button -->
 			<div class="mt-3" *ngIf="!otpSent">
-			  <button mat-flat-button class="send-otp-button" type="button" (click)="sendOtp()" [disabled]="loginForm.controls['username'].invalid">
+			  <button mat-flat-button class="send-otp-button" type="button" (click)="sendOtp()" [disabled]="loginForm.controls['phonenumber'].invalid">
 				Send OTP
 			  </button>
 			</div>
