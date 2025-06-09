@@ -1,0 +1,47 @@
+.page-container{
+    padding: 20px;
+    font-size: 13.8px;
+}
+
+.grid-card{
+    box-shadow: 0px 4px 6px rgba(0, 14, 31, 0.18);
+    mat-card-header{
+        padding: 15px;
+        border-radius: 8px 8px 0 0;
+        background-color: #1C2B78;
+        color: #ffffff;
+        font-size: 24px;
+        font-weight: 600;   
+    }
+    mat-card-content{
+        padding: 15px;
+        gap: 200px;
+        table{
+            margin-top: 20px;
+            background-color: #F4F3F6;
+        }
+    }
+}
+
+.preventive-raids{
+    img{
+        padding: 10px 0 10px 0;
+        width: 400px;
+    }
+    ::ng-deep tbody{
+        .mat-column-caption{
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+            padding-top: 10px;
+        }
+    }
+}
+
+@media(max-width: 365px){
+    .notifications{
+        mat-card-content{
+            overflow-x: scroll; 
+        }
+    }
+}

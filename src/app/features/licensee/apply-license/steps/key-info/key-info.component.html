@@ -1,0 +1,171 @@
+<!-- Reactive Form for Key Info -->
+<form [formGroup]="keyInfoForm">
+  <mat-card>
+
+    <!-- Header Section -->
+    <mat-card-header>
+      <div class="heading">Key Info</div>
+      <div class="validation">* Marked Fields Are Mandatory</div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="form-field-container">
+
+        <!-- License Type Dropdown -->
+        <mat-form-field appearance="outline">
+          <mat-label>License Type</mat-label>
+          <mat-select formControlName="licenseType" required>
+            <mat-option *ngFor="let licenseType of licenseTypes" [value]="licenseType.licenseType">
+              {{ licenseType.licenseType }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="keyInfoForm.controls['licenseType'].invalid">
+            {{ getErrorMessage('licenseType') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Establishment Name Textarea -->
+        <mat-form-field appearance="outline">
+          <mat-label>Establishment Name</mat-label>
+          <textarea matInput
+                    placeholder="Enter Establishment Name (max 150 characters)"
+                    formControlName="establishmentName"
+                    cdkTextareaAutosize
+                    cdkAutosizeMinRows="1"
+                    cdkAutosizeMaxRows="5"
+                    required>
+          </textarea>
+          <mat-error *ngIf="keyInfoForm.controls['establishmentName'].invalid">
+            {{ getErrorMessage('establishmentName') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Contact Number -->
+        <mat-form-field appearance="outline">
+          <mat-label>Contact Number</mat-label>
+          <input matInput placeholder="Enter Contact Number" type="tel" formControlName="mobileNumber" required />
+          <mat-error *ngIf="keyInfoForm.controls['mobileNumber'].invalid">
+            {{ getErrorMessage('mobileNumber') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Email ID -->
+        <mat-form-field appearance="outline">
+          <mat-label>Email Id</mat-label>
+          <input matInput placeholder="Enter Email" type="email" formControlName="emailId" required />
+          <mat-error *ngIf="keyInfoForm.controls['emailId'].invalid">
+            {{ getErrorMessage('emailId') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Manual License Number -->
+        <mat-form-field appearance="outline">
+          <mat-label>License Number (Manual System)</mat-label>
+          <textarea matInput
+                    placeholder="Enter License Number if any (max 50 characters)"
+                    formControlName="licenseNo"
+                    cdkTextareaAutosize
+                    cdkAutosizeMinRows="1"
+                    cdkAutosizeMaxRows="5">
+          </textarea>
+        </mat-form-field>
+
+        <!-- Initial Grant Date -->
+        <mat-form-field appearance="outline">
+          <mat-label>Initial Grant Date</mat-label>
+          <input matInput [matDatepicker]="initialGrantDate" formControlName="initialGrantDate">
+          <mat-datepicker-toggle matIconSuffix [for]="initialGrantDate"></mat-datepicker-toggle>
+          <mat-datepicker #initialGrantDate></mat-datepicker>
+          <mat-error *ngIf="keyInfoForm.controls['initialGrantDate'].invalid">
+            {{ getErrorMessage('initialGrantDate') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Renewed From Date -->
+        <mat-form-field appearance="outline">
+          <mat-label>Renewed From</mat-label>
+          <input matInput [matDatepicker]="renewedFrom" formControlName="renewedFrom">
+          <mat-datepicker-toggle matIconSuffix [for]="renewedFrom"></mat-datepicker-toggle>
+          <mat-datepicker #renewedFrom></mat-datepicker>
+          <mat-error *ngIf="keyInfoForm.controls['renewedFrom'].invalid">
+            {{ getErrorMessage('renewedFrom') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Valid Up To Date -->
+        <mat-form-field appearance="outline">
+          <mat-label>Valid Up to Date</mat-label>
+          <input matInput [matDatepicker]="validUpTo" formControlName="validUpTo">
+          <mat-datepicker-toggle matIconSuffix [for]="validUpTo"></mat-datepicker-toggle>
+          <mat-datepicker #validUpTo></mat-datepicker>
+          <mat-error *ngIf="keyInfoForm.controls['validUpTo'].invalid">
+            {{ getErrorMessage('validUpTo') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Yearly License Fee -->
+        <mat-form-field floatLabel="always" appearance="outline">
+          <mat-label>Yearly License Fee (Rs.)</mat-label>
+          <input matInput type="number" class="example-right-align" formControlName="yearlyLicenseFee" placeholder="0" />
+          <span matTextPrefix>₹&nbsp;</span>
+          <mat-error *ngIf="keyInfoForm.controls['yearlyLicenseFee'].invalid">
+            {{ getErrorMessage('yearlyLicenseFee') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- License Nature Dropdown -->
+        <mat-form-field appearance="outline">
+          <mat-label>License Nature</mat-label>
+          <mat-select formControlName="licenseNature" required>
+            <mat-option *ngFor="let licenseNature of licenseNatures" [value]="licenseNature">
+              {{ licenseNature }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="keyInfoForm.controls['licenseNature'].invalid">
+            {{ getErrorMessage('licenseNature') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Functioning Status Dropdown -->
+        <mat-form-field appearance="outline">
+          <mat-label>Functioning Status</mat-label>
+          <mat-select formControlName="functioningStatus" required>
+            <mat-option *ngFor="let functioningStatus of functioningStatuses" [value]="functioningStatus">
+              {{ functioningStatus }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="keyInfoForm.controls['functioningStatus'].invalid">
+            {{ getErrorMessage('functioningStatus') }}
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Mode of Operation Dropdown -->
+        <mat-form-field appearance="outline">
+          <mat-label>Mode Of Operation</mat-label>
+          <mat-select formControlName="modeofOperation" required>
+            <mat-option *ngFor="let modeofOperation of modeofOperations" [value]="modeofOperation">
+              {{ modeofOperation }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="keyInfoForm.controls['modeofOperation'].invalid">
+            {{ getErrorMessage('modeofOperation') }}
+          </mat-error>
+        </mat-form-field>
+
+      </div>
+    </mat-card-content>
+
+    <!-- Action Buttons -->
+    <mat-card-actions>
+      <!-- Navigate back to previous step -->
+      <button mat-stroked-button (click)="goBack()">Back</button>
+
+      <!-- Reset the form fields -->
+      <button mat-stroked-button color="warn" (click)="resetForm()">Reset</button>
+
+      <!-- Proceed to next step only if form is valid -->
+      <button mat-flat-button color="primary" (click)="proceedToNext()" [disabled]="!keyInfoForm.valid">Next</button>
+    </mat-card-actions>
+
+  </mat-card>
+</form>

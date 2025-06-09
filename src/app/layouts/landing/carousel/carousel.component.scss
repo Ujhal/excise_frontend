@@ -1,0 +1,10 @@
+::ng-deep c-carousel img {
+  width: 100%;  // Full width of the container
+  height: 400px; // Adjust height as needed
+  object-fit: cover; // Ensures the image covers the space without distortion
+}
+
+.carousel-caption {
+  color: white; /* Ensure text is white for contrast */
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.9); /* Dark shadow for better readability */
+}

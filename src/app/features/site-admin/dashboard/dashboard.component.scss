@@ -1,0 +1,90 @@
+.dashboard-container{
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    .stat-card {
+        background-color: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+        display: flex;
+        align-items: center;
+        margin-top: 0;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        &:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+            cursor: pointer;
+        }
+        .circle-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            img {
+                width: 28px;
+                height: 28px;
+            }
+        }
+        .red-bg {
+            background-color: rgba(255, 0, 0, 0.17 );
+        }
+        
+        .green-bg {
+            background-color: rgba(9, 255, 0, 0.17);
+        }
+        
+        .yellow-bg {
+            background-color: rgba(231, 184, 0, 0.17);
+        } 
+        .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1c1c1c;
+        }
+        .label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 6px;
+        }
+    }
+}
+
+
+mat-card{
+    background-color: #fff;
+    border-radius: 12px;
+    margin-top: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+    mat-card-header{
+        font-size: 20px;
+        font-weight: 500;
+        color: #ffffff;
+        padding: 16px;
+        background-color: #1C2B78;
+        border-radius: 8px 8px 0 0;
+        justify-content: center;
+    }
+    mat-card-content{
+        padding: 15px;
+    }
+}
+
+@media(max-width: 674px){
+    .stats-container{
+        grid-template-columns: 1fr 1fr;
+    }
+    mat-card-content{
+        overflow-x: scroll;
+    }
+}
