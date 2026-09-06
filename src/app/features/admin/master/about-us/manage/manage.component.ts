@@ -7,13 +7,19 @@ import { validateUploadedFile } from '../../../../../shared/utils/file-upload-va
 import {
   ExciseSecretary,
   HeadOfOrganisation,
-  AboutUs
+  AboutUs,
+  Department,
+  ProductsServices,
+  RefundCancellationPolicy
 } from '../../../../../core/models/about-us.model';
 
 type AboutUsRecord =
   | HeadOfOrganisation
   | ExciseSecretary
-  | AboutUs;
+  | AboutUs
+  | Department
+  | ProductsServices
+  | RefundCancellationPolicy;
 
 interface AboutUsFieldConfig {
   key: string;

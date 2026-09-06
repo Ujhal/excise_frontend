@@ -19,12 +19,18 @@ import { ManageComponent } from '../manage/manage.component';
 type AboutUsCategoryKey =
   | 'headsOfOrganisations'
   | 'exciseSecretaries'
-  | 'aboutUsText';
+  | 'aboutUsText'
+  | 'department'
+  | 'productsServices'
+  | 'refundCancellationPolicy';
 
 type AboutUsRecord =
   | HeadOfOrganisation
   | ExciseSecretary
-  | AboutUs;
+  | AboutUs
+  | Department
+  | ProductsServices
+  | RefundCancellationPolicy;
 
 interface AboutUsFieldConfig {
   key: string;
@@ -209,8 +215,8 @@ export class ListComponent implements OnInit {
       },
       {
         key: 'aboutUsText',
-        label: 'Department Content',
-        singularLabel: 'Department Content',
+        label: 'About Us (Home Page Card)',
+        singularLabel: 'About Us Content',
         displayedColumns: ['title', 'content', 'actions'],
         fields: [
           { key: 'title', label: 'Title', required: true },
@@ -220,6 +226,48 @@ export class ListComponent implements OnInit {
         create: (data) => this.infoPagesService.createAboutUs(data),
         update: (id, data) => this.infoPagesService.updateAboutUs(id, data),
         delete: (id) => this.infoPagesService.deleteAboutUs(id)
+      },
+      {
+        key: 'department',
+        label: 'Department',
+        singularLabel: 'Department Content',
+        displayedColumns: ['title', 'content', 'actions'],
+        fields: [
+          { key: 'title', label: 'Title', required: true },
+          { key: 'content', label: 'Content', required: true, type: 'textarea' as const }
+        ],
+        load: () => this.infoPagesService.getDepartment(),
+        create: (data) => this.infoPagesService.createDepartment(data),
+        update: (id, data) => this.infoPagesService.updateDepartment(id, data),
+        delete: (id) => this.infoPagesService.deleteDepartment(id)
+      },
+      {
+        key: 'productsServices',
+        label: 'Products & Services',
+        singularLabel: 'Products & Services',
+        displayedColumns: ['title', 'content', 'actions'],
+        fields: [
+          { key: 'title', label: 'Title', required: true },
+          { key: 'content', label: 'Content', required: true, type: 'textarea' as const }
+        ],
+        load: () => this.infoPagesService.getProductsServices(),
+        create: (data) => this.infoPagesService.createProductsServices(data),
+        update: (id, data) => this.infoPagesService.updateProductsServices(id, data),
+        delete: (id) => this.infoPagesService.deleteProductsServices(id)
+      },
+      {
+        key: 'refundCancellationPolicy',
+        label: 'Refund / Cancellation Policy',
+        singularLabel: 'Refund / Cancellation Policy',
+        displayedColumns: ['title', 'content', 'actions'],
+        fields: [
+          { key: 'title', label: 'Title', required: true },
+          { key: 'content', label: 'Content', required: true, type: 'textarea' as const }
+        ],
+        load: () => this.infoPagesService.getRefundCancellationPolicy(),
+        create: (data) => this.infoPagesService.createRefundCancellationPolicy(data),
+        update: (id, data) => this.infoPagesService.updateRefundCancellationPolicy(id, data),
+        delete: (id) => this.infoPagesService.deleteRefundCancellationPolicy(id)
       }
     ];
   }
