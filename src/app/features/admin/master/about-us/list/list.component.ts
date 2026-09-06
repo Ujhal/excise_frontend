@@ -19,17 +19,12 @@ import { ManageComponent } from '../manage/manage.component';
 type AboutUsCategoryKey =
   | 'headsOfOrganisations'
   | 'exciseSecretaries'
-  | 'aboutUsText'
-  | 'productsAndServices'
-  | 'refundCancellationPolicy';
+  | 'aboutUsText';
 
 type AboutUsRecord =
   | HeadOfOrganisation
   | ExciseSecretary
-  | AboutUs
-  | Department
-  | ProductsServices
-  | RefundCancellationPolicy;
+  | AboutUs;
 
 interface AboutUsFieldConfig {
   key: string;
@@ -181,60 +176,6 @@ export class ListComponent implements OnInit {
   private buildCategories(): AboutUsCategoryConfig[] {
     return [
       {
-        key: 'aboutUsText',
-        label: 'About Us',
-        singularLabel: 'About Us Content',
-        displayedColumns: ['title', 'headerColor', 'cardBgColor', 'content', 'actions'],
-        fields: [
-          { key: 'title', label: 'Page Title', required: true },
-          { key: 'headerColor', apiKey: 'header_color', label: 'Header Background Color', type: 'color' as const },
-          { key: 'headerTextColor', apiKey: 'header_text_color', label: 'Header Text Color', type: 'color' as const },
-          { key: 'cardBgColor', apiKey: 'card_bg_color', label: 'Card Background Color', type: 'color' as const },
-          { key: 'accentColor', apiKey: 'accent_color', label: 'Accent / Border Color', type: 'color' as const },
-          { key: 'content', label: 'Content (Markdown)', required: true, type: 'textarea' as const }
-        ],
-        load: () => this.infoPagesService.getDepartment(),
-        create: (data) => this.infoPagesService.createDepartment(data),
-        update: (id, data) => this.infoPagesService.updateDepartment(id, data),
-        delete: (id) => this.infoPagesService.deleteDepartment(id)
-      },
-      {
-        key: 'productsAndServices',
-        label: 'Products & Services',
-        singularLabel: 'Products & Services Content',
-        displayedColumns: ['title', 'headerColor', 'cardBgColor', 'content', 'actions'],
-        fields: [
-          { key: 'title', label: 'Page Title', required: true },
-          { key: 'headerColor', apiKey: 'header_color', label: 'Header Background Color', type: 'color' as const },
-          { key: 'headerTextColor', apiKey: 'header_text_color', label: 'Header Text Color', type: 'color' as const },
-          { key: 'cardBgColor', apiKey: 'card_bg_color', label: 'Card Background Color', type: 'color' as const },
-          { key: 'accentColor', apiKey: 'accent_color', label: 'Accent / Border Color', type: 'color' as const },
-          { key: 'content', label: 'Content (Markdown)', required: true, type: 'textarea' as const }
-        ],
-        load: () => this.infoPagesService.getProductsServices(),
-        create: (data) => this.infoPagesService.createProductsServices(data),
-        update: (id, data) => this.infoPagesService.updateProductsServices(id, data),
-        delete: (id) => this.infoPagesService.deleteProductsServices(id)
-      },
-      {
-        key: 'refundCancellationPolicy',
-        label: 'Refund / Cancellation Policy',
-        singularLabel: 'Refund / Cancellation Policy Content',
-        displayedColumns: ['title', 'headerColor', 'cardBgColor', 'content', 'actions'],
-        fields: [
-          { key: 'title', label: 'Page Title', required: true },
-          { key: 'headerColor', apiKey: 'header_color', label: 'Header Background Color', type: 'color' as const },
-          { key: 'headerTextColor', apiKey: 'header_text_color', label: 'Header Text Color', type: 'color' as const },
-          { key: 'cardBgColor', apiKey: 'card_bg_color', label: 'Card Background Color', type: 'color' as const },
-          { key: 'accentColor', apiKey: 'accent_color', label: 'Accent / Border Color', type: 'color' as const },
-          { key: 'content', label: 'Content (Markdown)', required: true, type: 'textarea' as const }
-        ],
-        load: () => this.infoPagesService.getRefundCancellationPolicy(),
-        create: (data) => this.infoPagesService.createRefundCancellationPolicy(data),
-        update: (id, data) => this.infoPagesService.updateRefundCancellationPolicy(id, data),
-        delete: (id) => this.infoPagesService.deleteRefundCancellationPolicy(id)
-      },
-      {
         key: 'headsOfOrganisations',
         label: 'Heads of Organisations',
         singularLabel: 'Head of Organisation',
@@ -265,6 +206,20 @@ export class ListComponent implements OnInit {
         create: (data) => this.infoPagesService.createExciseSecretary(data),
         update: (id, data) => this.infoPagesService.updateExciseSecretary(id, data),
         delete: (id) => this.infoPagesService.deleteExciseSecretary(id)
+      },
+      {
+        key: 'aboutUsText',
+        label: 'Department Content',
+        singularLabel: 'Department Content',
+        displayedColumns: ['title', 'content', 'actions'],
+        fields: [
+          { key: 'title', label: 'Title', required: true },
+          { key: 'content', label: 'Content', required: true, type: 'textarea' as const }
+        ],
+        load: () => this.infoPagesService.getAboutUs(),
+        create: (data) => this.infoPagesService.createAboutUs(data),
+        update: (id, data) => this.infoPagesService.updateAboutUs(id, data),
+        delete: (id) => this.infoPagesService.deleteAboutUs(id)
       }
     ];
   }

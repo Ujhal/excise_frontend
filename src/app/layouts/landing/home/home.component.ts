@@ -290,42 +290,22 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadMarkdown(): void {
-    this.infoPagesService.getDepartment().subscribe({
+    this.infoPagesService.getAboutUs().subscribe({
       next: (records) => {
-        if (records && records.length > 0 && records[0].content) {
-          this.markdownContent = records[0].content;
-          this.aboutUsRecords = [{ title: records[0].title || 'About Us', content: records[0].content }];
+        const validRecords = (records || []).filter(r => r.content && r.isActive !== false);
+        if (validRecords.length > 0) {
+          this.aboutUsRecords = validRecords.map(r => ({
+            title: r.title || 'About Us',
+            content: r.content
+          }));
           this.aboutUsIndex = 0;
+          this.markdownContent = this.aboutUsRecords[0].content;
         } else {
-          this.infoPagesService.getAboutUs('department').subscribe({
-            next: (aboutRecords) => {
-              const dep = aboutRecords?.find(r => r.pageKey === 'department') || aboutRecords?.[0];
-              if (dep && dep.content) {
-                this.markdownContent = dep.content;
-                this.aboutUsRecords = [{ title: dep.title || 'About Us', content: dep.content }];
-                this.aboutUsIndex = 0;
-              } else {
-                this.loadFallbackMarkdown();
-              }
-            },
-            error: () => this.loadFallbackMarkdown()
-          });
+          this.loadFallbackMarkdown();
         }
       },
       error: () => {
-        this.infoPagesService.getAboutUs('department').subscribe({
-          next: (aboutRecords) => {
-            const dep = aboutRecords?.find(r => r.pageKey === 'department') || aboutRecords?.[0];
-            if (dep && dep.content) {
-              this.markdownContent = dep.content;
-              this.aboutUsRecords = [{ title: dep.title || 'About Us', content: dep.content }];
-              this.aboutUsIndex = 0;
-            } else {
-              this.loadFallbackMarkdown();
-            }
-          },
-          error: () => this.loadFallbackMarkdown()
-        });
+        this.loadFallbackMarkdown();
       }
     });
   }

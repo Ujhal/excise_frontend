@@ -197,7 +197,7 @@ export class InfoPagesComponent implements OnInit {
           next: (records) => {
             if (records && records.length > 0) {
               const record = records[0];
-              this.applyPageRecord(record, 'About Us');
+              this.applyPageRecord(record, 'Department');
             } else {
               this.loadFallbackMarkdown(page);
             }
@@ -256,7 +256,11 @@ export class InfoPagesComponent implements OnInit {
 
     private applyPageRecord(record: any, defaultTitle: string): void {
       this.markdownContent = record.content || '';
-      this.pageTitle = record.title || defaultTitle;
+      if (defaultTitle === 'Department' && (!record.title || record.title.toLowerCase() === 'about us')) {
+        this.pageTitle = 'Department';
+      } else {
+        this.pageTitle = record.title || defaultTitle;
+      }
       this.headerColor = record.headerColor || record.header_color || '';
       this.headerTextColor = record.headerTextColor || record.header_text_color || '';
       this.cardBgColor = record.cardBgColor || record.card_bg_color || '';

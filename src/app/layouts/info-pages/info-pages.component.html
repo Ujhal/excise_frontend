@@ -8,7 +8,7 @@
   <!--ABOUT US: Department-->
   @if (page === 'department') {
     <mat-card class="department grid-card" [style.backgroundColor]="cardBgColor || null" [style.borderColor]="accentColor || null">
-      <mat-card-header [style.backgroundColor]="headerColor || null" [style.color]="headerTextColor || null">{{ pageTitle || 'About Us' }}</mat-card-header>
+      <mat-card-header [style.backgroundColor]="headerColor || null" [style.color]="headerTextColor || null">{{ pageTitle || 'Department' }}</mat-card-header>
       <mat-card-content class="card-container">
         <markdown [data]="markdownContent"></markdown>
       </mat-card-content>
