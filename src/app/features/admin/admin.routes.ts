@@ -319,7 +319,7 @@ const routes: Routes = [
           },
           {
             path: 'about-us',
-            redirectTo: 'about-us/heads-of-organisations',
+            redirectTo: 'about-us/department-content',
             pathMatch: 'full'
           },
           {

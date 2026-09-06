@@ -290,27 +290,42 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadMarkdown(): void {
-    this.infoPagesService.getAboutUs().subscribe({
+    this.infoPagesService.getDepartment().subscribe({
       next: (records) => {
-        this.aboutUsRecords = (records || [])
-          .filter(r => r.content)
-          .sort((a, b) => {
-            // Sort by ID (ascending) to show first entered record first
-            // If no ID, sort by title
-            if (a.id && b.id) return a.id - b.id;
-            return (a.title || '').localeCompare(b.title || '');
-          })
-          .map(r => ({ title: r.title || 'About Us', content: r.content }));
-
-        if (this.aboutUsRecords.length > 0) {
+        if (records && records.length > 0 && records[0].content) {
+          this.markdownContent = records[0].content;
+          this.aboutUsRecords = [{ title: records[0].title || 'About Us', content: records[0].content }];
           this.aboutUsIndex = 0;
-          this.markdownContent = this.aboutUsRecords[0].content;
         } else {
-          this.loadFallbackMarkdown();
+          this.infoPagesService.getAboutUs('department').subscribe({
+            next: (aboutRecords) => {
+              const dep = aboutRecords?.find(r => r.pageKey === 'department') || aboutRecords?.[0];
+              if (dep && dep.content) {
+                this.markdownContent = dep.content;
+                this.aboutUsRecords = [{ title: dep.title || 'About Us', content: dep.content }];
+                this.aboutUsIndex = 0;
+              } else {
+                this.loadFallbackMarkdown();
+              }
+            },
+            error: () => this.loadFallbackMarkdown()
+          });
         }
       },
       error: () => {
-        this.loadFallbackMarkdown();
+        this.infoPagesService.getAboutUs('department').subscribe({
+          next: (aboutRecords) => {
+            const dep = aboutRecords?.find(r => r.pageKey === 'department') || aboutRecords?.[0];
+            if (dep && dep.content) {
+              this.markdownContent = dep.content;
+              this.aboutUsRecords = [{ title: dep.title || 'About Us', content: dep.content }];
+              this.aboutUsIndex = 0;
+            } else {
+              this.loadFallbackMarkdown();
+            }
+          },
+          error: () => this.loadFallbackMarkdown()
+        });
       }
     });
   }

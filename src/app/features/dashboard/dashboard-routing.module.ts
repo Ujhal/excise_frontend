@@ -304,7 +304,7 @@ const routes: Routes = [
       },
       {
         path: 'admin/about-us',
-        redirectTo: 'admin/about-us/heads-of-organisations',
+        redirectTo: 'admin/about-us/department-content',
         pathMatch: 'full'
       },
       {

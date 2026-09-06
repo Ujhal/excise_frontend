@@ -182,8 +182,8 @@ export class ListComponent implements OnInit {
     return [
       {
         key: 'aboutUsText',
-        label: 'Department Content',
-        singularLabel: 'Department Content',
+        label: 'About Us',
+        singularLabel: 'About Us Content',
         displayedColumns: ['title', 'headerColor', 'cardBgColor', 'content', 'actions'],
         fields: [
           { key: 'title', label: 'Page Title', required: true },
