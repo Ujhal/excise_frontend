@@ -30,7 +30,7 @@ import { AdminService } from '../../admin/admin.service';
 })
 export class MyLicensesComponent implements OnInit, OnDestroy {
   dataSource = new MatTableDataSource<UnifiedApplication>();
-  displayedColumns: string[] = ['slNo', 'applicationId', 'type', 'establishmentName', 'approvalDate', 'actions'];
+  displayedColumns: string[] = ['applicationId', 'type', 'establishmentName', 'approvalDate', 'actions'];
   isLoading = false;
   private routerSub?: Subscription;
   private readonly renewalReminderTimerCode = 'LICENSE_RENEWAL_REMINDER_TIMER';
@@ -1355,6 +1355,17 @@ export class MyLicensesComponent implements OnInit, OnDestroy {
       return 'Company Registration';
     }
     return (application?.licenseCategoryName || raw.license_category_name || 'License');
+  }
+
+  getTypeClass(application: any): string {
+    const label = (this.getTypeLabel(application) || '').toLowerCase();
+    if (label.includes('manufacturing')) return 'type-manufacturing';
+    if (label.includes('company') || label.includes('collaboration')) return 'type-company';
+    if (label.includes('salesman') || label.includes('barman')) return 'type-salesman';
+    if (label.includes('retail') || label.includes('liquor') || label.includes('bar') || label.includes('restaurant') || label.includes('club') || label.includes('hotel')) return 'type-retail';
+    if (label.includes('homestay')) return 'type-homestay';
+    if (label.includes('renewal')) return 'type-renewal';
+    return 'type-default';
   }
 
   getDisplayName(application: UnifiedApplication): string {

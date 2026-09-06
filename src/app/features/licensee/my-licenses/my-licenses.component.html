@@ -36,14 +36,6 @@
       <div class="table-container">
         <mat-table [dataSource]="dataSource" class="licenses-table">
           
-          <!-- Serial Number Column -->
-          <ng-container matColumnDef="slNo">
-            <mat-header-cell *matHeaderCellDef class="sl-no-col">Sl No</mat-header-cell>
-            <mat-cell *matCellDef="let element; let i = index" class="sl-no-col">
-              {{ i + 1 }}
-            </mat-cell>
-          </ng-container>
-
           <!-- Application ID Column -->
           <ng-container matColumnDef="applicationId">
             <mat-header-cell *matHeaderCellDef class="app-id-col">LICENSE ID</mat-header-cell>
@@ -59,9 +51,9 @@
           <ng-container matColumnDef="type">
             <mat-header-cell *matHeaderCellDef class="type-col">Type</mat-header-cell>
             <mat-cell *matCellDef="let element" class="type-col">
-              <mat-chip class="type-chip">
+              <span class="type-chip" [ngClass]="getTypeClass(element)">
                 {{ getTypeLabel(element) }}
-              </mat-chip>
+              </span>
             </mat-cell>
           </ng-container>
 
