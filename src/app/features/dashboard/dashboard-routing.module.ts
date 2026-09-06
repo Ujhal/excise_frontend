@@ -329,6 +329,20 @@ const routes: Routes = [
         data: { authorities: ['site_admin'], aboutUsCategory: 'aboutUsText' }
       },
       {
+        path: 'admin/about-us/products-and-services',
+        loadComponent: () =>
+          import('../admin/master/about-us/list/list.component').then((m) => m.ListComponent),
+        canActivate: [UserRouteAccessService],
+        data: { authorities: ['site_admin'], aboutUsCategory: 'productsAndServices' }
+      },
+      {
+        path: 'admin/about-us/refund-and-cancellation-policy',
+        loadComponent: () =>
+          import('../admin/master/about-us/list/list.component').then((m) => m.ListComponent),
+        canActivate: [UserRouteAccessService],
+        data: { authorities: ['site_admin'], aboutUsCategory: 'refundCancellationPolicy' }
+      },
+      {
         path: 'admin/preventive-raids',
         loadComponent: () =>
           import('../admin/master/preventive-raids/list/list.component').then((m) => m.ListComponent),
