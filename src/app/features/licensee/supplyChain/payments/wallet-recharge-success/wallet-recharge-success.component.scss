@@ -17,7 +17,7 @@
     border: 1px solid rgba(15, 23, 42, 0.08);
     border-radius: 16px;
     box-shadow: 0 16px 40px rgba(2, 6, 23, 0.08);
-    padding: 22px;
+    padding: 24px;
   }
 
   .header {
@@ -69,6 +69,47 @@
     font-size: 13px;
   }
 
+  /* Amount Banner */
+  .amount-banner {
+    margin-top: 18px;
+    margin-bottom: 6px;
+    padding: 16px 20px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    &.success {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.08) 100%);
+      border: 1.5px solid rgba(16, 185, 129, 0.35);
+      .amount-val {
+        color: #047857;
+      }
+    }
+
+    &.failed {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(185, 28, 28, 0.08) 100%);
+      border: 1.5px solid rgba(239, 68, 68, 0.35);
+      .amount-val {
+        color: #b91c1c;
+      }
+    }
+
+    .amount-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .amount-val {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+  }
+
   .grid {
     padding-top: 14px;
     display: grid;
@@ -77,13 +118,18 @@
 
   .row {
     display: grid;
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: 240px 1fr;
     gap: 12px;
     align-items: center;
-    padding: 10px 12px;
+    padding: 10px 14px;
     border-radius: 12px;
     background: rgba(15, 23, 42, 0.02);
     border: 1px solid rgba(15, 23, 42, 0.06);
+  }
+
+  .sbm-row {
+    background: rgba(37, 99, 235, 0.03);
+    border: 1px dashed rgba(37, 99, 235, 0.25);
   }
 
   .label {
@@ -102,6 +148,11 @@
     flex-wrap: wrap;
   }
 
+  .highlight-val {
+    color: #1d4ed8;
+    font-weight: 800;
+  }
+
   .mono {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-weight: 650;
@@ -112,6 +163,30 @@
     font-weight: 900;
   }
 
+  .text-success {
+    color: #047857;
+  }
+
+  .text-failed {
+    color: #b91c1c;
+  }
+
+  .text-muted {
+    color: #64748b;
+    font-style: italic;
+    font-size: 12px;
+  }
+
+  .operation-pill {
+    background: rgba(99, 102, 241, 0.12);
+    color: #4338ca;
+    border: 1px solid rgba(99, 102, 241, 0.28);
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+  }
+
   .pill {
     display: inline-flex;
     align-items: center;
@@ -120,6 +195,11 @@
     font-size: 12px;
     font-weight: 800;
     text-transform: capitalize;
+
+    &.sm {
+      padding: 2px 8px;
+      font-size: 11px;
+    }
   }
 
   .pill.success {
@@ -135,6 +215,12 @@
     box-shadow: 0 8px 18px rgba(239, 68, 68, 0.12);
   }
 
+  .pill.secondary {
+    background: rgba(100, 116, 139, 0.12);
+    color: #475569;
+    border: 1px solid rgba(100, 116, 139, 0.24);
+  }
+
   .copy {
     border: 1px solid rgba(15, 23, 42, 0.14);
     background: #fff;
@@ -143,6 +229,12 @@
     padding: 4px 10px;
     font-weight: 800;
     font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: #f1f5f9;
+    }
   }
 
   .copy:disabled {
@@ -150,32 +242,69 @@
     cursor: not-allowed;
   }
 
-  .actions {
+  .notice-box {
     margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+
+    .notice-title {
+      font-weight: 800;
+      color: #1e293b;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .notice-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 12.5px;
+      color: #475569;
+      line-height: 1.6;
+    }
+  }
+
+  .actions {
+    margin-top: 20px;
     display: flex;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
     justify-content: flex-end;
   }
 
   .btn {
     border-radius: 12px;
-    padding: 10px 14px;
-    font-weight: 900;
+    padding: 10px 18px;
+    font-weight: 800;
     font-size: 13px;
     border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease-in-out;
   }
 
   .btn.primary {
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     color: #fff;
-    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.18);
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.2);
+
+    &:hover {
+      box-shadow: 0 14px 28px rgba(37, 99, 235, 0.3);
+      transform: translateY(-1px);
+    }
   }
 
   .btn.secondary {
     background: #ffffff;
     color: #0f172a;
     border-color: rgba(15, 23, 42, 0.16);
+
+    &:hover {
+      background: #f8fafc;
+    }
   }
 
   @media (max-width: 720px) {
@@ -187,7 +316,51 @@
     }
     .btn {
       width: 100%;
+      justify-content: center;
     }
   }
 }
+
+/* Print Stylesheet for clean payslip printing */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .wallet-recharge-success,
+  .wallet-recharge-success * {
+    visibility: visible;
+  }
+
+  .wallet-recharge-success {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #fff !important;
+
+    .hero {
+      background: #fff !important;
+      padding: 0 !important;
+      min-height: auto !important;
+    }
+
+    .card {
+      box-shadow: none !important;
+      border: 1px solid #cbd5e1 !important;
+      padding: 16px !important;
+    }
+
+    .copy {
+      display: none !important;
+    }
+  }
+}
+
 

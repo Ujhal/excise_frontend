@@ -1193,19 +1193,46 @@ export class DeclarationPaymentComponent implements OnInit, OnDestroy {
           next: (res: any) => {
             const submittedId = String(res?.application_id || res?.applicationId || applicationId || '').trim();
             this.submittedApplicationId = submittedId || applicationId;
+            const sbmId = String(res?.sbm_application_id || '').trim();
             try {
               if (this.submittedApplicationId) {
                 sessionStorage.setItem('new_license_submitted_application_id', this.submittedApplicationId);
               }
-              const sbmId = String(res?.sbm_application_id || '').trim();
               if (sbmId) sessionStorage.setItem('new_license_sbm_application_id', sbmId);
               if (res?.sbm_submitted) sessionStorage.setItem('new_license_sbm_submitted', '1');
             } catch {
               // no-op
             }
             this.isSubmitting = false;
-            Swal.fire('Submitted', 'Application force submitted successfully.', 'success');
-            this.cdr.detectChanges();
+
+            // Redirect immediately to the success page to display the New License payment payslip
+            this.router.navigate(['/dashboard/wallet-recharge/success'], {
+              queryParams: {
+                payment_type: 'new_license_fee',
+                paymentType: 'new_license_fee',
+                module_code: '001',
+                moduleCode: '001',
+                application_id: submittedId,
+                applicationId: submittedId,
+                amount: res?.amount || this.feeAmount || 500,
+                status: 'success',
+                payment_status: 'S',
+                transaction_id: res?.transaction_id || `FORCE-${submittedId}`,
+                transactionId: res?.transaction_id || `FORCE-${submittedId}`,
+                hoa: res?.hoa || '0039-00-800-45-02',
+                mode_of_operation: res?.mode_of_operation || res?.application?.mode_of_operation || '',
+                modeOfOperation: res?.mode_of_operation || res?.application?.mode_of_operation || '',
+                establishment_name: res?.establishment_name || res?.application?.establishment_name || '',
+                establishmentName: res?.establishment_name || res?.application?.establishment_name || '',
+                applicant_name: res?.applicant_name || res?.application?.applicant_name || '',
+                applicantName: res?.applicant_name || res?.application?.applicant_name || '',
+                sbm_application_id: sbmId,
+                sbmApplicationId: sbmId,
+                sbm_submitted: res?.sbm_submitted ? '1' : '0',
+                sbmSubmitted: res?.sbm_submitted ? '1' : '0',
+                createdAt: new Date().toISOString()
+              }
+            });
           },
           error: (err: any) => {
             this.isSubmitting = false;
@@ -1258,7 +1285,7 @@ export class DeclarationPaymentComponent implements OnInit, OnDestroy {
   onPayClick() {
     if (!this.draftApplicationId) return;
 
-  this.isProcessing = true;
+    this.isProcessing = true;
    
     const amountToSend = this.feeAmount && this.feeAmount > 0 ? this.feeAmount : undefined;
 
@@ -1276,12 +1303,7 @@ export class DeclarationPaymentComponent implements OnInit, OnDestroy {
         try {
           // Use the shared service method
           this.paymentService.launchBillDeskSDK(response, (txn) => {
-            if (txn.status === 'success' || txn.status === '0300') {
-              this.submittedApplicationId = this.draftApplicationId;
-              this.cdr.detectChanges();
-            } else {
-              Swal.fire('Payment Incomplete', 'The payment was cancelled or declined.', 'error');
-            }
+            this.handlePaymentCallback(txn);
           });
         } catch (err) {
           Swal.fire('Error', 'Payment SDK failed to load.', 'error');
@@ -1305,13 +1327,35 @@ export class DeclarationPaymentComponent implements OnInit, OnDestroy {
 }
 
   private handlePaymentCallback(txn: any) {
-    console.log("BillDesk Callback received. Status:", txn.status);
-    if (txn.status === 'success' || txn.status === '0300') {
+    console.log("BillDesk Callback received. Status:", txn?.status);
+    const isSuccess = txn?.status === 'success' || txn?.status === '0300';
+    if (isSuccess) {
       this.submittedApplicationId = this.draftApplicationId;
-      this.cdr.detectChanges();
-    } else {
-      Swal.fire('Payment Incomplete', 'Your payment was cancelled or declined. Please try again.', 'error');
+      try {
+        if (this.submittedApplicationId) {
+          sessionStorage.setItem('new_license_submitted_application_id', this.submittedApplicationId);
+        }
+      } catch {
+        // no-op
+      }
     }
+
+    this.router.navigate(['/dashboard/wallet-recharge/success'], {
+      queryParams: {
+        payment_type: 'new_license_fee',
+        paymentType: 'new_license_fee',
+        module_code: '001',
+        moduleCode: '001',
+        application_id: this.draftApplicationId,
+        applicationId: this.draftApplicationId,
+        amount: this.feeAmount || 500,
+        status: isSuccess ? 'success' : 'failed',
+        transaction_id: txn?.transaction_id || txn?.txn_id || txn?.orderid || txn?.utr || '',
+        transactionId: txn?.transaction_id || txn?.txn_id || txn?.orderid || txn?.utr || '',
+        hoa: '0039-00-800-45-02',
+        createdAt: new Date().toISOString()
+      }
+    });
   }
 
 

@@ -1,7 +1,8 @@
 <section class="wallet-recharge-success">
   <div class="hero">
     <div class="container">
-      <div class="card">
+      <div class="card" [class.print-card]="isNewLicensePayment">
+        <!-- HEADER -->
         <div class="header">
           <div class="badge" [class.failed]="statusKind === 'failed'" aria-hidden="true">
             <span class="check" *ngIf="statusKind === 'success'">&#10003;</span>
@@ -13,56 +14,177 @@
           </div>
         </div>
 
-        <div class="grid">
-          <div class="row">
-            <div class="label">Wallet Transaction ID</div>
-            <div class="value mono">
-              {{ vm.transactionId || '-' }}
-              <button class="copy" type="button" (click)="copy(vm.transactionId)" [disabled]="!vm.transactionId">Copy</button>
-            </div>
-          </div>
-
-          <div class="row" *ngIf="vm.walletTransactionId">
-            <div class="label">Record ID</div>
-            <div class="value mono">{{ vm.walletTransactionId }}</div>
-          </div>
-
-          <div class="row">
-            <div class="label">Wallet Type</div>
-            <div class="value">{{ vm.walletType || '-' }}</div>
-          </div>
-
-          <div class="row">
-            <div class="label">Head Of Account</div>
-            <div class="value mono">{{ vm.hoa || '-' }}</div>
-          </div>
-
-          <div class="row">
-            <div class="label">Amount</div>
-            <div class="value amount">&#8377;{{ formattedAmount }}</div>
-          </div>
-
-          <div class="row">
-            <div class="label">Status</div>
-            <div class="value">
+        <!-- NEW LICENSE PAYMENT PAYSLIP VIEW -->
+        <ng-container *ngIf="isNewLicensePayment">
+          <!-- Highlight Amount Banner -->
+          <div class="amount-banner" [class.success]="statusKind === 'success'" [class.failed]="statusKind === 'failed'">
+            <div class="amount-title">Total Application Fee</div>
+            <div class="amount-val">&#8377;{{ formattedAmount }}/-</div>
+            <div class="amount-status">
               <span class="pill" [class.success]="statusKind === 'success'" [class.failed]="statusKind === 'failed'">
                 {{ statusLabel }}
               </span>
             </div>
           </div>
 
-          <div class="row">
-            <div class="label">Credited At</div>
-            <div class="value">{{ createdAtLabel }}</div>
-          </div>
-        </div>
+          <div class="grid">
+            <div class="row" *ngIf="vm.applicationId">
+              <div class="label">New License Application ID</div>
+              <div class="value mono highlight-val">
+                {{ vm.applicationId }}
+                <button class="copy" type="button" (click)="copy(vm.applicationId)">Copy</button>
+              </div>
+            </div>
 
-        <div class="actions">
-          <button class="btn primary" type="button" (click)="goToWalletRecharge()">Back to Wallet Recharge</button>
-          <button class="btn secondary" type="button" (click)="goToWalletHistory()">View Wallet History</button>
-        </div>
+            <div class="row" *ngIf="vm.establishmentName">
+              <div class="label">Establishment Name</div>
+              <div class="value">{{ vm.establishmentName }}</div>
+            </div>
+
+            <div class="row" *ngIf="vm.applicantName">
+              <div class="label">Applicant Name</div>
+              <div class="value">{{ vm.applicantName }}</div>
+            </div>
+
+            <div class="row" *ngIf="vm.licenseCategory">
+              <div class="label">License Category</div>
+              <div class="value">{{ vm.licenseCategory }}</div>
+            </div>
+
+            <div class="row" *ngIf="vm.modeOfOperation">
+              <div class="label">Mode of Operation</div>
+              <div class="value">
+                <span class="operation-pill">{{ vm.modeOfOperation }}</span>
+              </div>
+            </div>
+
+            <div class="row sbm-row" *ngIf="hasSalesmanBarman">
+              <div class="label">Salesman / Barman Application ID</div>
+              <div class="value mono">
+                <span *ngIf="vm.sbmApplicationId">{{ vm.sbmApplicationId }}</span>
+                <span *ngIf="!vm.sbmApplicationId" class="text-muted">Generated with Application</span>
+                <button class="copy" type="button" *ngIf="vm.sbmApplicationId" (click)="copy(vm.sbmApplicationId)">Copy</button>
+                <span class="pill sm" [class.success]="vm.sbmSubmitted" [class.secondary]="!vm.sbmSubmitted">
+                  {{ vm.sbmSubmitted ? 'Submitted' : 'Linked' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Fee Description</div>
+              <div class="value">New License Application Fee (Module 001)</div>
+            </div>
+
+            <div class="row">
+              <div class="label">Transaction Reference (UTR)</div>
+              <div class="value mono">
+                {{ vm.transactionId || '-' }}
+                <button class="copy" type="button" (click)="copy(vm.transactionId)" [disabled]="!vm.transactionId">Copy</button>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Head Of Account (HOA)</div>
+              <div class="value mono">{{ vm.hoa || '0039-00-800-45-02' }}</div>
+            </div>
+
+            <div class="row">
+              <div class="label">Paid Amount</div>
+              <div class="value amount" [class.text-success]="statusKind === 'success'" [class.text-failed]="statusKind === 'failed'">
+                &#8377;{{ formattedAmount }}
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Transaction Status</div>
+              <div class="value">
+                <span class="pill" [class.success]="statusKind === 'success'" [class.failed]="statusKind === 'failed'">
+                  {{ statusLabel }}
+                </span>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Transaction Date & Time</div>
+              <div class="value">{{ createdAtLabel }}</div>
+            </div>
+          </div>
+
+          <!-- Application Note -->
+          <div class="notice-box" *ngIf="statusKind === 'success'">
+            <div class="notice-title">&#9432; What Happens Next?</div>
+            <ul class="notice-list">
+              <li>Your New License Application ({{ vm.applicationId }}) has been received and forwarded to the Excise Department.</li>
+              <li>You can track the live status anytime from your <b>New License Application</b> dashboard.</li>
+              <li>Keep this payslip and transaction reference for future inquiries.</li>
+            </ul>
+          </div>
+
+          <!-- Actions -->
+          <div class="actions">
+            <button class="btn secondary no-print" type="button" (click)="printPayslip()">
+              <span>&#128438; Print Payslip</span>
+            </button>
+            <button class="btn primary no-print" type="button" (click)="goToNewLicenseDashboard()">
+              <span>Back to Dashboard</span>
+            </button>
+          </div>
+        </ng-container>
+
+        <!-- WALLET RECHARGE RECEIPT VIEW (PRESERVED) -->
+        <ng-container *ngIf="!isNewLicensePayment">
+          <div class="grid">
+            <div class="row">
+              <div class="label">Wallet Transaction ID</div>
+              <div class="value mono">
+                {{ vm.transactionId || '-' }}
+                <button class="copy" type="button" (click)="copy(vm.transactionId)" [disabled]="!vm.transactionId">Copy</button>
+              </div>
+            </div>
+
+            <div class="row" *ngIf="vm.walletTransactionId">
+              <div class="label">Record ID</div>
+              <div class="value mono">{{ vm.walletTransactionId }}</div>
+            </div>
+
+            <div class="row">
+              <div class="label">Wallet Type</div>
+              <div class="value">{{ vm.walletType || '-' }}</div>
+            </div>
+
+            <div class="row">
+              <div class="label">Head Of Account</div>
+              <div class="value mono">{{ vm.hoa || '-' }}</div>
+            </div>
+
+            <div class="row">
+              <div class="label">Amount</div>
+              <div class="value amount">&#8377;{{ formattedAmount }}</div>
+            </div>
+
+            <div class="row">
+              <div class="label">Status</div>
+              <div class="value">
+                <span class="pill" [class.success]="statusKind === 'success'" [class.failed]="statusKind === 'failed'">
+                  {{ statusLabel }}
+                </span>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="label">Credited At</div>
+              <div class="value">{{ createdAtLabel }}</div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn primary" type="button" (click)="goToWalletRecharge()">Back to Wallet Recharge</button>
+            <button class="btn secondary" type="button" (click)="goToWalletHistory()">View Wallet History</button>
+          </div>
+        </ng-container>
       </div>
     </div>
   </div>
 </section>
+
 
