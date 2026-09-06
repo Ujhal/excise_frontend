@@ -111,11 +111,19 @@ export class WalletRechargeSuccessComponent {
     const pType = String(this.vm.paymentType || '').toLowerCase();
     const mCode = String(this.vm.moduleCode || '').trim();
     const appId = String(this.vm.applicationId || '').trim();
+    const isWallet = Boolean(this.vm.walletType) || Boolean(this.vm.walletTransactionId);
+
+    // If explicit wallet recharge parameters are present without license application id
+    if (isWallet && !appId && !pType.includes('license') && mCode !== '001') {
+      return false;
+    }
+
     return (
       pType.includes('new_license') ||
       pType.includes('license_fee') ||
+      pType.includes('new-license') ||
       mCode === '001' ||
-      (Boolean(appId) && (appId.toUpperCase().startsWith('NLA') || appId.toUpperCase().startsWith('APP')))
+      Boolean(appId)
     );
   }
 
