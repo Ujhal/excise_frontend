@@ -4876,7 +4876,18 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   }
 
   get applicantDisplayName(): string {
-    return String(this.applicantForm.controls.applicantCompanyName.value || '').trim() || 'Applicant';
+    const fromForm = String(this.applicantForm.controls.applicantCompanyName.value || '').trim();
+    if (fromForm) return fromForm;
+    const user = this.accountService.getCurrentUser() as any;
+    let cachedUser: any = null;
+    try {
+      const cached = localStorage.getItem('currentUser') || localStorage.getItem('user');
+      if (cached) cachedUser = JSON.parse(cached);
+    } catch {}
+    const company = user?.companyName || user?.company_name || user?.establishmentName || user?.establishment_name ||
+                    cachedUser?.companyName || cachedUser?.company_name || cachedUser?.establishmentName || cachedUser?.establishment_name;
+    const name = user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : (user?.username || cachedUser?.username || '');
+    return company || name || 'Distributor';
   }
 
   showForm(): void {
@@ -6546,7 +6557,23 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     if (!silent) this.isLoadingHologram = true;
     this.imflHoloService.getProcurements().subscribe({
       next: (data) => {
-        this.hologramProcurements = Array.isArray(data) ? data : (data as any)?.results || [];
+        const rawList = Array.isArray(data) ? data : (data as any)?.results || (data as any)?.data || [];
+        this.hologramProcurements = rawList.map((item: any) => ({
+          ...item,
+          id: item.id,
+          ref_no: item.ref_no || item.reference_no || item.referenceNo || item.refNo || 'N/A',
+          created_at: item.created_at || item.createdAt || item.submitted_date || item.created_date,
+          distributor_name: item.distributor_name || item.distributorName || item.applicant_name || item.applicantName || 'Distributor',
+          establishment_name: item.establishment_name || item.establishmentName || '',
+          license_number: item.license_number || item.licenseNumber || '',
+          quantity: Number(item.quantity || 0),
+          rate_per_piece: Number(item.rate_per_piece ?? item.ratePerPiece ?? 0.15),
+          total_amount: Number(item.total_amount ?? item.totalAmount ?? (Number(item.quantity || 0) * 0.15)),
+          payment_status: item.payment_status || item.paymentStatus || 'PENDING',
+          current_stage_name: item.current_stage_name || item.currentStageName || item.status || 'Submitted',
+          status: item.status || item.current_stage_name || 'Submitted',
+          allowed_actions: item.allowed_actions || item.allowedActions || []
+        }));
         this.isLoadingHologram = false;
         this.cdr.markForCheck();
       },

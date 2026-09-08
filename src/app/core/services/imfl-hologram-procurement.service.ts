@@ -7,27 +7,42 @@ import { environment } from '../../../environments/environment';
 export interface IMFLHologramProcurementItem {
   id?: number;
   ref_no?: string;
+  reference_no?: string;
+  referenceNo?: string;
+  refNo?: string;
   applicant?: number;
   applicant_name?: string;
+  applicantName?: string;
   applicant_email?: string;
   distributor_name?: string;
+  distributorName?: string;
   license_number?: string;
+  licenseNumber?: string;
   establishment_name?: string;
+  establishmentName?: string;
   quantity: number;
   rate_per_piece?: number;
+  ratePerPiece?: number;
   total_amount?: number;
+  totalAmount?: number;
   payment_status?: string;
+  paymentStatus?: string;
   payment_date?: string | null;
+  paymentDate?: string | null;
   payment_details?: any;
+  paymentDetails?: any;
   workflow?: number;
   workflow_name?: string;
   current_stage?: number;
   current_stage_name?: string;
+  currentStageName?: string;
   status?: string;
   remarks?: string;
   allowed_actions?: string[];
   allowedActions?: string[];
   created_at?: string;
+  createdAt?: string;
+  submitted_date?: string;
   updated_at?: string;
 }
 
@@ -36,7 +51,7 @@ export interface IMFLHologramProcurementItem {
 })
 export class ImflHologramProcurementService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.apiBaseUrl}/transactional/distributor_permit/hologram-procurement`;
+  private baseUrl = `${environment.apiBaseUrl}/transactional/distributor-permit/hologram-procurement`;
 
   private refreshSubject = new Subject<void>();
   refresh$ = this.refreshSubject.asObservable();

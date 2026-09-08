@@ -1162,8 +1162,9 @@
 
                   <!-- Distributor / Establishment -->
                   <td style="padding:14px 16px;">
-                    <div class="fw-bold text-dark">{{ item.applicant_name || item.distributor_name || 'Distributor' }}</div>
+                    <div class="fw-bold text-dark">{{ item.distributor_name || item.applicant_name || 'Distributor' }}</div>
                     <small class="text-muted d-block" *ngIf="item.establishment_name">{{ item.establishment_name }}</small>
+                    <small class="text-primary font-monospace d-block" *ngIf="item.license_number">Lic: {{ item.license_number }}</small>
                   </td>
 
                   <!-- Quantity -->

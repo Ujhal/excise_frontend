@@ -128,7 +128,6 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
     { section: 'monthly-hologram-statement', label: 'Monthly Statement', icon: 'description', group: 'Hologram' },
     { section: 'hologram-inventory', label: 'Inventory', icon: 'inventory_2', group: 'Hologram', showOnlyForOic: true },
     { section: 'commissioner-hologram-working-records', label: 'Working Records', icon: 'fact_check', group: 'Hologram', showOnlyForCommissioner: true },
-    { section: 'imfl-hologram-procurement', label: 'IMFL Hologram Procurement', icon: 'qr_code_2', group: 'Hologram', hideForOic: true, hideForPermitSection: true, hideForSiteAdmin: true },
     { section: 'secretary-licenses', label: 'Licenses', icon: 'verified' },
     { section: 'secretary-imfl-ena', label: 'IMFL & ENA', icon: 'local_shipping' },
     { section: 'salesman-barman-registration', label: 'Salesman/Barman Registration', icon: 'badge' },

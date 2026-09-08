@@ -317,7 +317,7 @@
                     <span class="nav-text">Brand Warehouse Stock</span>
                   </button>
 
-                  <button *ngIf="isItCellUser() || isCommissionerUser() || isDistributorOic() || isPermitSectionUser()" class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('hologram-procurement')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('hologram-procurement')">
+                  <button *ngIf="isItCellUser() || isCommissionerUser()" class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('hologram-procurement')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('hologram-procurement')">
                     <mat-icon class="nav-icon">qr_code_2</mat-icon>
                     <span class="nav-text">IMFL Hologram Procurement</span>
                   </button>
