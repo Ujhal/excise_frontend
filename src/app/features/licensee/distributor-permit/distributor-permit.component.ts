@@ -2374,7 +2374,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   }
 
   canUpdateBrandsArrival(rowOrApp: any): boolean {
-    if (!this.isOicDistributorUser && !this.isOfficerUser) return false;
+    if (!this.isOicDistributorUser) return false;
     const app = rowOrApp?.application || rowOrApp;
     if (!app) return false;
     const arrivalStatus = this.getArrivalStatusForRow(rowOrApp);
