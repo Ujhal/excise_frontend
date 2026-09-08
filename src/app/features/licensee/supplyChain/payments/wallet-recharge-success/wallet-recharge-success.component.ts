@@ -97,6 +97,16 @@ export class WalletRechargeSuccessComponent {
         licenseCategory: String(params.get('licenseCategory') || params.get('license_category') || '').trim()
       };
 
+      // If this is a New License Application payment, auto-redirect to the dedicated Application Fee Receipt page
+      if (this.isNewLicensePayment) {
+        const queryParams: Record<string, any> = {};
+        params.keys.forEach((key) => {
+          queryParams[key] = params.get(key);
+        });
+        this.router.navigate(['/dashboard/new-license/application-fee/receipt'], { queryParams, replaceUrl: true });
+        return;
+      }
+
       // Set fallback HOA for New License if empty
       if (this.isNewLicensePayment && !this.vm.hoa) {
         this.vm.hoa = '0039-00-800-45-02';

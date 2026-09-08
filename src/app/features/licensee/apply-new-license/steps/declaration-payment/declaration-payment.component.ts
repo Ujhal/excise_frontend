@@ -1206,7 +1206,7 @@ export class DeclarationPaymentComponent implements OnInit, OnDestroy {
             this.isSubmitting = false;
 
             // Redirect immediately to the success page to display the New License payment payslip
-            this.router.navigate(['/dashboard/wallet-recharge/success'], {
+            this.router.navigate(['/dashboard/new-license/application-fee/receipt'], {
               queryParams: {
                 payment_type: 'new_license_fee',
                 paymentType: 'new_license_fee',
@@ -1220,6 +1220,8 @@ export class DeclarationPaymentComponent implements OnInit, OnDestroy {
                 transaction_id: res?.transaction_id || `FORCE-${submittedId}`,
                 transactionId: res?.transaction_id || `FORCE-${submittedId}`,
                 hoa: res?.hoa || '0039-00-800-45-02',
+                auto_submitted: '1',
+                autoSubmitted: '1',
                 mode_of_operation: res?.mode_of_operation || res?.application?.mode_of_operation || '',
                 modeOfOperation: res?.mode_of_operation || res?.application?.mode_of_operation || '',
                 establishment_name: res?.establishment_name || res?.application?.establishment_name || '',
@@ -1340,7 +1342,7 @@ export class DeclarationPaymentComponent implements OnInit, OnDestroy {
       }
     }
 
-    this.router.navigate(['/dashboard/wallet-recharge/success'], {
+    this.router.navigate(['/dashboard/new-license/application-fee/receipt'], {
       queryParams: {
         payment_type: 'new_license_fee',
         paymentType: 'new_license_fee',
@@ -1350,9 +1352,13 @@ export class DeclarationPaymentComponent implements OnInit, OnDestroy {
         applicationId: this.draftApplicationId,
         amount: this.feeAmount || 500,
         status: isSuccess ? 'success' : 'failed',
+        payment_status: isSuccess ? 'S' : 'F',
+        auto_submitted: isSuccess ? '1' : '0',
+        autoSubmitted: isSuccess ? '1' : '0',
         transaction_id: txn?.transaction_id || txn?.txn_id || txn?.orderid || txn?.utr || '',
         transactionId: txn?.transaction_id || txn?.txn_id || txn?.orderid || txn?.utr || '',
         hoa: '0039-00-800-45-02',
+        reason: isSuccess ? '' : (txn?.error_desc || txn?.message || 'Payment could not be completed.'),
         createdAt: new Date().toISOString()
       }
     });

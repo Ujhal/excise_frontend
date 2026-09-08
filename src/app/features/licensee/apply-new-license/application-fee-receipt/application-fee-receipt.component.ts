@@ -50,19 +50,61 @@ export class ApplicationFeeReceiptComponent {
     private router: Router
   ) {
     this.route.queryParamMap.subscribe((params) => {
+      let savedAppId = '';
+      let savedSbmId = '';
+      try {
+        savedAppId = sessionStorage.getItem('new_license_submitted_application_id') || sessionStorage.getItem('new_license_draft_application_id') || '';
+        savedSbmId = sessionStorage.getItem('new_license_sbm_application_id') || '';
+      } catch {
+        // no-op
+      }
+
+      const appId = String(
+        params.get('applicationId') ||
+        params.get('application_id') ||
+        params.get('payerId') ||
+        params.get('payer_id') ||
+        savedAppId ||
+        ''
+      ).trim();
+
+      const txnId = String(
+        params.get('transactionId') ||
+        params.get('transaction_id') ||
+        params.get('utr') ||
+        params.get('txn_id') ||
+        params.get('orderid') ||
+        ''
+      ).trim();
+
+      const rawAmount = params.get('amount');
+      const parsedAmount = rawAmount !== null && rawAmount !== undefined && rawAmount !== '' ? Number(rawAmount) : 500;
+      const finalAmount = Number.isNaN(parsedAmount) || parsedAmount <= 0 ? 500 : parsedAmount;
+
+      const hoaVal = String(params.get('hoa') || params.get('head_of_account') || '0039-00-800-45-02').trim();
+      const statusVal = String(params.get('status') || params.get('payment_status') || 'success').trim();
+      const reasonVal = String(params.get('reason') || params.get('error_desc') || params.get('error') || params.get('message') || '').trim();
+      const createdVal = String(params.get('createdAt') || params.get('created_at') || params.get('date') || params.get('txnDate') || '').trim();
+
+      const autoSub = String(params.get('autoSubmitted') || params.get('auto_submitted') || (statusVal === 'success' || statusVal === 'S' ? '1' : '0')).trim();
+      const autoSubErr = String(params.get('autoSubmitError') || params.get('auto_submit_error') || '').trim();
+      const sbmSub = String(params.get('sbmSubmitted') || params.get('sbm_submitted') || '0').trim();
+      const sbmAppId = String(params.get('sbmApplicationId') || params.get('sbm_application_id') || savedSbmId || '').trim();
+      const sbmSubErr = String(params.get('sbmSubmitError') || params.get('sbm_submit_error') || '').trim();
+
       this.vm = {
-        applicationId: String(params.get('applicationId') || params.get('payerId') || '').trim(),
-        transactionId: String(params.get('transactionId') || '').trim(),
-        amount: Number(params.get('amount') || 0),
-        hoa: String(params.get('hoa') || '').trim(),
-        status: String(params.get('status') || 'success').trim(),
-        reason: String(params.get('reason') || '').trim(),
-        createdAt: String(params.get('createdAt') || '').trim(),
-        autoSubmitted: String(params.get('autoSubmitted') || '0').trim(),
-        autoSubmitError: String(params.get('autoSubmitError') || '').trim(),
-        sbmSubmitted: String(params.get('sbmSubmitted') || '0').trim(),
-        sbmApplicationId: String(params.get('sbmApplicationId') || '').trim(),
-        sbmSubmitError: String(params.get('sbmSubmitError') || '').trim()
+        applicationId: appId,
+        transactionId: txnId,
+        amount: finalAmount,
+        hoa: hoaVal,
+        status: statusVal,
+        reason: reasonVal,
+        createdAt: createdVal || new Date().toISOString(),
+        autoSubmitted: autoSub,
+        autoSubmitError: autoSubErr,
+        sbmSubmitted: sbmSub,
+        sbmApplicationId: sbmAppId,
+        sbmSubmitError: sbmSubErr
       };
       this.initialized = true;
       this.refreshDerived();
