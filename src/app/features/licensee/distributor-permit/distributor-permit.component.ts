@@ -6026,6 +6026,9 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   }
 
   getHeaderTitle(): string {
+    if (this.activeTab === 'hologram-arrival') {
+      return 'IMFL Holograms Arrival Register';
+    }
     if (this.activeTab === 'hologram-procurement') {
       return 'IMFL / Hologram Procurement';
     }
@@ -6974,8 +6977,12 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     return (this.hologramArrivals || []).reduce(
       (acc, item) => {
         acc.totalRecords += 1;
-        acc.totalHolograms += Number(item.total_holograms || 0);
-        acc.totalDamaged += Number(item.damaged_total || 0);
+        // Count holograms only after serial numbers have actually been recorded/saved
+        const isReceived = Boolean((item.hologram_from_range && item.hologram_to_range) || String(item.status || '').toUpperCase() === 'RECEIVED');
+        if (isReceived) {
+          acc.totalHolograms += Number(item.total_holograms || item.procured_quantity || 0);
+          acc.totalDamaged += Number(item.damaged_total || 0);
+        }
         return acc;
       },
       { totalRecords: 0, totalHolograms: 0, totalDamaged: 0 }
@@ -6987,7 +6994,18 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     this.imflHoloService.getHologramArrivals().subscribe({
       next: (data) => {
         const raw = Array.isArray(data) ? data : (data as any)?.results || (data as any)?.data || [];
-        this.hologramArrivals = raw;
+        this.hologramArrivals = raw.map((item: any) => ({
+          ...item,
+          imfl_hologram_ref_no: item.imfl_hologram_ref_no || item.imflHologramRefNo || item.procurement_ref_no || item.procurementRefNo || item.ref_no || item.refNo || item.reference_no || item.referenceNo || '',
+          distributor_name: item.distributor_name || item.distributorName || item.establishment_name || item.establishmentName || 'Distributor',
+          license_number: item.license_number || item.licenseNumber || '',
+          establishment_name: item.establishment_name || item.establishmentName || '',
+          total_holograms: Number(item.total_holograms ?? item.totalHolograms ?? item.procured_quantity ?? item.procuredQuantity ?? item.quantity ?? 0),
+          procured_quantity: Number(item.procured_quantity ?? item.procuredQuantity ?? item.total_holograms ?? item.totalHolograms ?? item.quantity ?? 0),
+          arrival_date: item.arrival_date || item.arrivalDate || item.created_at || item.createdAt || '',
+          recorded_by_name: item.recorded_by_name || item.recordedByName || item.received_by_username || item.receivedByUsername || 'OIC Officer',
+          status: item.status || 'PENDING_SERIALS'
+        }));
         this.isLoadingHologramArrivals = false;
         this.cdr.markForCheck();
       },
@@ -7012,6 +7030,170 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   }
 
   selectedArrivalIdToUpdate: number | null = null;
+  arrivalChunkRanges: Array<{ from: string; to: string; count: number; status?: string }> = [];
+
+  get totalArrivalChunksCount(): number {
+    return (this.arrivalChunkRanges || []).reduce((acc, c) => acc + (Number(c.count) || 0), 0);
+  }
+
+  getArrivalChunkValidation(chunk: { from: string; to: string; count: number }): { isValid: boolean; errorMsg: string } {
+    const fromStr = (chunk.from || '').trim();
+    const toStr = (chunk.to || '').trim();
+    const count = Number(chunk.count || 0);
+
+    if (!fromStr && !toStr && count === 0) {
+      return { isValid: false, errorMsg: 'Enter serial range' };
+    }
+    if (!fromStr) {
+      return { isValid: false, errorMsg: 'Enter starting serial / barcode' };
+    }
+    if (!toStr) {
+      return { isValid: false, errorMsg: 'Enter ending serial / barcode' };
+    }
+    if (count <= 0) {
+      return { isValid: false, errorMsg: 'Quantity must be greater than 0' };
+    }
+
+    const matchFrom = fromStr.match(/^(.*?)(\d+)$/);
+    const matchTo = toStr.match(/^(.*?)(\d+)$/);
+
+    if (!matchFrom || !matchTo) {
+      return { isValid: false, errorMsg: 'Serials must contain numeric ending (e.g. 1001 or HLG-001)' };
+    }
+
+    const prefixFrom = matchFrom[1];
+    const prefixTo = matchTo[1];
+    if (prefixFrom !== prefixTo) {
+      return { isValid: false, errorMsg: `Prefix mismatch ('${prefixFrom}' vs '${prefixTo}')` };
+    }
+
+    const startNum = parseInt(matchFrom[2], 10);
+    const endNum = parseInt(matchTo[2], 10);
+
+    if (endNum < startNum) {
+      return { isValid: false, errorMsg: 'Ending serial cannot be smaller than starting serial' };
+    }
+
+    const expectedCount = endNum - startNum + 1;
+    if (count !== expectedCount) {
+      return { isValid: false, errorMsg: `Range (${startNum} → ${endNum}) is ${expectedCount} pcs, but quantity is ${count} pcs` };
+    }
+
+    return { isValid: true, errorMsg: '' };
+  }
+
+  get isArrivalChunksValid(): boolean {
+    const procured = Number(this.arrivalTotalHolograms || 0);
+    if (procured <= 0) return false;
+    if (this.totalArrivalChunksCount !== procured) return false;
+    if (!this.arrivalChunkRanges || this.arrivalChunkRanges.length === 0) return false;
+    return this.arrivalChunkRanges.every(c => this.getArrivalChunkValidation(c).isValid);
+  }
+
+  addArrivalChunkRange(): void {
+    const remaining = Math.max(0, Number(this.arrivalTotalHolograms || 0) - this.totalArrivalChunksCount);
+    let nextFrom = '';
+    let nextTo = '';
+
+    const lastChunk = this.arrivalChunkRanges[this.arrivalChunkRanges.length - 1];
+    if (lastChunk && lastChunk.to) {
+      const match = String(lastChunk.to).trim().match(/^(.*?)(\d+)$/);
+      if (match) {
+        const prefix = match[1];
+        const prevEnd = parseInt(match[2], 10);
+        const padLen = match[2].length;
+        const nextStart = prevEnd + 1;
+        nextFrom = `${prefix}${String(nextStart).padStart(padLen, '0')}`;
+        if (remaining > 0) {
+          const nextEnd = nextStart + remaining - 1;
+          nextTo = `${prefix}${String(nextEnd).padStart(padLen, '0')}`;
+        }
+      }
+    }
+
+    this.arrivalChunkRanges.push({
+      from: nextFrom,
+      to: nextTo,
+      count: remaining,
+      status: 'AVAILABLE'
+    });
+    this.cdr.markForCheck();
+  }
+
+  removeArrivalChunkRange(index: number): void {
+    if (this.arrivalChunkRanges.length > 1) {
+      this.arrivalChunkRanges.splice(index, 1);
+      this.cdr.markForCheck();
+    }
+  }
+
+  onChunkFromChange(index: number): void {
+    const chunk = this.arrivalChunkRanges[index];
+    if (!chunk) return;
+    const fromStr = (chunk.from || '').trim();
+    const qty = Number(chunk.count || 0);
+
+    if (fromStr && qty > 0) {
+      const match = fromStr.match(/^(.*?)(\d+)$/);
+      if (match) {
+        const prefix = match[1];
+        const startNum = parseInt(match[2], 10);
+        const padLen = match[2].length;
+        const endNum = startNum + qty - 1;
+        chunk.to = `${prefix}${String(endNum).padStart(padLen, '0')}`;
+      }
+    } else if (fromStr && chunk.to) {
+      const matchFrom = fromStr.match(/^(.*?)(\d+)$/);
+      const matchTo = String(chunk.to).trim().match(/^(.*?)(\d+)$/);
+      if (matchFrom && matchTo && matchFrom[1] === matchTo[1]) {
+        const start = parseInt(matchFrom[2], 10);
+        const end = parseInt(matchTo[2], 10);
+        if (end >= start) {
+          chunk.count = end - start + 1;
+        }
+      }
+    }
+    this.cdr.markForCheck();
+  }
+
+  onChunkToChange(index: number): void {
+    const chunk = this.arrivalChunkRanges[index];
+    if (!chunk) return;
+    const fromStr = (chunk.from || '').trim();
+    const toStr = (chunk.to || '').trim();
+
+    if (fromStr && toStr) {
+      const matchFrom = fromStr.match(/^(.*?)(\d+)$/);
+      const matchTo = toStr.match(/^(.*?)(\d+)$/);
+      if (matchFrom && matchTo && matchFrom[1] === matchTo[1]) {
+        const start = parseInt(matchFrom[2], 10);
+        const end = parseInt(matchTo[2], 10);
+        if (end >= start) {
+          chunk.count = end - start + 1;
+        }
+      }
+    }
+    this.cdr.markForCheck();
+  }
+
+  onChunkCountChange(index: number): void {
+    const chunk = this.arrivalChunkRanges[index];
+    if (!chunk) return;
+    const fromStr = (chunk.from || '').trim();
+    const qty = Number(chunk.count || 0);
+
+    if (fromStr && qty > 0) {
+      const match = fromStr.match(/^(.*?)(\d+)$/);
+      if (match) {
+        const prefix = match[1];
+        const startNum = parseInt(match[2], 10);
+        const padLen = match[2].length;
+        const endNum = startNum + qty - 1;
+        chunk.to = `${prefix}${String(endNum).padStart(padLen, '0')}`;
+      }
+    }
+    this.cdr.markForCheck();
+  }
 
   openRecordHologramArrivalModal(): void {
     this.loadApprovedProcurementsForArrival();
@@ -7026,6 +7208,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     this.arrivalToRange = '';
     this.arrivalDamagedTotal = 0;
     this.holoArrivalRemarks = '';
+    this.arrivalChunkRanges = [{ from: '', to: '', count: 0 }];
     this.showRecordHologramArrivalModal = true;
     this.cdr.markForCheck();
   }
@@ -7037,15 +7220,36 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     this.arrivalDistributorName = item.distributor_name || '';
     this.arrivalLicenseNumber = item.license_number || '';
     this.arrivalEstablishmentName = item.establishment_name || '';
-    this.arrivalTotalHolograms = item.total_holograms || 0;
+    this.arrivalTotalHolograms = Number(item.total_holograms || (item as any).procured_quantity || 0);
     this.arrivalFromRange = item.hologram_from_range || '';
     this.arrivalToRange = item.hologram_to_range || '';
     this.arrivalDamagedTotal = item.damaged_total || 0;
     this.holoArrivalRemarks = item.remarks || '';
-    this.showRecordHologramArrivalModal = true;
-    if (this.arrivalFromRange && !this.arrivalToRange) {
-      this.calculateArrivalToRange();
+
+    if (item.hologram_ranges && item.hologram_ranges.length > 0) {
+      this.arrivalChunkRanges = item.hologram_ranges.map(r => ({
+        from: r.from || '',
+        to: r.to || '',
+        count: Number(r.count || 0) || this.arrivalTotalHolograms,
+        status: r.status || 'AVAILABLE'
+      }));
+    } else if (this.arrivalFromRange) {
+      this.arrivalChunkRanges = [{
+        from: this.arrivalFromRange,
+        to: this.arrivalToRange,
+        count: this.arrivalTotalHolograms,
+        status: 'AVAILABLE'
+      }];
+    } else {
+      this.arrivalChunkRanges = [{
+        from: '',
+        to: '',
+        count: this.arrivalTotalHolograms,
+        status: 'AVAILABLE'
+      }];
     }
+
+    this.showRecordHologramArrivalModal = true;
     this.cdr.markForCheck();
   }
 
@@ -7064,9 +7268,8 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       this.arrivalDistributorName = selected.distributor_name || '';
       this.arrivalLicenseNumber = selected.license_number || '';
       this.arrivalEstablishmentName = selected.establishment_name || '';
-      const remaining = Math.max(0, (selected.quantity || 0) - (selected.already_received || 0));
-      this.arrivalTotalHolograms = remaining || selected.quantity || 0;
-      this.calculateArrivalToRange();
+      this.arrivalTotalHolograms = Number(selected.quantity || 0);
+      this.arrivalChunkRanges = [{ from: '', to: '', count: this.arrivalTotalHolograms }];
     }
     this.cdr.markForCheck();
   }
@@ -7101,22 +7304,28 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       });
       return;
     }
-    if (!this.arrivalFromRange.trim() || !this.arrivalToRange.trim()) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Range Required',
-        text: 'Please enter both Hologram Range From and Hologram Range To.'
-      });
-      return;
-    }
     if (Number(this.arrivalTotalHolograms || 0) <= 0) {
       Swal.fire({
         icon: 'warning',
         title: 'Invalid Quantity',
-        text: 'Total holograms received must be greater than zero.'
+        text: 'Total holograms procured must be greater than zero.'
       });
       return;
     }
+
+    if (!this.isArrivalChunksValid) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Range Count Mismatch',
+        text: `Total holograms across all ranges (${this.totalArrivalChunksCount}) must exactly match the procured total (${this.arrivalTotalHolograms}). Please fill valid From and To values.`
+      });
+      return;
+    }
+
+    const firstChunk = this.arrivalChunkRanges[0];
+    const lastChunk = this.arrivalChunkRanges[this.arrivalChunkRanges.length - 1];
+    const fromRange = firstChunk ? firstChunk.from.trim() : '';
+    const toRange = lastChunk ? lastChunk.to.trim() : '';
 
     this.isSubmittingHologramArrival = true;
     const payload: Partial<IMFLHologramArrivalItem> = {
@@ -7126,8 +7335,14 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       license_number: this.arrivalLicenseNumber,
       establishment_name: this.arrivalEstablishmentName,
       total_holograms: Number(this.arrivalTotalHolograms || 0),
-      hologram_from_range: this.arrivalFromRange.trim(),
-      hologram_to_range: this.arrivalToRange.trim(),
+      hologram_from_range: fromRange,
+      hologram_to_range: toRange,
+      hologram_ranges: this.arrivalChunkRanges.map(r => ({
+        from: r.from.trim(),
+        to: r.to.trim(),
+        count: Number(r.count || 0),
+        status: 'AVAILABLE'
+      })),
       damaged_total: Number(this.arrivalDamagedTotal || 0),
       damaged_holograms_range: [],
       remarks: this.holoArrivalRemarks,
@@ -7145,7 +7360,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
         Swal.fire({
           icon: 'success',
           title: this.selectedArrivalIdToUpdate ? 'Serial Numbers Saved!' : 'Arrival Recorded!',
-          text: `Saved hologram serial range (${this.arrivalFromRange} to ${this.arrivalToRange}) for Ref #${this.arrivalRefNo}.`
+          text: `Saved ${this.totalArrivalChunksCount.toLocaleString()} holograms (${fromRange} to ${toRange}) for Ref #${this.arrivalRefNo}.`
         });
         this.selectedArrivalIdToUpdate = null;
         this.loadHologramArrivals();
@@ -7153,7 +7368,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.isSubmittingHologramArrival = false;
-        console.error('Error recording hologram arrival:', err);
+        console.error('Error saving hologram serials/arrival:', err);
         Swal.fire({
           icon: 'error',
           title: 'Failed to Save',

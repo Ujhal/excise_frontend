@@ -51,24 +51,44 @@ export interface IMFLHologramArrivalItem {
   procurement?: number;
   procurement_id?: number;
   procurement_ref_no?: string;
+  procurementRefNo?: string;
   imfl_hologram_ref_no?: string;
+  imflHologramRefNo?: string;
   distributor_name?: string;
+  distributorName?: string;
   license_number?: string;
+  licenseNumber?: string;
   establishment_name?: string;
+  establishmentName?: string;
   total_holograms: number;
+  totalHolograms?: number;
+  procured_quantity?: number;
+  procuredQuantity?: number;
+  payment_status?: string;
+  paymentStatus?: string;
   hologram_from_range: string;
+  hologramFromRange?: string;
   hologram_to_range: string;
+  hologramToRange?: string;
   hologram_ranges?: Array<{ from: string; to: string; count?: number; status?: string }>;
+  hologramRanges?: Array<{ from: string; to: string; count?: number; status?: string }>;
   damaged_total?: number;
+  damagedTotal?: number;
   damaged_holograms_range?: any[];
+  damagedHologramsRange?: any[];
   received_by?: number;
   received_by_username?: string;
+  receivedByUsername?: string;
   recorded_by_name?: string;
+  recordedByName?: string;
   arrival_date?: string;
+  arrivalDate?: string;
   status?: string;
   remarks?: string;
   created_at?: string;
+  createdAt?: string;
   updated_at?: string;
+  updatedAt?: string;
 }
 
 @Injectable({

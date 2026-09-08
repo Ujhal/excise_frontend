@@ -14,18 +14,6 @@
       </h4>
     </div>
 
-    <div class="d-flex align-items-center gap-2" *ngIf="isOfficer && activeTab === 'hologram-arrival'">
-      <button
-        type="button"
-        class="btn btn-success btn-sm fw-bold px-3 py-2 text-white bg-gradient border-0 rounded-pill shadow-sm"
-        (click)="onApplyNewClick()"
-        style="background: linear-gradient(135deg, #10b981, #059669) !important; color: #ffffff !important; display: inline-flex; align-items: center;"
-      >
-        <i class="bi bi-qr-code-scan me-1"></i>
-        Record Hologram Arrival
-      </button>
-    </div>
-
     <div class="d-flex align-items-center gap-2" *ngIf="!isOfficer && activeTab === 'hologram-procurement'">
       <button
         type="button"
