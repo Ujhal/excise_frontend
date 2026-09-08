@@ -3385,13 +3385,13 @@ export class UnifiedSupplyChainViewComponent implements OnInit {
         }
 
         const rawAllowedActions = this.applicationData.allowedActions ?? this.applicationData['allowed_actions'];
-        if (Array.isArray(rawAllowedActions) && rawAllowedActions.length > 0) {
+        if (Array.isArray(rawAllowedActions)) {
             let actions = (rawAllowedActions as string[])
                 .map(a => String(a || '').toUpperCase().trim())
                 .filter(a => !!a && a !== 'VIEW');
 
             if (this.isImflDistributorPermitSource() && this.isLicenseeContext()) {
-                const stageId = Number(this.applicationData?.['current_stage_id'] || (this.applicationData as any)?.current_stage?.id || 0);
+                const stageId = Number(this.applicationData?.currentStage || this.applicationData?.['current_stage_id'] || (this.applicationData as any)?.current_stage?.id || 0);
                 const statusStr = String(this.applicationData?.['status'] || '').toUpperCase();
                 const isPaid = Boolean(this.applicationData?.['is_excise_duty_fee_paid'] || this.applicationData?.['isExciseDutyFeePaid']);
                 if (!isPaid && (stageId === 154 || statusStr === 'AWAITING PAYMENT' || statusStr === 'AWAITING_PAYMENT')) {
@@ -3408,9 +3408,7 @@ export class UnifiedSupplyChainViewComponent implements OnInit {
                 actions = actions.filter(a => a !== 'REJECT');
             }
 
-            if (actions.length > 0) {
-                return Array.from(new Set(actions));
-            }
+            return Array.from(new Set(actions));
         }
 
         if (this.applicationType === 'cancellation' && !this.isLicenseeContext()) {
@@ -3421,32 +3419,44 @@ export class UnifiedSupplyChainViewComponent implements OnInit {
             return ['APPROVE'];
         }
 
-        const status = String(this.applicationData.status || '').toUpperCase();
-        const stageId = Number((this.applicationData as any)?.current_stage?.id || (this.applicationData as any)?.current_stage_id || 0);
-        const stageName = String((this.applicationData as any)?.current_stage?.name || (this.applicationData as any)?.current_stage_name || '').toUpperCase();
+        const status = String(this.applicationData.status || '').toUpperCase().trim();
+        const stageId = Number(this.applicationData.currentStage || (this.applicationData as any)?.current_stage?.id || (this.applicationData as any)?.current_stage_id || 0);
+        const stageName = String(this.applicationData.currentStageName || (this.applicationData as any)?.current_stage?.name || (this.applicationData as any)?.current_stage_name || '').toUpperCase().trim();
 
-        if (
-            stageId === 153 ||
-            status.includes('FORWARDED TO COMMISSIONER') ||
-            status.includes('APPROVED') ||
-            status.includes('REJECTED') ||
-            stageName.includes('FORWARDED TO COMMISSIONER') ||
-            stageName.includes('APPROVED') ||
-            stageName.includes('REJECTED')
-        ) {
-            const context = this.getUserContext();
-            if (context === USER_CONTEXTS.PERMIT_SECTION) {
+        const context = this.getUserContext();
+
+        if (context === USER_CONTEXTS.PERMIT_SECTION) {
+            // If already forwarded to Commissioner, in payment stage, or finished, Permit Section has no action
+            if (
+                stageId === 153 ||
+                stageId === 154 ||
+                stageId === 157 ||
+                stageId === 151 ||
+                stageId === 152 ||
+                stageId === 150 ||
+                status.includes('COMMISSIONER') ||
+                status.includes('AWAITING') ||
+                status.includes('APPROVED') ||
+                status.includes('REJECTED') ||
+                stageName.includes('COMMISSIONER') ||
+                stageName.includes('AWAITING') ||
+                stageName.includes('APPROVED') ||
+                stageName.includes('REJECTED')
+            ) {
+                // Only allow actions if it's the payslip verification stage for permit section (stage 156)
+                if (stageId === 156 || (status.includes('PAYSLIP') && !status.includes('COMMISSIONER'))) {
+                    return ['VERIFY', 'FORWARD', 'REJECT'];
+                }
                 return [];
             }
         }
 
         let actions: string[] = [];
-        const context = this.getUserContext();
 
         if (context === USER_CONTEXTS.COMMISSIONER) {
             if (this.applicationType === 'cancellation' || String(this.applicationType).includes('revalidation')) {
                 actions = ['APPROVE'];
-            } else if (stageId === 162 || status.includes('COMMISSIONER')) {
+            } else if (stageId === 162 || status.includes('COMMISSIONER') || stageName.includes('COMMISSIONER')) {
                 actions = ['APPROVE', 'REJECT'];
             } else if (stageId === 160) {
                 actions = ['APPROVE'];
@@ -3456,17 +3466,24 @@ export class UnifiedSupplyChainViewComponent implements OnInit {
                 actions = ['APPROVE', 'FORWARD', 'REJECT', 'RAISE_OBJECTION'];
             }
         } else if (context === USER_CONTEXTS.PERMIT_SECTION) {
-            if (!status.includes('FORWARD') && !status.includes('APPROVED') && !status.includes('REJECTED') && !stageName.includes('FORWARD') && !stageName.includes('APPROVED')) {
+            if (status.includes('PAYSLIP') || status.includes('PAYMENT')) {
+                actions = ['VERIFY', 'FORWARD', 'REJECT'];
+            } else if (
+                status === 'SUBMITTED' ||
+                status === 'PENDING' ||
+                status === 'DRAFT' ||
+                status.includes('PERMIT SECTION') ||
+                stageId === 148 ||
+                stageId === 149
+            ) {
                 if (this.applicationType === 'cancellation' || this.applicationType === 'revalidation') {
                     actions = ['FORWARD', 'REJECT'];
-                } else if (status.includes('PAYSLIP') || status.includes('PAYMENT')) {
-                    actions = ['VERIFY', 'FORWARD', 'REJECT'];
                 } else {
                     actions = ['FORWARD', 'APPROVE', 'REJECT', 'RAISE_OBJECTION'];
                 }
             }
         } else if (context === USER_CONTEXTS.LICENSEE) {
-            if (status.includes('PAYMENT') || status.includes('AWAITING_PAYMENT')) {
+            if (status.includes('PAYMENT') || status.includes('AWAITING_PAYMENT') || status.includes('APPROVED COMMISSIONER')) {
                 actions = ['PAY'];
             }
         }
@@ -3489,7 +3506,7 @@ export class UnifiedSupplyChainViewComponent implements OnInit {
             finalActions = finalActions.filter(a => a !== 'PAY' && a !== 'FORCE_PAY');
         }
 
-        return finalActions.length > 0 ? finalActions : null;
+        return finalActions;
     }
 
     canViewSiteEnquiryReport(): boolean {

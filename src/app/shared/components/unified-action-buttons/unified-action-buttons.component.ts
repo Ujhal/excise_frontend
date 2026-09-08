@@ -305,35 +305,58 @@ export class UnifiedActionButtonsComponent implements OnInit, OnChanges {
   }
 
   private getRequisitionFallbackActionConfigs(): ActionButtonConfig[] {
-    const status = String(this.item?.status || '').toUpperCase();
+    const status = String(this.item?.status || '').toUpperCase().trim();
+
+    // Terminal/final stages - no actions for anyone
+    if (status === 'APPROVED' || status === 'REJECTED' || status.includes('REJECTEDBYCOMMISSIONER') || status.includes('CANCELLED')) {
+      return [];
+    }
+
     if (this.context === 'commissioner') {
-      if (status.includes('PAYSLIP') || status.includes('VERIF') || status.includes('FINAL')) {
+      // 1. Final payslip approval stage
+      if (status.includes('PAYSLIP COMMISSIONER') || (status.includes('PAYSLIP') && status.includes('COMMISSIONER'))) {
         return [
           { action: 'APPROVE', label: 'Approve & Issue Permit', icon: 'verified_user', color: 'success', tooltip: 'Approve & Issue Permit' },
           { action: 'REJECT', label: 'Reject Application', icon: 'cancel', color: 'warn', tooltip: 'Reject Application' }
         ];
       }
-      return [
-        { action: 'APPROVE', label: 'Approve Payment Stage', icon: 'check_circle', color: 'success', tooltip: 'Approve Payment Stage' },
-        { action: 'FORWARD', label: 'Forward Application', icon: 'send', color: 'primary', tooltip: 'Forward Application' },
-        { action: 'REJECT', label: 'Reject', icon: 'cancel', color: 'warn', tooltip: 'Reject Application' },
-        { action: 'RAISE_OBJECTION', label: 'Raise Objection', icon: 'warning', color: 'warn', tooltip: 'Raise Objection' }
-      ];
+      // 2. Initial requisition review stage
+      if (status.includes('FORWARDED COMMISSIONER') || status.includes('FORWARDED TO COMMISSIONER') || (status.includes('COMMISSIONER') && !status.includes('PAYSLIP') && !status.includes('APPROVED'))) {
+        return [
+          { action: 'APPROVE', label: 'Approve Payment Stage', icon: 'check_circle', color: 'success', tooltip: 'Approve Payment Stage' },
+          { action: 'REJECT', label: 'Reject', icon: 'cancel', color: 'warn', tooltip: 'Reject Application' },
+          { action: 'RAISE_OBJECTION', label: 'Raise Objection', icon: 'warning', color: 'warn', tooltip: 'Raise Objection' }
+        ];
+      }
+      return [];
     } else if (this.context === 'permit-section') {
-      if (status.includes('PAYSLIP') || status.includes('PAYMENT')) {
+      // 1. Payslip review stage at Permit Section
+      if (status.includes('PAYSLIP') && !status.includes('COMMISSIONER')) {
         return [
           { action: 'VERIFY', label: 'Verify Payslip', icon: 'verified', color: 'success', tooltip: 'Verify Payslip & Forward' },
           { action: 'FORWARD', label: 'Forward to Commissioner', icon: 'send', color: 'primary', tooltip: 'Forward to Commissioner' },
           { action: 'REJECT', label: 'Reject', icon: 'cancel', color: 'warn', tooltip: 'Reject Application' }
         ];
       }
-      return [
-        { action: 'FORWARD', label: 'Forward to Commissioner', icon: 'send', color: 'primary', tooltip: 'Forward to Commissioner' },
-        { action: 'REJECT', label: 'Reject', icon: 'cancel', color: 'warn', tooltip: 'Reject Application' },
-        { action: 'RAISE_OBJECTION', label: 'Raise Objection', icon: 'warning', color: 'warn', tooltip: 'Raise Objection' }
-      ];
+      // 2. Initial submission / pending at Permit Section
+      if (
+        status === 'SUBMITTED' ||
+        status === 'PENDING' ||
+        status === 'DRAFT' ||
+        status.includes('FORWARDED PERMIT SECTION') ||
+        status.includes('FORWARDED TO PERMIT SECTION') ||
+        (status.includes('PERMIT SECTION') && !status.includes('COMMISSIONER') && !status.includes('PAYSLIP'))
+      ) {
+        return [
+          { action: 'FORWARD', label: 'Forward to Commissioner', icon: 'send', color: 'primary', tooltip: 'Forward to Commissioner' },
+          { action: 'REJECT', label: 'Reject', icon: 'cancel', color: 'warn', tooltip: 'Reject Application' },
+          { action: 'RAISE_OBJECTION', label: 'Raise Objection', icon: 'warning', color: 'warn', tooltip: 'Raise Objection' }
+        ];
+      }
+      // Any other status (Forwarded Commissioner, Awaiting Payment, etc.) - no actions for permit-section
+      return [];
     } else if (this.context === 'licensee') {
-      if (status.includes('PAYMENT') || status.includes('AWAITING_PAYMENT')) {
+      if (status.includes('PAYMENT') || status.includes('AWAITING_PAYMENT') || status.includes('APPROVED COMMISSIONER')) {
         return [
           { action: 'PAY', label: 'Make Payment / Upload Payslip', icon: 'payment', color: 'primary', tooltip: 'Make Payment' }
         ];
