@@ -3298,6 +3298,132 @@
   </div>
 </div>
 
+<!-- Payment Deduction Confirmation Modal for IMFL Hologram Procurement -->
+<div class="modal-backdrop fade show" *ngIf="showHologramPaymentModal" style="z-index: 1050;"></div>
+<div
+  class="modal fade show d-block"
+  tabindex="-1"
+  *ngIf="showHologramPaymentModal"
+  style="z-index: 1055;"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content shadow-lg border-0 rounded-3 overflow-hidden">
+      <!-- Modal Header -->
+      <div class="modal-header text-white py-3 px-4 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;">
+        <h5 class="modal-title m-0 fw-bold d-flex align-items-center text-white" style="font-size: 1.15rem;">
+          <mat-icon class="me-2" style="font-size: 22px; width: 22px; height: 22px;">account_balance_wallet</mat-icon>
+          Hologram Wallet Payment Confirmation
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="closeHologramPaymentModal()"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="modal-body p-4 bg-light" *ngIf="hologramPaymentItem">
+        <!-- Application Summary Card -->
+        <div class="card border-0 shadow-sm rounded-3 mb-3" style="background: #eff6ff; border-left: 4px solid #2563eb !important;">
+          <div class="card-body p-3">
+            <div class="row g-2 align-items-center">
+              <div class="col-md-4">
+                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Application Ref</small>
+                <span class="fw-bold text-primary font-monospace">{{ hologramPaymentItem.ref_no || 'N/A' }}</span>
+              </div>
+              <div class="col-md-4">
+                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Quantity</small>
+                <span class="fw-bold text-dark">{{ (hologramPaymentItem.quantity || 0) | number }} Holograms</span>
+              </div>
+              <div class="col-md-4">
+                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Rate per Hologram</small>
+                <span class="fw-bold text-dark">₹{{ (hologramPaymentItem.rate_per_piece || 0.15) | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Insufficient Balance Alert Banner -->
+        <div class="alert alert-danger d-flex align-items-center py-2.5 px-3 mb-3 border-danger border-opacity-25 rounded-3" *ngIf="isHologramWalletInsufficient">
+          <mat-icon class="me-2 text-danger flex-shrink-0" style="font-size: 20px;">error_outline</mat-icon>
+          <span class="fw-medium small text-danger">
+            Insufficient Hologram Wallet balance. Current balance is ₹{{ hologramCurrentWalletBalance | number:'1.2-2' }}, but required amount is ₹{{ hologramPaymentPayableAmount | number:'1.2-2' }}. Please recharge your Hologram Wallet.
+          </span>
+        </div>
+
+        <!-- Section Title -->
+        <h6 class="fw-bold text-primary mb-3" style="color: #2563eb !important;">Wallet Deduction Preview</h6>
+
+        <!-- Wallet Deduction Table -->
+        <div class="table-responsive bg-white rounded-3 border shadow-sm mb-4">
+          <table class="table align-middle mb-0" style="font-size: 14px;">
+            <thead style="background-color: #dbeafe; color: #1e3a8a;">
+              <tr>
+                <th class="py-2.5 px-3">Wallet</th>
+                <th class="py-2.5 px-3">Fee Breakdown</th>
+                <th class="py-2.5 px-3 text-end">Current Balance</th>
+                <th class="py-2.5 px-3 text-end">Total Deduction</th>
+                <th class="py-2.5 px-3 text-end">Balance After Proceed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="py-2.5 px-3">
+                  <div class="fw-bold text-dark" style="font-size: 14px;">Hologram Wallet</div>
+                  <div class="text-muted" style="font-size: 11.5px;">(IMFL Hologram Procurement)</div>
+                </td>
+                <td class="py-2.5 px-3">
+                  <div style="font-size: 12.5px;">{{ (hologramPaymentItem.quantity || 0) | number }} Pcs &#64; <strong class="text-dark">₹{{ (hologramPaymentItem.rate_per_piece || 0.15) | number:'1.2-2' }}</strong> / piece</div>
+                </td>
+                <td class="py-2.5 px-3 text-end fw-semibold">₹{{ hologramCurrentWalletBalance | number:'1.2-2' }}</td>
+                <td class="py-2.5 px-3 text-end text-danger fw-bold">- ₹{{ hologramPaymentPayableAmount | number:'1.2-2' }}</td>
+                <td class="py-2.5 px-3 text-end fw-bold" [ngClass]="hologramBalanceAfterPayment < 0 ? 'text-danger' : 'text-success'">
+                  ₹{{ hologramBalanceAfterPayment | number:'1.2-2' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Agreement Checkbox -->
+        <div class="p-3 bg-white border rounded-3 d-flex align-items-start gap-2 shadow-sm">
+          <input
+            type="checkbox"
+            class="form-check-input mt-1 flex-shrink-0"
+            id="hologramPaymentAgreementCheck"
+            [(ngModel)]="isHologramPaymentAgreed"
+          />
+          <label class="form-check-label fw-semibold text-dark small cursor-pointer" for="hologramPaymentAgreementCheck">
+            I understand that ₹{{ hologramPaymentPayableAmount | number:'1.2-2' }} will be deducted immediately from my Hologram Wallet balance for this procurement.
+          </label>
+        </div>
+      </div>
+
+      <!-- Modal Footer Action Buttons -->
+      <div class="modal-footer bg-white border-top py-2.5 px-4 d-flex justify-content-end gap-2">
+        <button
+          type="button"
+          class="btn btn-outline-secondary px-4 fw-semibold"
+          (click)="closeHologramPaymentModal()"
+          [disabled]="isSubmittingHologramPayment"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary px-4 fw-bold shadow-sm"
+          style="background: linear-gradient(135deg, #2563eb, #1d4ed8) !important; border: none !important;"
+          (click)="confirmExecuteHologramPayment()"
+          [disabled]="!isHologramPaymentAgreed || isHologramWalletInsufficient || isSubmittingHologramPayment"
+        >
+          <span class="spinner-border spinner-border-sm me-1" *ngIf="isSubmittingHologramPayment"></span>
+          Proceed & Pay ₹{{ hologramPaymentPayableAmount | number:'1.2-2' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ========================================== -->
 <!-- ========================================== -->
 <!-- UPDATE BRANDS ARRIVAL FULL PAGE (OIC WORKFLOW) -->

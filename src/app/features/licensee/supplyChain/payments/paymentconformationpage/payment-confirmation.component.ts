@@ -1216,6 +1216,10 @@ private initializeWalletContextAndLoadData(): void {
     const reference = String(this.pickAny(row, ['reference_no', 'referenceNo'], '')).toUpperCase();
     const remarks = String(this.pickAny(row, ['remarks', 'remark', 'description'], '')).toLowerCase();
 
+    const entryType = String(this.pickAny(row, ['entry_type', 'entryType'], '')).toLowerCase();
+    const isCredit = entryType === 'cr' || entryType === 'credit';
+    const isRefund = remarks.includes('refund') || sourceModule.includes('refund') || sourceModule.includes('cancellation');
+
     if (reference.startsWith('DP/') || reference.startsWith('SP/')) {
       return 'Dry Day Permit Fee Paid';
     }
@@ -1244,7 +1248,26 @@ private initializeWalletContextAndLoadData(): void {
     if (sourceModule.includes('license') && sourceModule.includes('fee')) {
       return 'Licensee Fee';
     }
-    if (sourceModule.includes('hologram_procurement') || txnId.startsWith('HGP-')) {
+    if (
+      sourceModule.includes('imfl_hologram') ||
+      sourceModule.includes('hologram') ||
+      txnId.startsWith('HGP-') ||
+      txnId.startsWith('TXN-IMFLHOLO') ||
+      txnId.startsWith('TXN-HOLO') ||
+      reference.startsWith('IMFL_HOLO') ||
+      reference.startsWith('HOLO') ||
+      remarks.includes('hologram') ||
+      (!isCredit && walletType === 'hologram')
+    ) {
+      if (
+        sourceModule.includes('imfl') ||
+        txnId.includes('IMFL') ||
+        reference.includes('IMFL') ||
+        remarks.includes('imfl') ||
+        sourceModule.includes('distributor')
+      ) {
+        return 'IMFL Hologram Procurement';
+      }
       return 'Hologram Procurement';
     }
     if (sourceModule.includes('cancellation') || txnId.startsWith('CAN-') || reference.startsWith('CAN/') || reference.startsWith('IMFLCAN/')) {
@@ -1269,23 +1292,22 @@ private initializeWalletContextAndLoadData(): void {
       return 'IMFL Revalidation Fee';
     }
     if (sourceModule.includes('transit') || txnId.startsWith('TRP-') || reference.startsWith('TRP/')) {
-      const entryType = String(this.pickAny(row, ['entry_type', 'entryType'], '')).toLowerCase();
       const pStatus = String(this.pickAny(row, ['payment_status', 'paymentStatus'], '')).toLowerCase();
-      const isRefund = entryType === 'cr' || entryType === 'credit' || pStatus === 'refunded' || remarks.includes('refund');
+      const isTransitRefund = isCredit || pStatus === 'refunded' || remarks.includes('refund');
 
       if (txnId.includes('BOTTLING_FEE') || txnId.includes('BOTTLING') || walletType.includes('bottling') || remarks.includes('bottling')) {
-        return isRefund ? 'Transit - Bottling Fee Refund' : 'Transit - Bottling Fee';
+        return isTransitRefund ? 'Transit - Bottling Fee Refund' : 'Transit - Bottling Fee';
       }
       if (txnId.includes('ADDITIONAL_EXCISE') || sourceModule.includes('additional') || walletType === 'additional_excise' || remarks.includes('additional')) {
-        return isRefund ? 'Transit - Additional Excise Duty Refund' : 'Transit - Additional Excise Duty';
+        return isTransitRefund ? 'Transit - Additional Excise Duty Refund' : 'Transit - Additional Excise Duty';
       }
       if (txnId.includes('EXCISE_DUTY') || (sourceModule.includes('excise') && walletType === 'excise') || remarks.includes('excise duty')) {
-        return isRefund ? 'Transit - Excise Duty Refund' : 'Transit - Excise Duty';
+        return isTransitRefund ? 'Transit - Excise Duty Refund' : 'Transit - Excise Duty';
       }
       if (walletType === 'education_cess' || sourceModule.includes('cess') || remarks.includes('education')) {
-        return isRefund ? 'Transit - Education Duty Refund' : 'Transit - Education Duty';
+        return isTransitRefund ? 'Transit - Education Duty Refund' : 'Transit - Education Duty';
       }
-      return isRefund ? 'Transit Permit Refund' : 'Transit Permit Fee';
+      return isTransitRefund ? 'Transit Permit Refund' : 'Transit Permit Fee';
     }
     if (sourceModule.includes('requisition') || txnId.includes('REQ') || reference.includes('REQ') || reference.startsWith('NHP/')) {
       if (txnId.includes('EXCISE-ADD') || sourceModule.includes('additional') || remarks.includes('add. ed') || remarks.includes('additional excise') || walletType === 'additional_excise') {
@@ -1299,7 +1321,7 @@ private initializeWalletContextAndLoadData(): void {
       }
       return 'IMFL Requisition Fee';
     }
-    if (sourceModule.includes('wallet')) {
+    if (sourceModule.includes('wallet') || (isCredit && !isRefund)) {
       return 'Wallet Recharge';
     }
     return 'Other';
@@ -4523,7 +4545,7 @@ private initializeWalletContextAndLoadData(): void {
         id: history?.id || String((items[0] as any)?.id || ref),
         txnId,
         type,
-        paymentFor: 'Hologram Procurement',
+        paymentFor: history?.paymentFor || 'IMFL Hologram Procurement',
         amount,
         reference: ref,
         status,
@@ -4540,7 +4562,7 @@ private initializeWalletContextAndLoadData(): void {
     for (const row of historyRows) {
       const ref = String(row?.reference || '').trim().toUpperCase();
       if (ref && seenRefs.has(ref)) continue;
-      rows.push({ ...row, paymentFor: 'Hologram Procurement' });
+      rows.push({ ...row, paymentFor: row?.paymentFor || 'IMFL Hologram Procurement' });
     }
 
     return rows.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());

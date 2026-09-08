@@ -6724,46 +6724,157 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  showHologramPaymentModal = false;
+  hologramPaymentItem: IMFLHologramProcurementItem | null = null;
+  hologramCurrentWalletBalance = 0;
+  isHologramPaymentAgreed = false;
+  isSubmittingHologramPayment = false;
+
+  get hologramPaymentPayableAmount(): number {
+    if (!this.hologramPaymentItem) return 0;
+    return Number(this.hologramPaymentItem.total_amount || (this.hologramPaymentItem.quantity * 0.15));
+  }
+
+  get hologramBalanceAfterPayment(): number {
+    return this.hologramCurrentWalletBalance - this.hologramPaymentPayableAmount;
+  }
+
+  get isHologramWalletInsufficient(): boolean {
+    return this.hologramBalanceAfterPayment < 0;
+  }
+
   onHologramWalletPay(item: IMFLHologramProcurementItem): void {
+    if (!item) return;
+    this.hologramPaymentItem = item;
+    this.isHologramPaymentAgreed = false;
+    this.isSubmittingHologramPayment = false;
+
+    const user = this.accountService.getCurrentUser() || (this.profileService as any)?.profile;
+    const licenseeId = String(
+      item.license_number ||
+      (user as any)?.licensee_id ||
+      (user as any)?.license_number ||
+      (user as any)?.licenseId ||
+      (user as any)?.username ||
+      ''
+    ).trim();
+
+    this.permitService.getWalletBalances().subscribe({
+      next: (res: any) => {
+        let holoBal = Number(res?.hologram_balance ?? res?.hologramBalance ?? 0);
+        if (holoBal > 0) {
+          this.hologramCurrentWalletBalance = holoBal;
+          this.showHologramPaymentModal = true;
+          this.cdr.markForCheck();
+          return;
+        }
+
+        if (licenseeId) {
+          this.paymentIntegrationService.getWalletBalance(licenseeId, true).subscribe({
+            next: (wbRes: any) => {
+              const wallets = wbRes?.results || [];
+              const holoW = wallets.find((w: any) => String(w.wallet_type || w.wallet_type_code || '').toLowerCase() === 'hologram');
+              if (holoW) {
+                holoBal = Number(holoW.current_balance || 0);
+              }
+              this.hologramCurrentWalletBalance = holoBal;
+              this.showHologramPaymentModal = true;
+              this.cdr.markForCheck();
+            },
+            error: () => {
+              this.hologramCurrentWalletBalance = holoBal;
+              this.showHologramPaymentModal = true;
+              this.cdr.markForCheck();
+            }
+          });
+        } else {
+          this.hologramCurrentWalletBalance = holoBal;
+          this.showHologramPaymentModal = true;
+          this.cdr.markForCheck();
+        }
+      },
+      error: () => {
+        if (licenseeId) {
+          this.paymentIntegrationService.getWalletBalance(licenseeId, true).subscribe({
+            next: (wbRes: any) => {
+              const wallets = wbRes?.results || [];
+              const holoW = wallets.find((w: any) => String(w.wallet_type || w.wallet_type_code || '').toLowerCase() === 'hologram');
+              this.hologramCurrentWalletBalance = holoW ? Number(holoW.current_balance || 0) : 0;
+              this.showHologramPaymentModal = true;
+              this.cdr.markForCheck();
+            },
+            error: () => {
+              this.hologramCurrentWalletBalance = 0;
+              this.showHologramPaymentModal = true;
+              this.cdr.markForCheck();
+            }
+          });
+        } else {
+          this.hologramCurrentWalletBalance = 0;
+          this.showHologramPaymentModal = true;
+          this.cdr.markForCheck();
+        }
+      }
+    });
+  }
+
+  closeHologramPaymentModal(): void {
+    this.showHologramPaymentModal = false;
+    this.hologramPaymentItem = null;
+    this.isHologramPaymentAgreed = false;
+    this.isSubmittingHologramPayment = false;
+    this.cdr.markForCheck();
+  }
+
+  confirmExecuteHologramPayment(): void {
+    if (!this.hologramPaymentItem?.id) return;
+    if (this.isHologramWalletInsufficient) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Insufficient Balance',
+        text: 'Your Hologram Wallet balance is insufficient to complete this payment. Please recharge your wallet.'
+      });
+      return;
+    }
+    if (!this.isHologramPaymentAgreed) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Agreement Required',
+        text: 'Please accept the payment deduction agreement before proceeding.'
+      });
+      return;
+    }
+
+    const item = this.hologramPaymentItem;
     const itemId: number | undefined = item?.id;
     if (!itemId) return;
-    const amount = Number(item.total_amount || (item.quantity * 0.15));
-    Swal.fire({
-      title: 'Pay from Hologram Wallet?',
-      html: `You are about to pay <b>₹${amount.toFixed(2)}</b> for <b>${Number(item.quantity).toLocaleString()}</b> holograms directly from your Hologram Wallet balance.`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#2563eb',
-      cancelButtonColor: '#64748b',
-      confirmButtonText: 'Yes, Pay Now'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.isProcessingHologramAction = true;
-        this.imflHoloService.payViaWallet(itemId).subscribe({
-          next: (res) => {
-            this.isProcessingHologramAction = false;
-            Swal.fire({
-              icon: 'success',
-              title: 'Payment Successful!',
-              text: `₹${amount.toFixed(2)} deducted from Hologram Wallet. Reference: ${res.data?.payment_details?.transaction_id || ''}`
-            });
-            this.loadHologramProcurements();
-            if (this.showHologramDetailsModal && this.selectedHologramItem?.id === item.id) {
-              this.selectedHologramItem = { ...this.selectedHologramItem, ...res.data };
-            }
-            this.cdr.markForCheck();
-          },
-          error: (err) => {
-            this.isProcessingHologramAction = false;
-            console.error('Wallet payment error:', err);
-            Swal.fire({
-              icon: 'error',
-              title: 'Payment Failed',
-              text: err?.error?.error || err?.error?.detail || 'Wallet payment failed. Please check your Hologram Wallet balance.'
-            });
-            this.cdr.markForCheck();
-          }
+    const amount = this.hologramPaymentPayableAmount;
+
+    this.isSubmittingHologramPayment = true;
+    this.imflHoloService.payViaWallet(itemId).subscribe({
+      next: (res) => {
+        this.isSubmittingHologramPayment = false;
+        this.closeHologramPaymentModal();
+        Swal.fire({
+          icon: 'success',
+          title: 'Payment Successful!',
+          text: `₹${amount.toFixed(2)} deducted from Hologram Wallet. Reference: ${res.data?.payment_details?.transaction_id || ''}`
         });
+        this.loadHologramProcurements();
+        if (this.showHologramDetailsModal && this.selectedHologramItem?.id === item.id) {
+          this.selectedHologramItem = { ...this.selectedHologramItem, ...res.data };
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isSubmittingHologramPayment = false;
+        console.error('Wallet payment error:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Payment Failed',
+          text: err?.error?.error || err?.error?.detail || 'Wallet payment failed. Please check your Hologram Wallet balance.'
+        });
+        this.cdr.markForCheck();
       }
     });
   }
