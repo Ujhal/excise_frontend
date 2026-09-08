@@ -24,6 +24,7 @@ import { UnifiedActionsService } from '../../../shared/services/unified-actions.
 
 import { SidebarPendingBadgeService } from '../../../shared/services/sidebar-pending-badge.service';
 import { ImflHologramProcurementService, IMFLHologramProcurementItem } from '../../../core/services/imfl-hologram-procurement.service';
+import { RoleService } from '../../../core/services/role.service';
 
 type DistributorPermitStatusFilter = 'all' | 'approved' | 'pending' | 'under_process' | 'objection' | 'rejected';
 type DistributorPermitStatusGroup = Exclude<DistributorPermitStatusFilter, 'all'>;
@@ -64,6 +65,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly accountService = inject(AccountService);
+  private readonly roleService = inject(RoleService);
   private readonly profileService = inject(SupplyChainProfileService);
   private readonly unifiedActionsService = inject(UnifiedActionsService);
   private readonly sidebarPendingBadgeService = inject(SidebarPendingBadgeService);
@@ -5101,6 +5103,10 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       return true;
     }
     return normalized.includes('officer') || normalized.includes('oic') || normalized.includes('permit') || normalized.includes('commissioner');
+  }
+
+  get isOfficer(): boolean {
+    return this.isOfficerUser;
   }
 
   get isOicDistributorUser(): boolean {

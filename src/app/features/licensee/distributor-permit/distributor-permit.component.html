@@ -1232,11 +1232,11 @@
                         <i class="bi bi-eye"></i>
                       </button>
 
-                      <!-- Pay via Wallet button (if status is Approved for Payment and payment pending) -->
+                      <!-- Pay via Wallet button (only visible to distributor/licensee when approved for payment) -->
                       <button
                         type="button"
                         class="btn btn-sm btn-success fw-bold px-2.5 py-1 text-white shadow-sm d-flex align-items-center gap-1"
-                        *ngIf="(item.status === 'Approved for Payment' || item.current_stage_name === 'Approved for Payment') && item.payment_status !== 'COMPLETED'"
+                        *ngIf="!isOfficerUser && (item.status === 'Approved for Payment' || item.current_stage_name === 'Approved for Payment') && item.payment_status !== 'COMPLETED'"
                         (click)="onHologramWalletPay(item)"
                         [disabled]="isProcessingHologramAction"
                         title="Pay Total Amount from Hologram Wallet"
@@ -4987,11 +4987,11 @@
       </button>
 
       <div class="d-flex align-items-center gap-2">
-        <!-- Pay Button in Details Modal -->
+        <!-- Pay Button in Details Modal (only for licensee/distributor) -->
         <button
           type="button"
           class="btn btn-success fw-bold px-3 py-1.5 text-white shadow-sm d-flex align-items-center gap-1"
-          *ngIf="(selectedHologramItem.status === 'Approved for Payment' || selectedHologramItem.current_stage_name === 'Approved for Payment') && selectedHologramItem.payment_status !== 'COMPLETED'"
+          *ngIf="!isOfficerUser && (selectedHologramItem.status === 'Approved for Payment' || selectedHologramItem.current_stage_name === 'Approved for Payment') && selectedHologramItem.payment_status !== 'COMPLETED'"
           (click)="onHologramWalletPay(selectedHologramItem)"
           [disabled]="isProcessingHologramAction"
         >
