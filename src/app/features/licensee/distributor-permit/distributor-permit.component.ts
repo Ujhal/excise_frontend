@@ -6672,14 +6672,51 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
 
   onHologramActionClick(item: IMFLHologramProcurementItem, action: string): void {
     const actionUpper = action.toUpperCase();
-    this.pendingHologramAction = {
-      item,
-      action: actionUpper,
-      title: actionUpper.replace(/_/g, ' ')
-    };
-    this.actionRemarksText = '';
-    this.actionRemarksModalOpen = true;
+
+    // Rejections require a reason/remarks modal
+    if (actionUpper.includes('REJECT')) {
+      this.pendingHologramAction = {
+        item,
+        action: actionUpper,
+        title: actionUpper.replace(/_/g, ' ')
+      };
+      this.actionRemarksText = '';
+      this.actionRemarksModalOpen = true;
+      this.cdr.markForCheck();
+      return;
+    }
+
+    // Direct single-click execution for FORWARD, APPROVE, etc.
+    if (!item || !item.id) return;
+    const itemId: number = item.id;
+    this.isProcessingHologramAction = true;
     this.cdr.markForCheck();
+
+    this.imflHoloService.performAction(itemId, actionUpper, `Action '${actionUpper}' performed`).subscribe({
+      next: (res) => {
+        this.isProcessingHologramAction = false;
+        Swal.fire({
+          icon: 'success',
+          title: 'Action Successful',
+          text: `Action '${actionUpper}' executed successfully.`
+        });
+        this.loadHologramProcurements();
+        if (this.showHologramDetailsModal && this.selectedHologramItem?.id === item.id) {
+          this.selectedHologramItem = { ...this.selectedHologramItem, ...res.data };
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isProcessingHologramAction = false;
+        console.error('Error performing action:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Action Failed',
+          text: err?.error?.error || err?.error?.detail || 'Failed to perform workflow action.'
+        });
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   confirmHologramAction(): void {
@@ -6688,7 +6725,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     const itemId: number = item.id!;
     this.isProcessingHologramAction = true;
 
-    this.imflHoloService.performAction(itemId, action, this.actionRemarksText).subscribe({
+    this.imflHoloService.performAction(itemId, action, this.actionRemarksText || `Action '${action}' performed`).subscribe({
       next: (res) => {
         this.isProcessingHologramAction = false;
         this.actionRemarksModalOpen = false;
