@@ -218,10 +218,10 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   getOfficerStatusGroup(row: DistributorPermitRow | any): DistributorPermitStatusGroup {
     const arrivalStatus = this.getArrivalStatusForRow(row);
     if (arrivalStatus === 'approved') return 'approved';
-    if (arrivalStatus === 'under_review') return 'under_process';
+    if (arrivalStatus === 'under_review') return 'pending';
     if (arrivalStatus === 'rejected') return 'rejected';
-    if (arrivalStatus === 'pending_entry') return 'pending';
-    return row.statusGroup || 'pending';
+    if (arrivalStatus === 'pending_entry') return 'under_process';
+    return row.statusGroup || 'under_process';
   }
 
   openApplyForm(): void {

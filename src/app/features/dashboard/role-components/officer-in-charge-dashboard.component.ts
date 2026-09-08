@@ -13,6 +13,8 @@ import { UnifiedActionsService } from '../../../shared/services/unified-actions.
 import { HologramDataService } from '../../licensee/supplyChain/services/hologram-data.service';
 import { SidebarPendingBadgeService } from '../../../shared/services/sidebar-pending-badge.service';
 import { DistributorPermitService } from '../../../core/services/distributor-permit.service';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 type HologramRequestCategory = 'PENDING' | 'UNDER_PROCESS' | 'APPROVED' | 'REJECTED';
 
@@ -294,17 +296,38 @@ export class OfficerInChargeDashboardComponent implements OnInit {
 
   public isDistributorOic(): boolean {
     const user: any = this.accountService.getCurrentUser() || {};
+    let roleId = Number(user?.role?.id || user?.roleId || user?.role_id || 0);
+    if (!roleId) {
+      try {
+        const cached = localStorage.getItem('currentUser') || localStorage.getItem('user');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          roleId = Number(parsed?.roleId || parsed?.role?.id || parsed?.user?.roleId || parsed?.user?.role?.id || 0);
+        }
+      } catch {}
+    }
     const assignment = user?.oicAssignment || user?.oic_assignment;
     const assignmentType = String(assignment?.assignmentType || assignment?.assignment_type || '').toLowerCase();
     if (assignmentType === 'distributor') return true;
     const username = String(user?.username || '').toLowerCase();
     const estName = String(assignment?.establishmentName || assignment?.establishment_name || '').toLowerCase();
-    return username.startsWith('do') || estName.includes('distributor') || assignmentType.includes('distributor');
+    const roleName = String(user?.role?.name || user?.role?.displayName || user?.role || '').toLowerCase();
+    return (
+      username.startsWith('do') ||
+      username.startsWith('oo') ||
+      estName.includes('distributor') ||
+      assignmentType.includes('distributor') ||
+      roleName.includes('distributor')
+    );
   }
 
   ngOnInit(): void {
     this.currentScopedLicenseId = this.resolveCurrentScopedLicenseId();
     this.refreshDashboardCounts();
+
+    this.sidebarPendingBadgeService.refreshNeeded$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.refreshDashboardCounts());
 
     if (!this.isDistributorOic()) {
       this.hologramService.requestUpdate$
@@ -312,10 +335,6 @@ export class OfficerInChargeDashboardComponent implements OnInit {
         .subscribe(() => this.refreshDashboardCounts());
 
       this.hologramService.dailyRegisterUpdate$
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe(() => this.refreshDashboardCounts());
-
-      this.sidebarPendingBadgeService.refreshNeeded$
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => this.refreshDashboardCounts());
     }
@@ -337,12 +356,25 @@ export class OfficerInChargeDashboardComponent implements OnInit {
   }
 
   private loadImflCasesPendingCount(): void {
-    this.distributorPermitService.getDashboardCounts('requisition', true).subscribe({
-      next: (res: any) => {
-        this.imflCasesAppliedCount = Number(res?.applied || res?.total || 0);
-        this.imflCasesPendingCount = Number(res?.pending || 0);
-        this.imflCasesApprovedCount = Number(res?.approved || 0);
-        this.imflCasesRejectedCount = Number(res?.rejected || 0);
+    const req$ = this.distributorPermitService.getDashboardCounts('requisition', true).pipe(catchError(() => of(null)));
+    const arr$ = this.distributorPermitService.getDashboardCounts('brand-arrival', true).pipe(catchError(() => of(null)));
+
+    forkJoin({ req: req$, arr: arr$ }).subscribe({
+      next: ({ req, arr }) => {
+        const reqApplied = Number(req?.applied || req?.total || 0);
+        const reqPending = Number(req?.pending || 0);
+        const reqApproved = Number(req?.approved || 0);
+        const reqRejected = Number(req?.rejected || 0);
+
+        const arrApplied = Number(arr?.applied || arr?.total || 0);
+        const arrPending = Number(arr?.pending || 0);
+        const arrApproved = Number(arr?.approved || 0);
+        const arrRejected = Number(arr?.rejected || 0);
+
+        this.imflCasesAppliedCount = Math.max(reqApplied, arrApplied);
+        this.imflCasesPendingCount = reqPending + arrPending;
+        this.imflCasesApprovedCount = Math.max(reqApproved, arrApproved);
+        this.imflCasesRejectedCount = reqRejected + arrRejected;
       },
       error: () => {
         this.distributorPermitService.listApplications().subscribe({
@@ -443,6 +475,16 @@ export class OfficerInChargeDashboardComponent implements OnInit {
 
   getDashboardStatistics() {
     if (this.isDistributorOic()) {
+      if (this.selectedModule && this.selectedModule !== 'all' && this.moduleCounts[this.selectedModule]) {
+        const counts = this.moduleCounts[this.selectedModule];
+        return {
+          applied: counts.applied || 0,
+          pending: counts.pending || 0,
+          approved: counts.approved || 0,
+          rejected: counts.rejected || 0,
+          dailyEntry: 0
+        };
+      }
       return {
         applied: this.imflCasesAppliedCount,
         pending: this.imflCasesPendingCount,

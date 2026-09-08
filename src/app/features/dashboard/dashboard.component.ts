@@ -1179,7 +1179,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
           } else {
             this.supplyChainPendingCounts['distributor-permit'] = reqStats.pending + (reqStats.objection ?? 0);
             this.supplyChainPendingCounts['distributor-permit-requisition'] = reqStats.pending + (reqStats.objection ?? 0);
-            this.supplyChainPendingCounts['imfl-requisition-cases'] = reqStats.pending || arrStats.pending;
+            this.supplyChainPendingCounts['imfl-requisition-cases'] = reqStats.pending;
             this.supplyChainPendingCounts['distributor-permit-revalidation'] = revStats.pending + (revStats.objection ?? 0);
             this.supplyChainPendingCounts['distributor-permit-cancellation'] = canStats.pending + (canStats.objection ?? 0);
             this.supplyChainPendingCounts['distributor-permit-brand-arrival'] = arrStats.pending;
@@ -3726,8 +3726,15 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const username = String(u?.username || accountUser?.username || '').toLowerCase();
     const estName = String(assignment?.establishmentName || assignment?.establishment_name || '').toLowerCase();
+    const roleName = String(u?.role?.name || u?.role?.displayName || accountUser?.role?.name || '').toLowerCase();
 
-    return username.startsWith('do') || estName.includes('distributor') || assignmentType.includes('distributor');
+    return (
+      username.startsWith('do') ||
+      username.startsWith('oo') ||
+      estName.includes('distributor') ||
+      assignmentType.includes('distributor') ||
+      roleName.includes('distributor')
+    );
   }
 
   isDistributorPermitSection(): boolean {

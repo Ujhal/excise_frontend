@@ -412,8 +412,8 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
     if (count > 0) return count;
     if (key === 'imfl-requisition-cases') {
       return Number(
-        this.pendingBadgeCounts?.['distributor-permit-brand-arrival'] ||
-        this.pendingBadgeCounts?.['brand-arrival'] ||
+        this.pendingBadgeCounts?.['imfl-requisition-cases'] ||
+        this.pendingBadgeCounts?.['imfl-requisition'] ||
         this.pendingBadgeCounts?.['distributor-permit-requisition'] ||
         this.pendingBadgeCounts?.['distributor-permit'] ||
         0
@@ -421,9 +421,10 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
     }
     if (key === 'distributor-permit-brand-arrival' || key === 'brand-arrival') {
       return Number(
-        this.pendingBadgeCounts?.['imfl-requisition-cases'] ||
         this.pendingBadgeCounts?.['distributor-permit-brand-arrival'] ||
         this.pendingBadgeCounts?.['brand-arrival'] ||
+        this.pendingBadgeCounts?.['imfl-brand-arrival'] ||
+        this.pendingBadgeCounts?.['update-brands-arrival'] ||
         0
       );
     }

@@ -223,8 +223,8 @@ export class SidebarPendingBadgeService {
       case 'imfl-permit':
       case 'distributor-permit-requisition':
       case 'imfl-requisition':
-        return 'requisition';
       case 'imfl-requisition-cases':
+        return 'requisition';
       case 'distributor-permit-brand-arrival':
       case 'imfl-brand-arrival':
       case 'brand-arrival':
@@ -276,10 +276,8 @@ export class SidebarPendingBadgeService {
       case 'imfl-permit':
       case 'distributor-permit-requisition':
       case 'imfl-requisition':
-        return this.fetchDistributorPermitDashboardCounts('requisition', audience).pipe(map(d => d.total));
-
       case 'imfl-requisition-cases':
-        return this.fetchDistributorPermitDashboardCounts('brand-arrival', audience).pipe(map(d => d.total));
+        return this.fetchDistributorPermitDashboardCounts('requisition', audience).pipe(map(d => d.total));
 
       case 'distributor-permit-brand-arrival':
       case 'imfl-brand-arrival':
