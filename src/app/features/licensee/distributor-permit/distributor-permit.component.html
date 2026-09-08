@@ -82,6 +82,46 @@
 
         </div>
 
+        <!-- Statistics Row for IMFL Holograms Arrival -->
+        <div class="row g-3 mb-4 stats-row" *ngIf="activeTab === 'hologram-arrival'">
+          <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="summary-card total-application-requests">
+              <div class="card-icon"><i class="bi bi-box-seam"></i></div>
+              <div class="card-content">
+                <h3 class="card-value">{{ hologramArrivalCounts.totalRecords }}</h3>
+                <p class="card-label">Arrival Batches</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="summary-card approved-requests">
+              <div class="card-icon"><i class="bi bi-qr-code"></i></div>
+              <div class="card-content">
+                <h3 class="card-value">{{ hologramArrivalCounts.totalHolograms | number }}</h3>
+                <p class="card-label">Total Holograms Received</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="summary-card under-process-requests">
+              <div class="card-icon"><i class="bi bi-shield-check"></i></div>
+              <div class="card-content">
+                <h3 class="card-value">{{ (hologramArrivalCounts.totalHolograms - hologramArrivalCounts.totalDamaged) | number }}</h3>
+                <p class="card-label">Active Usable Holograms</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="summary-card rejected-requests">
+              <div class="card-icon"><i class="bi bi-exclamation-triangle"></i></div>
+              <div class="card-content">
+                <h3 class="card-value">{{ hologramArrivalCounts.totalDamaged | number }}</h3>
+                <p class="card-label">Damaged Holograms</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Statistics Row for Hologram Procurement -->
         <div class="row g-3 mb-4 stats-row" *ngIf="activeTab === 'hologram-procurement'">
           <!-- Total Applications -->
@@ -171,7 +211,7 @@
         </div>
 
         <!-- Statistics Row for Application Requests (Requisition, Revalidation, Cancellation, Brand Arrival) -->
-        <div class="row g-3 mb-4 stats-row" *ngIf="activeTab !== 'brand-warehouse' && activeTab !== 'hologram-procurement'">
+        <div class="row g-3 mb-4 stats-row" *ngIf="activeTab !== 'brand-warehouse' && activeTab !== 'hologram-procurement' && activeTab !== 'hologram-arrival'">
           <div class="col-xl col-lg-6 col-md-6">
             <div
               class="summary-card total-application-requests summary-card-clickable"
@@ -283,6 +323,33 @@
         </div>
       </div>
 
+      <!-- IMFL Holograms Arrival Filters -->
+      <div class="compact-filter-section mb-3" *ngIf="activeTab === 'hologram-arrival'">
+        <div class="filter-row">
+          <span class="filter-label-text">
+            <i class="bi bi-funnel me-1"></i>
+            <small class="text-muted">Filters:</small>
+          </span>
+
+          <input
+            type="text"
+            class="form-control form-control-sm filter-input filter-input--search"
+            placeholder="Search by Ref No / Distributor / Range..."
+            [(ngModel)]="hologramArrivalSearchFilter"
+            aria-label="Search Hologram Arrivals"
+          />
+
+          <button
+            class="btn btn-outline-danger btn-sm filter-clear-btn"
+            type="button"
+            (click)="hologramArrivalSearchFilter = ''; hologramArrivalStatusFilter = 'all'"
+            *ngIf="hologramArrivalSearchFilter || hologramArrivalStatusFilter !== 'all'"
+          >
+            <i class="bi bi-x-circle"></i> Clear
+          </button>
+        </div>
+      </div>
+
       <!-- Hologram Procurement Filters -->
       <div class="compact-filter-section mb-3" *ngIf="activeTab === 'hologram-procurement'">
         <div class="filter-row">
@@ -311,7 +378,7 @@
       </div>
 
       <!-- Application Filters (Only for Requisition / Revalidation / Cancellation / Brand Arrival tabs) -->
-      <div class="compact-filter-section mb-3" *ngIf="activeTab !== 'brand-warehouse' && activeTab !== 'hologram-procurement'">
+      <div class="compact-filter-section mb-3" *ngIf="activeTab !== 'brand-warehouse' && activeTab !== 'hologram-procurement' && activeTab !== 'hologram-arrival'">
         <div class="filter-row">
           <span class="filter-label-text">
             <i class="bi bi-funnel me-1"></i>
@@ -1283,6 +1350,152 @@
           <div class="p-5 text-center text-muted" *ngIf="isLoadingHologram">
             <mat-progress-spinner mode="indeterminate" diameter="30" class="mx-auto mb-2"></mat-progress-spinner>
             <span>Loading hologram applications...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 6: IMFL Holograms Arrival Register Table -->
+      <div class="register-table" *ngIf="activeTab === 'hologram-arrival'">
+        <div class="card shadow-sm border-0 rounded-3">
+          <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-qr-code-scan text-success fs-5"></i>
+              <h5 class="m-0 fw-bold text-dark">IMFL Holograms Arrival Register</h5>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <button
+                type="button"
+                class="btn btn-success btn-sm fw-bold px-3 py-1.5 text-white shadow-sm"
+                *ngIf="isOfficerUser"
+                (click)="openRecordHologramArrivalModal()"
+              >
+                <i class="bi bi-plus-circle me-1"></i> Record Hologram Arrival
+              </button>
+              <span class="badge bg-success bg-opacity-10 text-success fw-semibold px-3 py-2 rounded-pill">
+                {{ filteredHologramArrivals.length }} Record{{ filteredHologramArrivals.length !== 1 ? 's' : '' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="table-responsive" *ngIf="!isLoadingHologramArrivals && filteredHologramArrivals.length > 0">
+            <table class="table table-hover align-middle mb-0 dp-table">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-3">Sl. No</th>
+                  <th>Procurement Ref No</th>
+                  <th>Distributor / Licensee</th>
+                  <th>Total Holograms</th>
+                  <th>Hologram Serial Range (From &rarr; To)</th>
+                  <th>Damaged Holograms</th>
+                  <th>Arrival Date & Time</th>
+                  <th>Recorded By (OIC)</th>
+                  <th>Status</th>
+                  <th class="text-center pe-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of filteredHologramArrivals; let i = index">
+                  <td class="ps-3 fw-semibold text-muted">{{ i + 1 }}</td>
+                  <td>
+                    <span class="fw-bold text-primary">{{ item.imfl_hologram_ref_no || item.procurement_ref_no || 'N/A' }}</span>
+                  </td>
+                  <td>
+                    <div class="fw-bold text-dark">{{ item.distributor_name || 'Distributor' }}</div>
+                    <small class="text-muted" *ngIf="item.license_number">Lic: {{ item.license_number }}</small>
+                  </td>
+                  <td>
+                    <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-2.5 py-1.5 fs-6">
+                      {{ item.total_holograms | number }}
+                    </span>
+                  </td>
+                  <td>
+                    <ng-container *ngIf="item.hologram_from_range && item.hologram_to_range; else notEnteredRange">
+                      <span class="badge bg-info bg-opacity-10 text-dark fw-bold font-monospace px-2.5 py-1.5 border border-info border-opacity-25">
+                        {{ item.hologram_from_range }} &rarr; {{ item.hologram_to_range }}
+                      </span>
+                    </ng-container>
+                    <ng-template #notEnteredRange>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-warning text-dark fw-bold px-2 py-0.5 shadow-sm"
+                        *ngIf="isOfficerUser"
+                        (click)="openEnterSerialsModal(item)"
+                      >
+                        <i class="bi bi-pencil-square me-1"></i> Enter Serials
+                      </button>
+                      <span class="badge bg-warning bg-opacity-10 text-warning-emphasis fw-semibold px-2 py-1" *ngIf="!isOfficerUser">
+                        Pending Entry
+                      </span>
+                    </ng-template>
+                  </td>
+                  <td>
+                    <span class="badge bg-danger bg-opacity-10 text-danger fw-semibold px-2 py-1">
+                      {{ item.damaged_total || 0 }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="small fw-semibold text-dark">{{ item.arrival_date | date:'dd MMM yyyy' }}</div>
+                    <div class="small text-muted" style="font-size: 11px;">{{ item.arrival_date | date:'hh:mm a' }}</div>
+                  </td>
+                  <td>
+                    <span class="small fw-semibold text-dark">{{ item.recorded_by_name || item.received_by_username || 'OIC Officer' }}</span>
+                  </td>
+                  <td>
+                    <span
+                      class="badge px-2.5 py-1 rounded-pill fw-semibold"
+                      [ngClass]="item.hologram_from_range ? 'bg-success text-white' : 'bg-warning text-dark'"
+                    >
+                      <i class="bi me-1" [ngClass]="item.hologram_from_range ? 'bi-check-circle-fill' : 'bi-clock-history'"></i>
+                      {{ item.hologram_from_range ? (item.status || 'RECEIVED') : 'Awaiting Serials' }}
+                    </span>
+                  </td>
+                  <td class="text-center pe-3">
+                    <div class="d-inline-flex gap-1 align-items-center">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-success fw-bold px-2.5 py-1 shadow-sm text-white"
+                        *ngIf="isOfficerUser && !item.hologram_from_range"
+                        (click)="openEnterSerialsModal(item)"
+                        title="Enter Serial Numbers"
+                      >
+                        <i class="bi bi-pencil-fill me-1"></i> Write Serials
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary fw-bold px-2 py-1 shadow-sm"
+                        *ngIf="isOfficerUser && item.hologram_from_range"
+                        (click)="openEnterSerialsModal(item)"
+                        title="Edit Serial Numbers"
+                      >
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary fw-bold px-2.5 py-1 shadow-sm"
+                        (click)="openHologramArrivalDetailsModal(item)"
+                        title="View Arrival Details"
+                      >
+                        <i class="bi bi-eye-fill me-1"></i> View
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State -->
+          <div class="p-5 text-center text-muted" *ngIf="!isLoadingHologramArrivals && filteredHologramArrivals.length === 0">
+            <i class="bi bi-qr-code-scan fs-1 d-block mb-2 text-secondary"></i>
+            <h6 class="fw-bold text-dark">No Hologram Arrivals Recorded Yet</h6>
+            <p class="small text-muted" *ngIf="isOfficerUser">Click "Record Hologram Arrival" above to record holograms received from approved procurements.</p>
+            <p class="small text-muted" *ngIf="!isOfficerUser">No hologram arrival records found.</p>
+          </div>
+
+          <!-- Loading State -->
+          <div class="p-5 text-center text-muted" *ngIf="isLoadingHologramArrivals">
+            <mat-progress-spinner mode="indeterminate" diameter="30" class="mx-auto mb-2"></mat-progress-spinner>
+            <span>Loading hologram arrivals...</span>
           </div>
         </div>
       </div>
@@ -5191,4 +5404,216 @@
     </div>
   </div>
 </div>
+
+<!-- ========================================== -->
+<!-- --- Record Hologram Arrival Modal (OIC) -- -->
+<!-- ========================================== -->
+<div class="dp-modal-backdrop" *ngIf="showRecordHologramArrivalModal">
+  <div class="dp-modal" style="max-width: 650px;">
+    <div class="dp-modal-header d-flex justify-content-between align-items-center p-3 bg-white border-bottom">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-qr-code-scan text-success fs-5"></i>
+        <h5 class="m-0 fw-bold text-dark">
+          {{ selectedArrivalIdToUpdate ? 'Write / Update Hologram Serial Numbers' : 'Record IMFL Holograms Arrival' }}
+        </h5>
+      </div>
+      <button type="button" class="btn-close" (click)="closeRecordHologramArrivalModal()"></button>
+    </div>
+
+    <div class="dp-modal-body p-4 bg-light">
+      <!-- Select Approved Procurement (Shown only when creating a new record) -->
+      <div class="mb-3" *ngIf="!selectedArrivalIdToUpdate">
+        <label class="form-label fw-bold text-dark small">
+          Select IMFL Hologram Procurement <span class="text-danger">*</span>
+        </label>
+        <select
+          class="form-select form-select-sm"
+          [ngModel]="selectedArrivalProcurementId"
+          (change)="onArrivalProcurementSelected($event)"
+        >
+          <option [ngValue]="null" disabled>-- Choose Approved Procurement --</option>
+          <option *ngFor="let p of approvedProcurementsForArrival" [value]="p.id">
+            {{ p.ref_no }} &mdash; {{ p.distributor_name }} ({{ p.quantity | number }} Holograms) [{{ p.status }}]
+          </option>
+        </select>
+        <div class="form-text small text-muted">
+          Select an approved or paid IMFL Hologram Procurement batch to record hologram serial numbers.
+        </div>
+      </div>
+
+      <div class="card p-3 mb-3 bg-white border-0 shadow-sm rounded-3" *ngIf="arrivalRefNo">
+        <div class="row g-2 small">
+          <div class="col-md-6">
+            <span class="text-muted d-block" style="font-size: 11px;">Distributor / Licensee:</span>
+            <span class="fw-bold text-dark">{{ arrivalDistributorName || '-' }}</span>
+          </div>
+          <div class="col-md-6">
+            <span class="text-muted d-block" style="font-size: 11px;">License Number:</span>
+            <span class="fw-bold text-dark">{{ arrivalLicenseNumber || '-' }}</span>
+          </div>
+          <div class="col-md-6">
+            <span class="text-muted d-block" style="font-size: 11px;">Procurement Ref No:</span>
+            <span class="fw-bold text-primary">{{ arrivalRefNo }}</span>
+          </div>
+          <div class="col-md-6">
+            <span class="text-muted d-block" style="font-size: 11px;">Total Holograms:</span>
+            <span class="fw-bold text-success">{{ arrivalTotalHolograms | number }} holograms</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <label class="form-label fw-bold text-dark small">Total Holograms <span class="text-danger">*</span></label>
+          <input
+            type="number"
+            min="1"
+            class="form-control form-control-sm"
+            [(ngModel)]="arrivalTotalHolograms"
+            (ngModelChange)="onArrivalFromRangeChange()"
+            placeholder="e.g. 1000"
+          />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold text-dark small">Hologram Range From <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            class="form-control form-control-sm font-monospace"
+            [(ngModel)]="arrivalFromRange"
+            (ngModelChange)="onArrivalFromRangeChange()"
+            placeholder="e.g. 100001 or HLG001"
+          />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold text-dark small">Hologram Range To <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            class="form-control form-control-sm font-monospace"
+            [(ngModel)]="arrivalToRange"
+            placeholder="e.g. 101000 or HLG1000"
+          />
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-dark small">Damaged Holograms (if any)</label>
+          <input
+            type="number"
+            min="0"
+            class="form-control form-control-sm"
+            [(ngModel)]="arrivalDamagedTotal"
+            placeholder="0"
+          />
+          <div class="form-text small text-muted" style="font-size: 11px;">Count of damaged/torn holograms detected on arrival</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-dark small">Remarks / Notes</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            [(ngModel)]="holoArrivalRemarks"
+            placeholder="Optional notes or carton barcodes..."
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="dp-modal-footer p-3 bg-white border-top d-flex justify-content-end gap-2">
+      <button type="button" class="btn btn-outline-secondary btn-sm px-3" (click)="closeRecordHologramArrivalModal()" [disabled]="isSubmittingHologramArrival">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn btn-success btn-sm px-4 fw-bold text-white shadow-sm"
+        (click)="submitHologramArrival()"
+        [disabled]="isSubmittingHologramArrival"
+      >
+        <span class="spinner-border spinner-border-sm me-1" *ngIf="isSubmittingHologramArrival"></span>
+        {{ selectedArrivalIdToUpdate ? 'Save Serial Numbers' : 'Save & Record Arrival' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- --- Hologram Arrival Details Modal ------- -->
+<!-- ========================================== -->
+<div class="dp-modal-backdrop" *ngIf="showHologramArrivalDetailsModal && selectedHologramArrivalItem">
+  <div class="dp-modal" style="max-width: 600px;">
+    <div class="dp-modal-header d-flex justify-content-between align-items-center p-3 bg-white border-bottom">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-qr-code-scan text-success fs-5"></i>
+        <h5 class="m-0 fw-bold text-dark">IMFL Hologram Arrival Details</h5>
+      </div>
+      <button type="button" class="btn-close" (click)="closeHologramArrivalDetailsModal()"></button>
+    </div>
+
+    <div class="dp-modal-body p-4 bg-light">
+      <!-- Summary Card -->
+      <div class="card p-3 mb-3 bg-white border-0 shadow-sm rounded-3">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-2 py-1 mb-1">
+              Procurement Ref #{{ selectedHologramArrivalItem.imfl_hologram_ref_no || selectedHologramArrivalItem.procurement_ref_no }}
+            </span>
+            <h6 class="m-0 fw-bold text-dark">{{ selectedHologramArrivalItem.distributor_name || 'Distributor' }}</h6>
+            <small class="text-muted" *ngIf="selectedHologramArrivalItem.license_number">Lic: {{ selectedHologramArrivalItem.license_number }}</small>
+          </div>
+          <span class="badge bg-success text-white px-2 py-1 rounded-pill">
+            {{ selectedHologramArrivalItem.status || 'RECEIVED' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Hologram Range Details -->
+      <div class="card p-3 mb-3 bg-white border-0 shadow-sm rounded-3">
+        <h6 class="fw-bold text-dark mb-3 border-bottom pb-2" style="font-size: 13px;">
+          <i class="bi bi-upc-scan me-1 text-primary"></i> Hologram Serial Number Information
+        </h6>
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <span class="text-muted small d-block">Total Holograms Received</span>
+            <span class="fw-bold text-primary fs-5">{{ selectedHologramArrivalItem.total_holograms | number }}</span>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted small d-block">Damaged Holograms</span>
+            <span class="fw-bold text-danger fs-5">{{ selectedHologramArrivalItem.damaged_total || 0 }}</span>
+          </div>
+          <div class="col-12">
+            <span class="text-muted small d-block mb-1">Assigned Hologram Serial Range</span>
+            <div class="p-2.5 bg-light rounded-2 border text-center font-monospace fw-bold text-dark fs-6">
+              {{ selectedHologramArrivalItem.hologram_from_range }} &nbsp;&rarr;&nbsp; {{ selectedHologramArrivalItem.hologram_to_range }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metadata -->
+      <div class="card p-3 bg-white border-0 shadow-sm rounded-3">
+        <div class="row g-2 small text-muted">
+          <div class="col-sm-6">
+            <span>Recorded By (OIC):</span>
+            <strong class="text-dark d-block">{{ selectedHologramArrivalItem.recorded_by_name || selectedHologramArrivalItem.received_by_username || 'OIC Officer' }}</strong>
+          </div>
+          <div class="col-sm-6">
+            <span>Arrival Date:</span>
+            <strong class="text-dark d-block">{{ selectedHologramArrivalItem.arrival_date | date:'dd MMM yyyy, hh:mm a' }}</strong>
+          </div>
+          <div class="col-12 mt-2" *ngIf="selectedHologramArrivalItem.remarks">
+            <span>Remarks:</span>
+            <p class="m-0 text-dark">{{ selectedHologramArrivalItem.remarks }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dp-modal-footer p-3 bg-white border-top d-flex justify-content-end">
+      <button type="button" class="btn btn-secondary btn-sm px-4" (click)="closeHologramArrivalDetailsModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
 

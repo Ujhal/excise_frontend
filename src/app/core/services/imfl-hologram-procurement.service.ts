@@ -46,12 +46,38 @@ export interface IMFLHologramProcurementItem {
   updated_at?: string;
 }
 
+export interface IMFLHologramArrivalItem {
+  id?: number;
+  procurement?: number;
+  procurement_id?: number;
+  procurement_ref_no?: string;
+  imfl_hologram_ref_no?: string;
+  distributor_name?: string;
+  license_number?: string;
+  establishment_name?: string;
+  total_holograms: number;
+  hologram_from_range: string;
+  hologram_to_range: string;
+  hologram_ranges?: Array<{ from: string; to: string; count?: number; status?: string }>;
+  damaged_total?: number;
+  damaged_holograms_range?: any[];
+  received_by?: number;
+  received_by_username?: string;
+  recorded_by_name?: string;
+  arrival_date?: string;
+  status?: string;
+  remarks?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ImflHologramProcurementService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiBaseUrl}/transactional/distributor-permit/hologram-procurement`;
+  private arrivalUrl = `${environment.apiBaseUrl}/transactional/distributor-permit/hologram-arrival`;
 
   private refreshSubject = new Subject<void>();
   refresh$ = this.refreshSubject.asObservable();
@@ -90,5 +116,30 @@ export class ImflHologramProcurementService {
     return this.http.post<any>(`${this.baseUrl}/${id}/pay/`, {}).pipe(
       tap(() => this.triggerRefresh())
     );
+  }
+
+  // --- IMFL Hologram Arrivals ---
+  getHologramArrivals(params?: any): Observable<IMFLHologramArrivalItem[]> {
+    return this.http.get<IMFLHologramArrivalItem[]>(`${this.arrivalUrl}/`, { params });
+  }
+
+  getHologramArrival(id: number): Observable<IMFLHologramArrivalItem> {
+    return this.http.get<IMFLHologramArrivalItem>(`${this.arrivalUrl}/${id}/`);
+  }
+
+  createHologramArrival(data: Partial<IMFLHologramArrivalItem>): Observable<IMFLHologramArrivalItem> {
+    return this.http.post<IMFLHologramArrivalItem>(`${this.arrivalUrl}/`, data).pipe(
+      tap(() => this.triggerRefresh())
+    );
+  }
+
+  updateHologramArrival(id: number, data: Partial<IMFLHologramArrivalItem>): Observable<IMFLHologramArrivalItem> {
+    return this.http.patch<IMFLHologramArrivalItem>(`${this.arrivalUrl}/${id}/`, data).pipe(
+      tap(() => this.triggerRefresh())
+    );
+  }
+
+  getApprovedProcurementsForArrival(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.arrivalUrl}/approved-procurements/`);
   }
 }

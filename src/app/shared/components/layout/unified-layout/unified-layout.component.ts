@@ -139,6 +139,7 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
     { section: 'secretary-revenue', label: 'Revenue', icon: 'payments' },
     { section: 'imfl-requisition-cases', label: 'IMFL Requisition Cases', icon: 'assignment_turned_in', showOnlyForOic: true },
     { section: 'distributor-permit-brand-arrival', label: 'Update Brands Arrival', icon: 'local_shipping', showOnlyForOic: true },
+    { section: 'distributor-permit-hologram-arrival', label: 'IMFL Holograms Arrival', icon: 'qr_code_scanner', showOnlyForOic: true },
     { section: 'brand-warehouse-stock', label: 'Brand Warehouse Stock', icon: 'inventory_2', showOnlyForOic: true },
     { section: 'stock-inventory', label: 'Stock Inventory', icon: 'inventory' },
     { section: 'single-window', label: 'User Details', icon: 'manage_search', hideForSiteAdmin: true, hideForOic: true },
@@ -553,7 +554,10 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
         'distributor-permit-brand-arrival',
         'imfl-brand-arrival',
         'brand-arrival',
-        'update-brands-arrival'
+        'update-brands-arrival',
+        'distributor-permit-hologram-arrival',
+        'imfl-hologram-arrival',
+        'hologram-arrival'
       ];
       for (const item of this.officerSectionItems) {
         if (!this.shouldShowOfficerSectionItem(item)) continue;
@@ -630,6 +634,7 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
       if (
         item.section === 'imfl-requisition-cases' ||
         item.section === 'distributor-permit-brand-arrival' ||
+        item.section === 'distributor-permit-hologram-arrival' ||
         item.section === 'brand-warehouse-stock' ||
         item.section === 'officer-activity'
       ) {
@@ -643,6 +648,7 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
         item.section === 'payment-transactions' ||
         item.section === 'imfl-requisition-cases' ||
         item.section === 'distributor-permit-brand-arrival' ||
+        item.section === 'distributor-permit-hologram-arrival' ||
         item.section === 'brand-warehouse-stock'
       ) {
         return false;
@@ -845,6 +851,10 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
       this.router.navigate(['/dashboard'], {
         queryParams: { section: 'distributor-permit', tab: 'brand-arrival' }
       });
+    } else if (section === 'distributor-permit-hologram-arrival' || section === 'imfl-hologram-arrival' || section === 'hologram-arrival') {
+      this.router.navigate(['/dashboard'], {
+        queryParams: { section: 'distributor-permit', tab: 'hologram-arrival' }
+      });
     } else if (section === 'brand-warehouse-stock' || section === 'distributor-permit-brand-warehouse' || section === 'brand-warehouse') {
       this.router.navigate(['/dashboard'], {
         queryParams: { section: 'distributor-permit', tab: 'brand-warehouse' }
@@ -1008,6 +1018,8 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
     if (section === 'distributor-permit' && this.isDistributorOic()) {
       if (queryTab === 'brand-arrival') {
         section = 'distributor-permit-brand-arrival';
+      } else if (queryTab === 'hologram-arrival') {
+        section = 'distributor-permit-hologram-arrival';
       } else if (queryTab === 'brand-warehouse') {
         section = 'brand-warehouse-stock';
       } else if (queryTab === 'requisition') {
@@ -2010,6 +2022,18 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
 
     // Allow OIC-only sections even if DB navigation tokens are incomplete.
     if ((section === 'hologram-inventory' || section === 'oic-hologram-requests' || section === 'bl-details' || section === 'hologram-register' || section === 'hologram-daily-entry') && this.isOicUser()) {
+      return true;
+    }
+
+    if (this.isDistributorOic() && (
+      section === 'imfl-requisition-cases' ||
+      section === 'distributor-permit-brand-arrival' ||
+      section === 'distributor-permit-hologram-arrival' ||
+      section === 'brand-warehouse-stock' ||
+      section === 'distributor-permit' ||
+      section === 'imfl-hologram-procurement' ||
+      section === 'hologram-arrival'
+    )) {
       return true;
     }
 

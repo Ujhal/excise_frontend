@@ -23,7 +23,7 @@ import { ActionItem, UnifiedActionButtonsComponent } from '../../../shared/compo
 import { UnifiedActionsService } from '../../../shared/services/unified-actions.service';
 
 import { SidebarPendingBadgeService } from '../../../shared/services/sidebar-pending-badge.service';
-import { ImflHologramProcurementService, IMFLHologramProcurementItem } from '../../../core/services/imfl-hologram-procurement.service';
+import { ImflHologramProcurementService, IMFLHologramProcurementItem, IMFLHologramArrivalItem } from '../../../core/services/imfl-hologram-procurement.service';
 import { RoleService } from '../../../core/services/role.service';
 
 type DistributorPermitStatusFilter = 'all' | 'approved' | 'pending' | 'under_process' | 'objection' | 'rejected';
@@ -140,17 +140,22 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       .subscribe((params) => {
         this.isFormView = String(params?.['mode'] || '').toLowerCase() === 'apply';
         const tabParam = String(params?.['tab'] || '').toLowerCase() as ImflTabType;
-        if (['requisition', 'brand-arrival', 'revalidation', 'cancellation', 'brand-warehouse', 'hologram-procurement'].includes(tabParam)) {
+        if (['requisition', 'brand-arrival', 'revalidation', 'cancellation', 'brand-warehouse', 'hologram-procurement', 'hologram-arrival'].includes(tabParam)) {
           this.activeTab = tabParam;
           if (tabParam === 'brand-warehouse') {
             this.loadBrandWarehouseStock();
           } else if (tabParam === 'hologram-procurement') {
             this.loadHologramProcurements();
+          } else if (tabParam === 'hologram-arrival') {
+            this.loadHologramArrivals();
           }
         } else {
           // Also resolve from the 'section' param (e.g. distributor-permit-cancellation, distributor-permit-brand-arrival)
           const sectionParam = String(params?.['section'] || '').toLowerCase();
-          if (this.isItCellUser || sectionParam.includes('hologram')) {
+          if (sectionParam.includes('hologram-arrival') || sectionParam.includes('hologram_arrival')) {
+            this.activeTab = 'hologram-arrival';
+            this.loadHologramArrivals();
+          } else if (this.isItCellUser || sectionParam.includes('hologram')) {
             this.activeTab = 'hologram-procurement';
             this.loadHologramProcurements();
           } else if (sectionParam.includes('brand-arrival') || sectionParam.includes('brand_arrival')) {
@@ -184,6 +189,8 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         if (this.activeTab === 'hologram-procurement') {
           this.loadHologramProcurements(true);
+        } else if (this.activeTab === 'hologram-arrival') {
+          this.loadHologramArrivals(true);
         }
       });
 
@@ -208,6 +215,8 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     this.pageIndex = 0;
     if (tab === 'hologram-procurement') {
       this.loadHologramProcurements();
+    } else if (tab === 'hologram-arrival') {
+      this.loadHologramArrivals();
     } else if (tab === 'brand-warehouse') {
       this.loadBrandWarehouseStock();
     }
@@ -6594,6 +6603,8 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   handleApplyNew(): void {
     if (this.activeTab === 'hologram-procurement') {
       this.openApplyHologramModal();
+    } else if (this.activeTab === 'hologram-arrival') {
+      this.openRecordHologramArrivalModal();
     } else {
       this.openApplyForm();
     }
@@ -6915,4 +6926,254 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  // --- IMFL Holograms Arrival Feature ---
+  hologramArrivals: IMFLHologramArrivalItem[] = [];
+  isLoadingHologramArrivals = false;
+  hologramArrivalSearchFilter = '';
+  hologramArrivalStatusFilter = 'all';
+  showRecordHologramArrivalModal = false;
+  isSubmittingHologramArrival = false;
+  approvedProcurementsForArrival: any[] = [];
+  selectedArrivalProcurementId: number | null = null;
+  arrivalRefNo = '';
+  arrivalDistributorName = '';
+  arrivalLicenseNumber = '';
+  arrivalEstablishmentName = '';
+  arrivalTotalHolograms = 0;
+  arrivalFromRange = '';
+  arrivalToRange = '';
+  arrivalDamagedTotal = 0;
+  holoArrivalRemarks = '';
+  selectedHologramArrivalItem: IMFLHologramArrivalItem | null = null;
+  showHologramArrivalDetailsModal = false;
+
+  get filteredHologramArrivals(): IMFLHologramArrivalItem[] {
+    const q = this.hologramArrivalSearchFilter.trim().toLowerCase();
+    const st = this.hologramArrivalStatusFilter;
+
+    return (this.hologramArrivals || []).filter((item) => {
+      const ref = String(item.imfl_hologram_ref_no || item.procurement_ref_no || '').toLowerCase();
+      const dist = String(item.distributor_name || '').toLowerCase();
+      const lic = String(item.license_number || '').toLowerCase();
+      const fromR = String(item.hologram_from_range || '').toLowerCase();
+      const toR = String(item.hologram_to_range || '').toLowerCase();
+      const status = String(item.status || 'RECEIVED').toLowerCase();
+
+      let matchesStatus = true;
+      if (st !== 'all') {
+        matchesStatus = status === st.toLowerCase();
+      }
+
+      const matchesSearch = !q || ref.includes(q) || dist.includes(q) || lic.includes(q) || fromR.includes(q) || toR.includes(q);
+      return matchesStatus && matchesSearch;
+    });
+  }
+
+  get hologramArrivalCounts(): { totalRecords: number; totalHolograms: number; totalDamaged: number } {
+    return (this.hologramArrivals || []).reduce(
+      (acc, item) => {
+        acc.totalRecords += 1;
+        acc.totalHolograms += Number(item.total_holograms || 0);
+        acc.totalDamaged += Number(item.damaged_total || 0);
+        return acc;
+      },
+      { totalRecords: 0, totalHolograms: 0, totalDamaged: 0 }
+    );
+  }
+
+  loadHologramArrivals(silent = false): void {
+    if (!silent) this.isLoadingHologramArrivals = true;
+    this.imflHoloService.getHologramArrivals().subscribe({
+      next: (data) => {
+        const raw = Array.isArray(data) ? data : (data as any)?.results || (data as any)?.data || [];
+        this.hologramArrivals = raw;
+        this.isLoadingHologramArrivals = false;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Error loading hologram arrivals:', err);
+        this.isLoadingHologramArrivals = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  loadApprovedProcurementsForArrival(): void {
+    this.imflHoloService.getApprovedProcurementsForArrival().subscribe({
+      next: (data) => {
+        this.approvedProcurementsForArrival = Array.isArray(data) ? data : [];
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Error loading approved procurements:', err);
+      }
+    });
+  }
+
+  selectedArrivalIdToUpdate: number | null = null;
+
+  openRecordHologramArrivalModal(): void {
+    this.loadApprovedProcurementsForArrival();
+    this.selectedArrivalIdToUpdate = null;
+    this.selectedArrivalProcurementId = null;
+    this.arrivalRefNo = '';
+    this.arrivalDistributorName = '';
+    this.arrivalLicenseNumber = '';
+    this.arrivalEstablishmentName = '';
+    this.arrivalTotalHolograms = 0;
+    this.arrivalFromRange = '';
+    this.arrivalToRange = '';
+    this.arrivalDamagedTotal = 0;
+    this.holoArrivalRemarks = '';
+    this.showRecordHologramArrivalModal = true;
+    this.cdr.markForCheck();
+  }
+
+  openEnterSerialsModal(item: IMFLHologramArrivalItem): void {
+    this.selectedArrivalIdToUpdate = item.id || null;
+    this.selectedArrivalProcurementId = item.procurement || item.procurement_id || null;
+    this.arrivalRefNo = item.imfl_hologram_ref_no || item.procurement_ref_no || '';
+    this.arrivalDistributorName = item.distributor_name || '';
+    this.arrivalLicenseNumber = item.license_number || '';
+    this.arrivalEstablishmentName = item.establishment_name || '';
+    this.arrivalTotalHolograms = item.total_holograms || 0;
+    this.arrivalFromRange = item.hologram_from_range || '';
+    this.arrivalToRange = item.hologram_to_range || '';
+    this.arrivalDamagedTotal = item.damaged_total || 0;
+    this.holoArrivalRemarks = item.remarks || '';
+    this.showRecordHologramArrivalModal = true;
+    if (this.arrivalFromRange && !this.arrivalToRange) {
+      this.calculateArrivalToRange();
+    }
+    this.cdr.markForCheck();
+  }
+
+  closeRecordHologramArrivalModal(): void {
+    this.showRecordHologramArrivalModal = false;
+    this.selectedArrivalIdToUpdate = null;
+    this.cdr.markForCheck();
+  }
+
+  onArrivalProcurementSelected(event: any): void {
+    const procId = Number(event?.target?.value || event);
+    this.selectedArrivalProcurementId = procId || null;
+    const selected = (this.approvedProcurementsForArrival || []).find(p => p.id === procId);
+    if (selected) {
+      this.arrivalRefNo = selected.ref_no || '';
+      this.arrivalDistributorName = selected.distributor_name || '';
+      this.arrivalLicenseNumber = selected.license_number || '';
+      this.arrivalEstablishmentName = selected.establishment_name || '';
+      const remaining = Math.max(0, (selected.quantity || 0) - (selected.already_received || 0));
+      this.arrivalTotalHolograms = remaining || selected.quantity || 0;
+      this.calculateArrivalToRange();
+    }
+    this.cdr.markForCheck();
+  }
+
+  onArrivalFromRangeChange(): void {
+    this.calculateArrivalToRange();
+  }
+
+  private calculateArrivalToRange(): void {
+    const fromStr = (this.arrivalFromRange || '').trim();
+    const qty = Number(this.arrivalTotalHolograms || 0);
+    if (!fromStr || qty <= 0) return;
+
+    // Check if numeric or ends with digits
+    const match = fromStr.match(/^(.*?)(\d+)$/);
+    if (match) {
+      const prefix = match[1];
+      const startNum = parseInt(match[2], 10);
+      const padLen = match[2].length;
+      const endNum = startNum + qty - 1;
+      this.arrivalToRange = `${prefix}${String(endNum).padStart(padLen, '0')}`;
+    }
+    this.cdr.markForCheck();
+  }
+
+  submitHologramArrival(): void {
+    if (!this.arrivalRefNo) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Procurement Required',
+        text: 'Please select an IMFL Hologram Procurement reference.'
+      });
+      return;
+    }
+    if (!this.arrivalFromRange.trim() || !this.arrivalToRange.trim()) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Range Required',
+        text: 'Please enter both Hologram Range From and Hologram Range To.'
+      });
+      return;
+    }
+    if (Number(this.arrivalTotalHolograms || 0) <= 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Invalid Quantity',
+        text: 'Total holograms received must be greater than zero.'
+      });
+      return;
+    }
+
+    this.isSubmittingHologramArrival = true;
+    const payload: Partial<IMFLHologramArrivalItem> = {
+      procurement_id: this.selectedArrivalProcurementId || undefined,
+      imfl_hologram_ref_no: this.arrivalRefNo,
+      distributor_name: this.arrivalDistributorName,
+      license_number: this.arrivalLicenseNumber,
+      establishment_name: this.arrivalEstablishmentName,
+      total_holograms: Number(this.arrivalTotalHolograms || 0),
+      hologram_from_range: this.arrivalFromRange.trim(),
+      hologram_to_range: this.arrivalToRange.trim(),
+      damaged_total: Number(this.arrivalDamagedTotal || 0),
+      damaged_holograms_range: [],
+      remarks: this.holoArrivalRemarks,
+      status: 'RECEIVED'
+    };
+
+    const request$ = this.selectedArrivalIdToUpdate
+      ? this.imflHoloService.updateHologramArrival(this.selectedArrivalIdToUpdate, payload)
+      : this.imflHoloService.createHologramArrival(payload);
+
+    request$.subscribe({
+      next: (res) => {
+        this.isSubmittingHologramArrival = false;
+        this.closeRecordHologramArrivalModal();
+        Swal.fire({
+          icon: 'success',
+          title: this.selectedArrivalIdToUpdate ? 'Serial Numbers Saved!' : 'Arrival Recorded!',
+          text: `Saved hologram serial range (${this.arrivalFromRange} to ${this.arrivalToRange}) for Ref #${this.arrivalRefNo}.`
+        });
+        this.selectedArrivalIdToUpdate = null;
+        this.loadHologramArrivals();
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isSubmittingHologramArrival = false;
+        console.error('Error recording hologram arrival:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed to Save',
+          text: err?.error?.error || err?.error?.detail || 'Failed to record hologram arrival details.'
+        });
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  openHologramArrivalDetailsModal(item: IMFLHologramArrivalItem): void {
+    this.selectedHologramArrivalItem = item;
+    this.showHologramArrivalDetailsModal = true;
+    this.cdr.markForCheck();
+  }
+
+  closeHologramArrivalDetailsModal(): void {
+    this.showHologramArrivalDetailsModal = false;
+    this.selectedHologramArrivalItem = null;
+    this.cdr.markForCheck();
+  }
 }
+
