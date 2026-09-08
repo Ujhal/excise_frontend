@@ -128,6 +128,7 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
     { section: 'monthly-hologram-statement', label: 'Monthly Statement', icon: 'description', group: 'Hologram' },
     { section: 'hologram-inventory', label: 'Inventory', icon: 'inventory_2', group: 'Hologram', showOnlyForOic: true },
     { section: 'commissioner-hologram-working-records', label: 'Working Records', icon: 'fact_check', group: 'Hologram', showOnlyForCommissioner: true },
+    { section: 'imfl-hologram-procurement', label: 'IMFL Hologram Procurement', icon: 'qr_code_2', group: 'Hologram', hideForOic: true, hideForPermitSection: true, hideForSiteAdmin: true },
     { section: 'secretary-licenses', label: 'Licenses', icon: 'verified' },
     { section: 'secretary-imfl-ena', label: 'IMFL & ENA', icon: 'local_shipping' },
     { section: 'salesman-barman-registration', label: 'Salesman/Barman Registration', icon: 'badge' },
@@ -443,7 +444,7 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
   isImflTabActive(tab: string): boolean {
     const url = this.router.url || '';
     if (tab === 'requisition') {
-      return !url.includes('tab=revalidation') && !url.includes('tab=cancellation') && !url.includes('tab=brand-warehouse');
+      return !url.includes('tab=revalidation') && !url.includes('tab=cancellation') && !url.includes('tab=brand-warehouse') && !url.includes('tab=hologram-procurement');
     }
     return url.includes(`tab=${tab}`);
   }
@@ -761,7 +762,8 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
     'hologram', 'hologram-request', 'hologram-daily-entry',
     'monthly-hologram-statement', 'hologram-inventory',
     'itcell-hologram', 'hologram-register', 'oic-hologram-requests',
-    'commissioner-hologram-working-records'
+    'commissioner-hologram-working-records', 'imfl-hologram-procurement',
+    'distributor-permit-hologram-procurement'
   ]);
 
   /** Whether the Hologram group is expanded in the sidebar (default: closed) */
@@ -847,6 +849,10 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
     } else if (section === 'brand-warehouse-stock' || section === 'distributor-permit-brand-warehouse' || section === 'brand-warehouse') {
       this.router.navigate(['/dashboard'], {
         queryParams: { section: 'distributor-permit', tab: 'brand-warehouse' }
+      });
+    } else if (section === 'imfl-hologram-procurement' || section === 'distributor-permit-hologram-procurement') {
+      this.router.navigate(['/dashboard'], {
+        queryParams: { section: 'distributor-permit', tab: 'hologram-procurement' }
       });
     } else if (section === 'itcell-hologram') {
       // For IT Cell hologram procurement, navigate with tab parameter to show the hologram tab

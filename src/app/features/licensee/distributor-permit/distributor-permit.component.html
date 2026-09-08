@@ -5,7 +5,7 @@
     [isOfficer]="isOfficerUser"
     [customTitle]="getHeaderTitle()"
     (tabChange)="onTabChange($event)"
-    (applyNew)="openApplyForm()"
+    (applyNew)="handleApplyNew()"
     (viewArrivals)="openArrivalsRegisterModal()">
   </app-imfl-header>
 
@@ -82,8 +82,96 @@
 
         </div>
 
+        <!-- Statistics Row for Hologram Procurement -->
+        <div class="row g-3 mb-4 stats-row" *ngIf="activeTab === 'hologram-procurement'">
+          <!-- Total Applications -->
+          <div class="col-xl col-lg-6 col-md-6">
+            <div
+              class="summary-card total-application-requests summary-card-clickable"
+              role="button"
+              tabindex="0"
+              (click)="hologramStatusFilter = 'all'"
+              [class.active]="hologramStatusFilter === 'all'"
+            >
+              <div class="card-icon"><i class="bi bi-list-ul"></i></div>
+              <div class="card-content">
+                <h3 class="card-value">{{ hologramCounts.total }}</h3>
+                <p class="card-label">Total Applications</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Approved / Completed -->
+          <div class="col-xl col-lg-6 col-md-6">
+            <div
+              class="summary-card approved-requests summary-card-clickable"
+              role="button"
+              tabindex="0"
+              (click)="hologramStatusFilter = 'approved'"
+              [class.active]="hologramStatusFilter === 'approved'"
+            >
+              <div class="card-icon"><i class="bi bi-check-circle"></i></div>
+              <div class="card-content">
+                <h3 class="card-value">{{ hologramCounts.approved }}</h3>
+                <p class="card-label">Approved</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending Review -->
+          <div class="col-xl col-lg-6 col-md-6">
+            <div
+              class="summary-card pending-requests summary-card-clickable"
+              role="button"
+              tabindex="0"
+              (click)="hologramStatusFilter = 'pending'"
+              [class.active]="hologramStatusFilter === 'pending'"
+            >
+              <div class="card-icon"><i class="bi bi-clock-history"></i></div>
+              <div class="card-content">
+                <h3 class="card-value">{{ hologramCounts.pending }}</h3>
+                <p class="card-label">Under Review</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Awaiting Payment -->
+          <div class="col-xl col-lg-6 col-md-6">
+            <div
+              class="summary-card under-process-requests summary-card-clickable"
+              role="button"
+              tabindex="0"
+              (click)="hologramStatusFilter = 'payment'"
+              [class.active]="hologramStatusFilter === 'payment'"
+            >
+              <div class="card-icon"><i class="bi bi-wallet2"></i></div>
+              <div class="card-content">
+                <h3 class="card-value">{{ hologramCounts.paymentPending }}</h3>
+                <p class="card-label">Awaiting Payment</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rejected -->
+          <div class="col-xl col-lg-6 col-md-6">
+            <div
+              class="summary-card rejected-requests summary-card-clickable"
+              role="button"
+              tabindex="0"
+              (click)="hologramStatusFilter = 'rejected'"
+              [class.active]="hologramStatusFilter === 'rejected'"
+            >
+              <div class="card-icon"><i class="bi bi-x-circle"></i></div>
+              <div class="card-content">
+                <h3 class="card-value">{{ hologramCounts.rejected }}</h3>
+                <p class="card-label">Rejected</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Statistics Row for Application Requests (Requisition, Revalidation, Cancellation, Brand Arrival) -->
-        <div class="row g-3 mb-4 stats-row" *ngIf="activeTab !== 'brand-warehouse'">
+        <div class="row g-3 mb-4 stats-row" *ngIf="activeTab !== 'brand-warehouse' && activeTab !== 'hologram-procurement'">
           <div class="col-xl col-lg-6 col-md-6">
             <div
               class="summary-card total-application-requests summary-card-clickable"
@@ -195,8 +283,35 @@
         </div>
       </div>
 
+      <!-- Hologram Procurement Filters -->
+      <div class="compact-filter-section mb-3" *ngIf="activeTab === 'hologram-procurement'">
+        <div class="filter-row">
+          <span class="filter-label-text">
+            <i class="bi bi-funnel me-1"></i>
+            <small class="text-muted">Filters:</small>
+          </span>
+
+          <input
+            type="text"
+            class="form-control form-control-sm filter-input filter-input--search"
+            placeholder="Search by Ref No / Applicant / Establishment"
+            [(ngModel)]="hologramSearchFilter"
+            aria-label="Search by Ref No / Applicant / Establishment"
+          />
+
+          <button
+            class="btn btn-outline-danger btn-sm filter-clear-btn"
+            type="button"
+            (click)="hologramSearchFilter = ''; hologramStatusFilter = 'all'"
+            *ngIf="hologramSearchFilter || hologramStatusFilter !== 'all'"
+          >
+            <i class="bi bi-x-circle"></i> Clear
+          </button>
+        </div>
+      </div>
+
       <!-- Application Filters (Only for Requisition / Revalidation / Cancellation / Brand Arrival tabs) -->
-      <div class="compact-filter-section mb-3" *ngIf="activeTab !== 'brand-warehouse'">
+      <div class="compact-filter-section mb-3" *ngIf="activeTab !== 'brand-warehouse' && activeTab !== 'hologram-procurement'">
         <div class="filter-row">
           <span class="filter-label-text">
             <i class="bi bi-funnel me-1"></i>
@@ -989,6 +1104,184 @@
             <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
             <h6 class="fw-bold text-dark">No Brand Stock Found</h6>
             <p class="small text-muted">Arrivals recorded by the Officer In-Charge will be displayed here in real time.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 5: IMFL Hologram Procurement Register Table -->
+      <div class="register-table" *ngIf="activeTab === 'hologram-procurement'">
+        <div class="register-container">
+          <div class="register-header-bar d-flex justify-content-between align-items-center" style="background:#0f172a; border-radius:8px 8px 0 0; padding: 12px 18px;">
+            <h5 class="register-table-title" style="color:#f1f5f9; margin:0;">
+              <i class="bi bi-tag-fill me-2 text-primary"></i>
+              IMFL Hologram Procurement Applications
+            </h5>
+            <div class="d-flex align-items-center gap-2">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-light d-flex align-items-center gap-1"
+                (click)="loadHologramProcurements(false)"
+                [disabled]="isLoadingHologram"
+                title="Refresh applications"
+              >
+                <i class="bi bi-arrow-clockwise" [class.spin]="isLoadingHologram"></i>
+                <span class="d-none d-sm-inline">Refresh</span>
+              </button>
+              <span class="entries-count" style="background:rgba(255,255,255,0.12); color:#e2e8f0; border:1px solid rgba(255,255,255,0.2); padding:4px 12px; border-radius:6px; font-size:0.82rem; font-weight:600;">
+                {{ filteredHologramProcurements.length }} Entries
+              </span>
+            </div>
+          </div>
+
+          <div class="table-wrapper" *ngIf="!isLoadingHologram && filteredHologramProcurements.length > 0">
+            <table class="table align-middle mb-0 custom-reg-table">
+              <thead>
+                <tr style="background:#1e293b; color:#f8fafc; font-size:11.5px; text-transform:uppercase; letter-spacing:0.5px;">
+                  <th style="padding:14px 16px;">REF NUMBER</th>
+                  <th style="padding:14px 16px;">APPLIED DATE</th>
+                  <th style="padding:14px 16px;">DISTRIBUTOR / ESTABLISHMENT</th>
+                  <th class="text-center" style="padding:14px 16px;">QUANTITY</th>
+                  <th class="text-center" style="padding:14px 16px;">RATE / PC</th>
+                  <th class="text-end" style="padding:14px 16px;">TOTAL AMOUNT</th>
+                  <th class="text-center" style="padding:14px 16px;">PAYMENT STATUS</th>
+                  <th class="text-center" style="padding:14px 16px;">CURRENT STAGE</th>
+                  <th class="text-center" style="padding:14px 16px; min-width: 180px;">ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of filteredHologramProcurements">
+                  <!-- Ref Number -->
+                  <td style="padding:14px 16px;">
+                    <div class="fw-bold text-primary font-monospace">{{ item.ref_no || 'N/A' }}</div>
+                  </td>
+
+                  <!-- Applied Date -->
+                  <td style="padding:14px 16px;">
+                    <span class="text-dark">{{ item.created_at | date:'dd MMM yyyy, hh:mm a' }}</span>
+                  </td>
+
+                  <!-- Distributor / Establishment -->
+                  <td style="padding:14px 16px;">
+                    <div class="fw-bold text-dark">{{ item.applicant_name || item.distributor_name || 'Distributor' }}</div>
+                    <small class="text-muted d-block" *ngIf="item.establishment_name">{{ item.establishment_name }}</small>
+                  </td>
+
+                  <!-- Quantity -->
+                  <td class="text-center" style="padding:14px 16px;">
+                    <span class="badge bg-light text-dark border font-monospace fs-6 px-2.5 py-1">
+                      {{ (item.quantity || 0) | number }} Pcs
+                    </span>
+                  </td>
+
+                  <!-- Rate / Pc -->
+                  <td class="text-center" style="padding:14px 16px;">
+                    <span class="text-muted fw-semibold">₹{{ (item.rate_per_piece || 0.15) | number:'1.2-2' }}</span>
+                  </td>
+
+                  <!-- Total Amount -->
+                  <td class="text-end" style="padding:14px 16px;">
+                    <div class="fw-bold text-success fs-6">₹{{ (item.total_amount || (item.quantity * 0.15)) | number:'1.2-2' }}</div>
+                  </td>
+
+                  <!-- Payment Status -->
+                  <td class="text-center" style="padding:14px 16px;">
+                    <span
+                      class="badge py-1 px-2.5"
+                      [ngClass]="{
+                        'bg-success': item.payment_status === 'COMPLETED' || item.payment_status === 'SUCCESS',
+                        'bg-warning text-dark': item.payment_status === 'PENDING' || !item.payment_status,
+                        'bg-danger': item.payment_status === 'FAILED'
+                      }"
+                    >
+                      <i class="bi me-1" [ngClass]="item.payment_status === 'COMPLETED' ? 'bi-check-circle-fill' : 'bi-clock'"></i>
+                      {{ item.payment_status || 'PENDING' }}
+                    </span>
+                    <small class="text-muted d-block mt-0.5" *ngIf="item.payment_details?.transaction_id">
+                      Ref: {{ item.payment_details.transaction_id }}
+                    </small>
+                  </td>
+
+                  <!-- Current Stage -->
+                  <td class="text-center" style="padding:14px 16px;">
+                    <span
+                      class="badge py-1.5 px-3 text-wrap"
+                      [ngClass]="{
+                        'bg-success': item.status === 'Approved by Commissioner' || (item.current_stage_name && item.current_stage_name.includes('Approved by Commissioner')),
+                        'bg-danger': item.status === 'Rejected' || (item.current_stage_name && item.current_stage_name.includes('Rejected')),
+                        'bg-info text-dark': item.status === 'Approved for Payment' || (item.current_stage_name && item.current_stage_name.includes('Approved for Payment')),
+                        'bg-primary': item.status === 'Payment Completed' || (item.current_stage_name && item.current_stage_name.includes('Payment Completed')),
+                        'bg-warning text-dark': item.status !== 'Approved by Commissioner' && item.status !== 'Rejected' && item.status !== 'Approved for Payment' && item.status !== 'Payment Completed'
+                      }"
+                      style="font-size: 11px; max-width: 170px;"
+                    >
+                      {{ item.current_stage_name || item.status || 'Submitted' }}
+                    </span>
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="text-center" style="padding:14px 16px;">
+                    <div class="d-flex align-items-center justify-content-center flex-wrap gap-1.5">
+                      <!-- View Details button -->
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary p-1.5 rounded-2"
+                        (click)="openHologramDetailsModal(item)"
+                        title="View Full Application Details"
+                      >
+                        <i class="bi bi-eye"></i>
+                      </button>
+
+                      <!-- Pay via Wallet button (if status is Approved for Payment and payment pending) -->
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-success fw-bold px-2.5 py-1 text-white shadow-sm d-flex align-items-center gap-1"
+                        *ngIf="(item.status === 'Approved for Payment' || item.current_stage_name === 'Approved for Payment') && item.payment_status !== 'COMPLETED'"
+                        (click)="onHologramWalletPay(item)"
+                        [disabled]="isProcessingHologramAction"
+                        title="Pay Total Amount from Hologram Wallet"
+                      >
+                        <i class="bi bi-wallet2"></i>
+                        <span>Pay ₹{{ (item.total_amount || (item.quantity * 0.15)) | number:'1.2-2' }}</span>
+                      </button>
+
+                      <!-- Dynamic Workflow Actions (FORWARD, APPROVE FOR PAYMENT, REJECT, FINAL APPROVAL) -->
+                      <ng-container *ngFor="let act of (item.allowed_actions || item.allowedActions || [])">
+                        <button
+                          type="button"
+                          class="btn btn-sm fw-bold px-2 py-1 shadow-sm"
+                          *ngIf="act !== 'PAY'"
+                          [ngClass]="{
+                            'btn-primary text-white': act.includes('FORWARD'),
+                            'btn-success text-white': act.includes('APPROVE') || act.includes('FINAL'),
+                            'btn-danger text-white': act.includes('REJECT'),
+                            'btn-secondary text-white': !act.includes('FORWARD') && !act.includes('APPROVE') && !act.includes('REJECT') && !act.includes('FINAL')
+                          }"
+                          (click)="onHologramActionClick(item, act)"
+                          [disabled]="isProcessingHologramAction"
+                          title="Execute {{ act }}"
+                        >
+                          {{ act }}
+                        </button>
+                      </ng-container>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State -->
+          <div class="p-5 text-center text-muted" *ngIf="!isLoadingHologram && filteredHologramProcurements.length === 0">
+            <i class="bi bi-tag fs-1 d-block mb-2 text-secondary"></i>
+            <h6 class="fw-bold text-dark">No Hologram Procurement Applications Found</h6>
+            <p class="small text-muted" *ngIf="!isOfficerUser">Click "Apply for Hologram Procurement" to request excise holograms.</p>
+            <p class="small text-muted" *ngIf="isOfficerUser">No applications match the current filter criteria.</p>
+          </div>
+
+          <!-- Loading State -->
+          <div class="p-5 text-center text-muted" *ngIf="isLoadingHologram">
+            <mat-progress-spinner mode="indeterminate" diameter="30" class="mx-auto mb-2"></mat-progress-spinner>
+            <span>Loading hologram applications...</span>
           </div>
         </div>
       </div>
@@ -4480,6 +4773,294 @@
         </button>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- --- Apply IMFL Hologram Procurement Modal -->
+<!-- ========================================== -->
+<div class="dp-modal-backdrop" *ngIf="showApplyHologramModal">
+  <div class="dp-modal" style="max-width: 580px;">
+    <div class="dp-modal-header d-flex justify-content-between align-items-center p-3 bg-white border-bottom">
+      <div class="d-flex align-items-center gap-2">
+        <div class="p-2 bg-primary bg-opacity-10 text-primary rounded-circle">
+          <i class="bi bi-tag-fill fs-5"></i>
+        </div>
+        <div>
+          <h5 class="m-0 fw-bold text-dark">Apply for Hologram Procurement</h5>
+          <small class="text-muted">Procure official excise holograms for IMFL distribution</small>
+        </div>
+      </div>
+      <button type="button" class="btn-close" (click)="closeApplyHologramModal()"></button>
+    </div>
+
+    <div class="dp-modal-body p-4 bg-light">
+      <!-- Applicant / Distributor Info Box -->
+      <div class="card border-0 shadow-sm rounded-3 mb-3">
+        <div class="card-body p-3">
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="text-muted small mb-1 d-block">Distributor / Establishment</label>
+              <span class="fw-bold text-dark">{{ applicantDisplayName || 'Distributor' }}</span>
+            </div>
+            <div class="col-6">
+              <label class="text-muted small mb-1 d-block">Rate per Hologram</label>
+              <span class="fw-bold text-primary">₹0.15 / piece</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quantity Input & Calculation Box -->
+      <div class="card border-0 shadow-sm rounded-3 mb-3">
+        <div class="card-body p-3">
+          <div class="mb-3">
+            <label class="form-label fw-bold text-dark">Number of Holograms (Pieces) <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="bi bi-tag"></i></span>
+              <input
+                type="number"
+                class="form-control form-control-lg fw-bold"
+                placeholder="Enter hologram quantity (e.g. 50000)"
+                [(ngModel)]="hologramQuantity"
+                min="1"
+                step="100"
+              />
+            </div>
+            <small class="text-muted mt-1 d-block">Enter the required quantity of holograms for your stock.</small>
+          </div>
+
+          <!-- Real-time Amount Calculation Card -->
+          <div class="p-3 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded-3 d-flex justify-content-between align-items-center">
+            <div>
+              <span class="text-muted small d-block">Total Estimated Cost (₹0.15 × {{ (hologramQuantity || 0) | number }})</span>
+              <span class="fw-bold text-dark" style="font-size: 0.9rem;">Total Payable Amount</span>
+            </div>
+            <div class="text-end">
+              <span class="fs-4 fw-bold text-primary">₹{{ hologramTotalAmount | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remarks Input -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold text-dark">Remarks / Notes</label>
+        <textarea
+          class="form-control"
+          rows="2"
+          placeholder="Optional remarks or purpose of requisition..."
+          [(ngModel)]="hologramRemarks"
+        ></textarea>
+      </div>
+
+      <!-- Workflow Info Alert -->
+      <div class="alert alert-info py-2 px-3 small d-flex align-items-center gap-2 mb-0" style="font-size: 11.5px;">
+        <i class="bi bi-info-circle-fill fs-6 text-info"></i>
+        <span>
+          <strong>Workflow:</strong> Distributor &rarr; IT Cell &rarr; Commissioner Approval &rarr; Wallet Payment (₹{{ hologramTotalAmount | number:'1.2-2' }}) &rarr; IT Cell &rarr; Final Approval.
+        </span>
+      </div>
+    </div>
+
+    <div class="dp-modal-footer p-3 bg-white border-top d-flex justify-content-between align-items-center">
+      <button type="button" class="btn btn-outline-secondary px-3" (click)="closeApplyHologramModal()" [disabled]="isSubmittingHologram">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary px-4 fw-bold text-white shadow-sm"
+        (click)="submitHologramProcurement()"
+        [disabled]="isSubmittingHologram || !hologramQuantity || hologramQuantity <= 0"
+      >
+        <i class="bi bi-send-fill me-1" *ngIf="!isSubmittingHologram"></i>
+        <span class="spinner-border spinner-border-sm me-1" *ngIf="isSubmittingHologram"></span>
+        {{ isSubmittingHologram ? 'Submitting...' : 'Submit Application' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- --- Hologram Details Modal -->
+<!-- ========================================== -->
+<div class="dp-modal-backdrop" *ngIf="showHologramDetailsModal && selectedHologramItem">
+  <div class="dp-modal" style="max-width: 650px;">
+    <div class="dp-modal-header d-flex justify-content-between align-items-center p-3 bg-white border-bottom">
+      <div class="d-flex align-items-center gap-2">
+        <div class="p-2 bg-primary bg-opacity-10 text-primary rounded-circle">
+          <i class="bi bi-file-earmark-text fs-5"></i>
+        </div>
+        <div>
+          <h5 class="m-0 fw-bold text-dark">Hologram Procurement Details</h5>
+          <span class="font-monospace text-primary small">{{ selectedHologramItem.ref_no }}</span>
+        </div>
+      </div>
+      <button type="button" class="btn-close" (click)="closeHologramDetailsModal()"></button>
+    </div>
+
+    <div class="dp-modal-body p-4 bg-light">
+      <div class="card border-0 shadow-sm rounded-3 mb-3">
+        <div class="card-body p-3">
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="text-muted small mb-0.5 d-block">Distributor Name</label>
+              <div class="fw-bold text-dark">{{ selectedHologramItem.applicant_name || selectedHologramItem.distributor_name || 'Distributor' }}</div>
+            </div>
+            <div class="col-6">
+              <label class="text-muted small mb-0.5 d-block">Establishment</label>
+              <div class="fw-bold text-dark">{{ selectedHologramItem.establishment_name || 'N/A' }}</div>
+            </div>
+            <div class="col-6">
+              <label class="text-muted small mb-0.5 d-block">Application Date</label>
+              <div class="text-dark">{{ selectedHologramItem.created_at | date:'dd MMM yyyy, hh:mm a' }}</div>
+            </div>
+            <div class="col-6">
+              <label class="text-muted small mb-0.5 d-block">Current Stage</label>
+              <span class="badge bg-primary px-2.5 py-1">{{ selectedHologramItem.current_stage_name || selectedHologramItem.status || 'Submitted' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial & Quantity Breakdown -->
+      <div class="card border-0 shadow-sm rounded-3 mb-3">
+        <div class="card-body p-3">
+          <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Procurement Breakdown</h6>
+          <div class="row g-3">
+            <div class="col-4">
+              <label class="text-muted small mb-0.5 d-block">Quantity</label>
+              <div class="fw-bold fs-5 text-dark">{{ (selectedHologramItem.quantity || 0) | number }} Pcs</div>
+            </div>
+            <div class="col-4">
+              <label class="text-muted small mb-0.5 d-block">Rate per Piece</label>
+              <div class="fw-bold fs-5 text-muted">₹{{ (selectedHologramItem.rate_per_piece || 0.15) | number:'1.2-2' }}</div>
+            </div>
+            <div class="col-4">
+              <label class="text-muted small mb-0.5 d-block">Total Amount</label>
+              <div class="fw-bold fs-5 text-success">₹{{ (selectedHologramItem.total_amount || (selectedHologramItem.quantity * 0.15)) | number:'1.2-2' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Details -->
+      <div class="card border-0 shadow-sm rounded-3 mb-3">
+        <div class="card-body p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold text-dark m-0">Payment Information</h6>
+            <span
+              class="badge py-1 px-2.5"
+              [ngClass]="{
+                'bg-success': selectedHologramItem.payment_status === 'COMPLETED' || selectedHologramItem.payment_status === 'SUCCESS',
+                'bg-warning text-dark': selectedHologramItem.payment_status === 'PENDING' || !selectedHologramItem.payment_status
+              }"
+            >
+              {{ selectedHologramItem.payment_status || 'PENDING' }}
+            </span>
+          </div>
+          <div class="small text-muted" *ngIf="selectedHologramItem.payment_details">
+            <div><strong>Payment Method:</strong> Hologram Wallet Balance</div>
+            <div *ngIf="selectedHologramItem.payment_details?.transaction_id"><strong>Transaction Ref:</strong> {{ selectedHologramItem.payment_details.transaction_id }}</div>
+            <div *ngIf="selectedHologramItem.payment_date"><strong>Paid On:</strong> {{ selectedHologramItem.payment_date | date:'dd MMM yyyy, hh:mm a' }}</div>
+          </div>
+          <div class="small text-muted" *ngIf="!selectedHologramItem.payment_details && selectedHologramItem.payment_status !== 'COMPLETED'">
+            Payment of ₹{{ (selectedHologramItem.total_amount || (selectedHologramItem.quantity * 0.15)) | number:'1.2-2' }} will be deducted from your Hologram Wallet after Commissioner approval.
+          </div>
+        </div>
+      </div>
+
+      <!-- Remarks -->
+      <div class="card border-0 shadow-sm rounded-3" *ngIf="selectedHologramItem.remarks">
+        <div class="card-body p-3">
+          <label class="text-muted small mb-0.5 d-block">Remarks</label>
+          <div class="text-dark small">{{ selectedHologramItem.remarks }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dp-modal-footer p-3 bg-white border-top d-flex justify-content-between align-items-center">
+      <button type="button" class="btn btn-secondary px-4" (click)="closeHologramDetailsModal()">
+        Close
+      </button>
+
+      <div class="d-flex align-items-center gap-2">
+        <!-- Pay Button in Details Modal -->
+        <button
+          type="button"
+          class="btn btn-success fw-bold px-3 py-1.5 text-white shadow-sm d-flex align-items-center gap-1"
+          *ngIf="(selectedHologramItem.status === 'Approved for Payment' || selectedHologramItem.current_stage_name === 'Approved for Payment') && selectedHologramItem.payment_status !== 'COMPLETED'"
+          (click)="onHologramWalletPay(selectedHologramItem)"
+          [disabled]="isProcessingHologramAction"
+        >
+          <i class="bi bi-wallet2"></i>
+          <span>Pay ₹{{ (selectedHologramItem.total_amount || (selectedHologramItem.quantity * 0.15)) | number:'1.2-2' }} via Wallet</span>
+        </button>
+
+        <!-- Dynamic Action Buttons in Details Modal -->
+        <ng-container *ngFor="let act of (selectedHologramItem.allowed_actions || selectedHologramItem.allowedActions || [])">
+          <button
+            type="button"
+            class="btn btn-sm fw-bold px-3 py-1.5 shadow-sm"
+            *ngIf="act !== 'PAY'"
+            [ngClass]="{
+              'btn-primary text-white': act.includes('FORWARD'),
+              'btn-success text-white': act.includes('APPROVE') || act.includes('FINAL'),
+              'btn-danger text-white': act.includes('REJECT'),
+              'btn-secondary text-white': !act.includes('FORWARD') && !act.includes('APPROVE') && !act.includes('REJECT') && !act.includes('FINAL')
+            }"
+            (click)="onHologramActionClick(selectedHologramItem, act)"
+            [disabled]="isProcessingHologramAction"
+          >
+            {{ act }}
+          </button>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- --- Action Remarks Confirmation Modal ---- -->
+<!-- ========================================== -->
+<div class="dp-modal-backdrop" *ngIf="actionRemarksModalOpen && pendingHologramAction">
+  <div class="dp-modal" style="max-width: 480px;">
+    <div class="dp-modal-header d-flex justify-content-between align-items-center p-3 bg-white border-bottom">
+      <h5 class="m-0 fw-bold text-dark">Confirm Action: {{ pendingHologramAction.title }}</h5>
+      <button type="button" class="btn-close" (click)="cancelHologramAction()"></button>
+    </div>
+
+    <div class="dp-modal-body p-4 bg-light">
+      <p class="small text-muted mb-3">
+        Are you sure you want to perform <strong>{{ pendingHologramAction.title }}</strong> on application
+        <strong>{{ pendingHologramAction.item.ref_no }}</strong>?
+      </p>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold text-dark small">Remarks / Notes</label>
+        <textarea
+          class="form-control form-control-sm"
+          rows="3"
+          placeholder="Enter remarks for this action (optional)..."
+          [(ngModel)]="actionRemarksText"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="dp-modal-footer p-3 bg-white border-top d-flex justify-content-end gap-2">
+      <button type="button" class="btn btn-outline-secondary btn-sm px-3" (click)="cancelHologramAction()" [disabled]="isProcessingHologramAction">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary btn-sm px-4 fw-bold text-white shadow-sm"
+        (click)="confirmHologramAction()"
+        [disabled]="isProcessingHologramAction"
+      >
+        <span class="spinner-border spinner-border-sm me-1" *ngIf="isProcessingHologramAction"></span>
+        Confirm
+      </button>
     </div>
   </div>
 </div>

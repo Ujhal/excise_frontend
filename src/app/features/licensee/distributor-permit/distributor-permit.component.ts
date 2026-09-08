@@ -23,6 +23,7 @@ import { ActionItem, UnifiedActionButtonsComponent } from '../../../shared/compo
 import { UnifiedActionsService } from '../../../shared/services/unified-actions.service';
 
 import { SidebarPendingBadgeService } from '../../../shared/services/sidebar-pending-badge.service';
+import { ImflHologramProcurementService, IMFLHologramProcurementItem } from '../../../core/services/imfl-hologram-procurement.service';
 
 type DistributorPermitStatusFilter = 'all' | 'approved' | 'pending' | 'under_process' | 'objection' | 'rejected';
 type DistributorPermitStatusGroup = Exclude<DistributorPermitStatusFilter, 'all'>;
@@ -137,15 +138,20 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       .subscribe((params) => {
         this.isFormView = String(params?.['mode'] || '').toLowerCase() === 'apply';
         const tabParam = String(params?.['tab'] || '').toLowerCase() as ImflTabType;
-        if (['requisition', 'brand-arrival', 'revalidation', 'cancellation', 'brand-warehouse'].includes(tabParam)) {
+        if (['requisition', 'brand-arrival', 'revalidation', 'cancellation', 'brand-warehouse', 'hologram-procurement'].includes(tabParam)) {
           this.activeTab = tabParam;
           if (tabParam === 'brand-warehouse') {
             this.loadBrandWarehouseStock();
+          } else if (tabParam === 'hologram-procurement') {
+            this.loadHologramProcurements();
           }
         } else {
           // Also resolve from the 'section' param (e.g. distributor-permit-cancellation, distributor-permit-brand-arrival)
           const sectionParam = String(params?.['section'] || '').toLowerCase();
-          if (sectionParam.includes('brand-arrival') || sectionParam.includes('brand_arrival')) {
+          if (this.isItCellUser || sectionParam.includes('hologram')) {
+            this.activeTab = 'hologram-procurement';
+            this.loadHologramProcurements();
+          } else if (sectionParam.includes('brand-arrival') || sectionParam.includes('brand_arrival')) {
             this.activeTab = 'brand-arrival';
           } else if (sectionParam.includes('brand-warehouse') || sectionParam.includes('brand_warehouse')) {
             this.activeTab = 'brand-warehouse';
@@ -171,6 +177,14 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
         }
       });
 
+    this.imflHoloService.refresh$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (this.activeTab === 'hologram-procurement') {
+          this.loadHologramProcurements(true);
+        }
+      });
+
     this.supplierForm.controls.selectedSupplierId.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((supplierId) => this.applySupplierById(supplierId || ''));
@@ -190,6 +204,11 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     if (this.activeTab === tab) return;
     this.activeTab = tab;
     this.pageIndex = 0;
+    if (tab === 'hologram-procurement') {
+      this.loadHologramProcurements();
+    } else if (tab === 'brand-warehouse') {
+      this.loadBrandWarehouseStock();
+    }
     this.autoSelectDefaultStatusFilter();
     this.cdr.markForCheck();
     this.router.navigate([], {
@@ -5099,6 +5118,23 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     );
   }
 
+  get isItCellUser(): boolean {
+    const user = this.accountService.getCurrentUser() as any;
+    let roleId = Number(user?.role?.id || user?.roleId || user?.role_id || 0);
+    if (!roleId) {
+      try {
+        const cached = localStorage.getItem('currentUser') || localStorage.getItem('user');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          roleId = Number(parsed?.roleId || parsed?.role?.id || parsed?.user?.roleId || parsed?.user?.role?.id || 0);
+        }
+      } catch {}
+    }
+    const roleName = String(user?.role?.name || user?.role?.displayName || user?.role || '').toLowerCase();
+    if (roleId === 3 || roleId === 12) return true;
+    return roleName.includes('it cell') || roleName.includes('it_cell') || roleName.includes('itcell');
+  }
+
   selectApplication(rawApp: any): void {
     console.log('selectApplication called with:', rawApp);
     if (!rawApp) {
@@ -5964,6 +6000,9 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   }
 
   getHeaderTitle(): string {
+    if (this.activeTab === 'hologram-procurement') {
+      return 'IMFL / Hologram Procurement';
+    }
     if (this.activeTab === 'brand-warehouse') {
       return 'IMFL Brand Warehouse Stock Register';
     }
@@ -6431,5 +6470,268 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     const copy = new Date(date);
     copy.setHours(23, 59, 59, 999);
     return copy;
+  }
+
+  // ==========================================
+  // --- IMFL Hologram Procurement Feature ---
+  // ==========================================
+  private readonly imflHoloService = inject(ImflHologramProcurementService);
+  hologramProcurements: IMFLHologramProcurementItem[] = [];
+  isLoadingHologram = false;
+  showApplyHologramModal = false;
+  showHologramDetailsModal = false;
+  selectedHologramItem: IMFLHologramProcurementItem | null = null;
+  hologramQuantity = 1000;
+  hologramRemarks = '';
+  isSubmittingHologram = false;
+  hologramRatePerPiece = 0.15;
+  hologramSearchFilter = '';
+  hologramStatusFilter = 'all';
+  isProcessingHologramAction = false;
+  actionRemarksModalOpen = false;
+  pendingHologramAction: { item: IMFLHologramProcurementItem; action: string; title: string } | null = null;
+  actionRemarksText = '';
+
+  get hologramTotalAmount(): number {
+    return Math.round(Number(this.hologramQuantity || 0) * this.hologramRatePerPiece * 100) / 100;
+  }
+
+  get filteredHologramProcurements(): IMFLHologramProcurementItem[] {
+    const q = this.hologramSearchFilter.trim().toLowerCase();
+    const stFilter = this.hologramStatusFilter;
+
+    return (this.hologramProcurements || []).filter((item) => {
+      const stageName = String(item.current_stage_name || item.status || '').toLowerCase();
+      const ref = String(item.ref_no || '').toLowerCase();
+      const applicant = String(item.applicant_name || item.distributor_name || '').toLowerCase();
+      const est = String(item.establishment_name || '').toLowerCase();
+
+      let matchesStatus = true;
+      if (stFilter === 'approved') {
+        matchesStatus = stageName.includes('approved') || stageName.includes('completed');
+      } else if (stFilter === 'pending') {
+        matchesStatus = stageName.includes('review') || stageName.includes('forwarded') || stageName.includes('submitted');
+      } else if (stFilter === 'payment') {
+        matchesStatus = stageName.includes('payment') || String(item.payment_status || '').toLowerCase() === 'pending';
+      } else if (stFilter === 'rejected') {
+        matchesStatus = stageName.includes('rejected');
+      }
+
+      const matchesSearch = !q || ref.includes(q) || applicant.includes(q) || est.includes(q);
+      return matchesStatus && matchesSearch;
+    });
+  }
+
+  get hologramCounts(): { total: number; approved: number; pending: number; paymentPending: number; rejected: number } {
+    return (this.hologramProcurements || []).reduce(
+      (acc, item) => {
+        acc.total += 1;
+        const stage = String(item.current_stage_name || item.status || '').toLowerCase();
+        if (stage.includes('approved') || stage.includes('completed')) {
+          acc.approved += 1;
+        } else if (stage.includes('payment') || (String(item.payment_status || '').toLowerCase() === 'pending' && stage.includes('approved for payment'))) {
+          acc.paymentPending += 1;
+        } else if (stage.includes('rejected')) {
+          acc.rejected += 1;
+        } else {
+          acc.pending += 1;
+        }
+        return acc;
+      },
+      { total: 0, approved: 0, pending: 0, paymentPending: 0, rejected: 0 }
+    );
+  }
+
+  loadHologramProcurements(silent = false): void {
+    if (!silent) this.isLoadingHologram = true;
+    this.imflHoloService.getProcurements().subscribe({
+      next: (data) => {
+        this.hologramProcurements = Array.isArray(data) ? data : (data as any)?.results || [];
+        this.isLoadingHologram = false;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Error loading hologram procurements:', err);
+        this.isLoadingHologram = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  handleApplyNew(): void {
+    if (this.activeTab === 'hologram-procurement') {
+      this.openApplyHologramModal();
+    } else {
+      this.openApplyForm();
+    }
+  }
+
+  openApplyHologramModal(): void {
+    this.hologramQuantity = 1000;
+    this.hologramRemarks = '';
+    this.showApplyHologramModal = true;
+    this.cdr.markForCheck();
+  }
+
+  closeApplyHologramModal(): void {
+    this.showApplyHologramModal = false;
+    this.cdr.markForCheck();
+  }
+
+  submitHologramProcurement(): void {
+    const qty = Number(this.hologramQuantity || 0);
+    if (qty <= 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Invalid Quantity',
+        text: 'Please enter a valid quantity of holograms (minimum 1).'
+      });
+      return;
+    }
+
+    this.isSubmittingHologram = true;
+    const distributorName = this.applicantDisplayName || 'Distributor';
+
+    this.imflHoloService.createProcurement({
+      quantity: qty,
+      distributor_name: distributorName,
+      establishment_name: distributorName,
+      remarks: this.hologramRemarks || 'Application for IMFL Hologram Procurement'
+    }).subscribe({
+      next: (res) => {
+        this.isSubmittingHologram = false;
+        this.showApplyHologramModal = false;
+        Swal.fire({
+          icon: 'success',
+          title: 'Application Submitted',
+          text: `Your IMFL Hologram Procurement application (${res.ref_no || ''}) for ${qty.toLocaleString()} holograms (Total: ₹${(qty * 0.15).toFixed(2)}) has been submitted successfully.`
+        });
+        this.loadHologramProcurements();
+        if (res) {
+          this.openHologramDetailsModal(res);
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isSubmittingHologram = false;
+        console.error('Error creating hologram procurement:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Submission Failed',
+          text: err?.error?.error || err?.error?.detail || 'Failed to submit hologram procurement application. Please try again.'
+        });
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  openHologramDetailsModal(item: IMFLHologramProcurementItem): void {
+    this.selectedHologramItem = item;
+    this.showHologramDetailsModal = true;
+    this.cdr.markForCheck();
+  }
+
+  closeHologramDetailsModal(): void {
+    this.showHologramDetailsModal = false;
+    this.selectedHologramItem = null;
+    this.cdr.markForCheck();
+  }
+
+  onHologramActionClick(item: IMFLHologramProcurementItem, action: string): void {
+    const actionUpper = action.toUpperCase();
+    this.pendingHologramAction = {
+      item,
+      action: actionUpper,
+      title: actionUpper.replace(/_/g, ' ')
+    };
+    this.actionRemarksText = '';
+    this.actionRemarksModalOpen = true;
+    this.cdr.markForCheck();
+  }
+
+  confirmHologramAction(): void {
+    if (!this.pendingHologramAction || !this.pendingHologramAction.item || !this.pendingHologramAction.item.id) return;
+    const { item, action } = this.pendingHologramAction;
+    const itemId: number = item.id!;
+    this.isProcessingHologramAction = true;
+
+    this.imflHoloService.performAction(itemId, action, this.actionRemarksText).subscribe({
+      next: (res) => {
+        this.isProcessingHologramAction = false;
+        this.actionRemarksModalOpen = false;
+        this.pendingHologramAction = null;
+        Swal.fire({
+          icon: 'success',
+          title: 'Action Successful',
+          text: `Action '${action}' executed successfully.`
+        });
+        this.loadHologramProcurements();
+        if (this.showHologramDetailsModal && this.selectedHologramItem?.id === item.id) {
+          this.selectedHologramItem = { ...this.selectedHologramItem, ...res.data };
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isProcessingHologramAction = false;
+        console.error('Error performing action:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Action Failed',
+          text: err?.error?.error || err?.error?.detail || 'Failed to perform workflow action.'
+        });
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  cancelHologramAction(): void {
+    this.actionRemarksModalOpen = false;
+    this.pendingHologramAction = null;
+    this.actionRemarksText = '';
+    this.cdr.markForCheck();
+  }
+
+  onHologramWalletPay(item: IMFLHologramProcurementItem): void {
+    const itemId: number | undefined = item?.id;
+    if (!itemId) return;
+    const amount = Number(item.total_amount || (item.quantity * 0.15));
+    Swal.fire({
+      title: 'Pay from Hologram Wallet?',
+      html: `You are about to pay <b>₹${amount.toFixed(2)}</b> for <b>${Number(item.quantity).toLocaleString()}</b> holograms directly from your Hologram Wallet balance.`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#2563eb',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Yes, Pay Now'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.isProcessingHologramAction = true;
+        this.imflHoloService.payViaWallet(itemId).subscribe({
+          next: (res) => {
+            this.isProcessingHologramAction = false;
+            Swal.fire({
+              icon: 'success',
+              title: 'Payment Successful!',
+              text: `₹${amount.toFixed(2)} deducted from Hologram Wallet. Reference: ${res.data?.payment_details?.transaction_id || ''}`
+            });
+            this.loadHologramProcurements();
+            if (this.showHologramDetailsModal && this.selectedHologramItem?.id === item.id) {
+              this.selectedHologramItem = { ...this.selectedHologramItem, ...res.data };
+            }
+            this.cdr.markForCheck();
+          },
+          error: (err) => {
+            this.isProcessingHologramAction = false;
+            console.error('Wallet payment error:', err);
+            Swal.fire({
+              icon: 'error',
+              title: 'Payment Failed',
+              text: err?.error?.error || err?.error?.detail || 'Wallet payment failed. Please check your Hologram Wallet balance.'
+            });
+            this.cdr.markForCheck();
+          }
+        });
+      }
+    });
   }
 }

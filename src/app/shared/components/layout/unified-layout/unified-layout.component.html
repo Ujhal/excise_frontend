@@ -93,6 +93,11 @@
                   <mat-icon class="nav-icon">cancel</mat-icon>
                   <span class="nav-text">IMFL Cancellation</span>
                 </button>
+
+                <button class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('hologram-procurement')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('hologram-procurement')">
+                  <mat-icon class="nav-icon">qr_code_2</mat-icon>
+                  <span class="nav-text">IMFL Hologram Procurement</span>
+                </button>
               </ng-container>
             </ng-container>
 
@@ -276,7 +281,7 @@
               </button>
 
               <!-- IMFL Permit Group rendered RIGHT AFTER Bulk Spirit -->
-              <ng-container *ngIf="item.section === 'cancellation' && (isCommissionerUser() || isPermitSectionUser())">
+              <ng-container *ngIf="item.section === 'cancellation' && (isCommissionerUser() || isPermitSectionUser() || isItCellUser())">
                 <button class="nav-item imfl-permit-nav-item" (click)="imflPermitExpanded = !imflPermitExpanded"
                   [class.active]="imflPermitExpanded && isDashboardSectionActive('distributor-permit')"
                   [class.group-expanded]="imflPermitExpanded">
@@ -288,20 +293,20 @@
                 </button>
 
                 <ng-container *ngIf="imflPermitExpanded">
-                  <button class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('requisition')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('requisition')">
+                  <button *ngIf="!isItCellUser()" class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('requisition')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('requisition')">
                     <mat-icon class="nav-icon">description</mat-icon>
                     <span class="nav-text">IMFL Requisition</span>
                     <span class="nav-badge" *ngIf="(getPendingCount('distributor-permit') || getPendingCount('distributor-permit-requisition') || getPendingCount('imfl-requisition')) as pending">{{ pending }}</span>
                     <span class="nav-badge nav-badge--payment" *ngIf="getPendingCount('distributor-permit:payment') as payCount" title="Awaiting Payment"><mat-icon>payment</mat-icon></span>
                   </button>
 
-                  <button *ngIf="!isPermitSectionUser()" class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('revalidation')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('revalidation')">
+                  <button *ngIf="!isPermitSectionUser() && !isItCellUser()" class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('revalidation')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('revalidation')">
                     <mat-icon class="nav-icon">refresh</mat-icon>
                     <span class="nav-text">IMFL Revalidation</span>
                     <span class="nav-badge" *ngIf="getPendingCount('distributor-permit-revalidation') || getPendingCount('imfl-revalidation') as pending">{{ pending }}</span>
                   </button>
 
-                  <button *ngIf="!isPermitSectionUser()" class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('cancellation')" [class.active]="isDashboardSectionActive('cancellation') || (isDashboardSectionActive('distributor-permit') && isImflTabActive('cancellation'))">
+                  <button *ngIf="!isPermitSectionUser() && !isItCellUser()" class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('cancellation')" [class.active]="isDashboardSectionActive('cancellation') || (isDashboardSectionActive('distributor-permit') && isImflTabActive('cancellation'))">
                     <mat-icon class="nav-icon">cancel</mat-icon>
                     <span class="nav-text">IMFL Cancellation</span>
                     <span class="nav-badge" *ngIf="getPendingCount('distributor-permit-cancellation') || getPendingCount('imfl-cancellation') as pending">{{ pending }}</span>
@@ -310,6 +315,11 @@
                   <button *ngIf="isDistributorOic()" class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('brand-warehouse')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('brand-warehouse')">
                     <mat-icon class="nav-icon">inventory_2</mat-icon>
                     <span class="nav-text">Brand Warehouse Stock</span>
+                  </button>
+
+                  <button *ngIf="isItCellUser() || isCommissionerUser() || isDistributorOic() || isPermitSectionUser()" class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('hologram-procurement')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('hologram-procurement')">
+                    <mat-icon class="nav-icon">qr_code_2</mat-icon>
+                    <span class="nav-text">IMFL Hologram Procurement</span>
                   </button>
                 </ng-container>
               </ng-container>
