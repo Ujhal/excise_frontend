@@ -6973,13 +6973,20 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     });
   }
 
+  isHologramArrivalUpdated(item: any): boolean {
+    if (!item) return false;
+    const fromR = String(item.hologram_from_range || item.hologramFromRange || '').trim();
+    const toR = String(item.hologram_to_range || item.hologramToRange || '').trim();
+    const st = String(item.status || '').toUpperCase();
+    return Boolean((fromR && toR) || st === 'RECEIVED' || st === 'UPDATED');
+  }
+
   get hologramArrivalCounts(): { totalRecords: number; totalHolograms: number; totalDamaged: number } {
     return (this.hologramArrivals || []).reduce(
       (acc, item) => {
         acc.totalRecords += 1;
         // Count holograms only after serial numbers have actually been recorded/saved
-        const isReceived = Boolean((item.hologram_from_range && item.hologram_to_range) || String(item.status || '').toUpperCase() === 'RECEIVED');
-        if (isReceived) {
+        if (this.isHologramArrivalUpdated(item)) {
           acc.totalHolograms += Number(item.total_holograms || item.procured_quantity || 0);
           acc.totalDamaged += Number(item.damaged_total || 0);
         }
@@ -7002,6 +7009,10 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
           establishment_name: item.establishment_name || item.establishmentName || '',
           total_holograms: Number(item.total_holograms ?? item.totalHolograms ?? item.procured_quantity ?? item.procuredQuantity ?? item.quantity ?? 0),
           procured_quantity: Number(item.procured_quantity ?? item.procuredQuantity ?? item.total_holograms ?? item.totalHolograms ?? item.quantity ?? 0),
+          hologram_from_range: item.hologram_from_range || item.hologramFromRange || '',
+          hologram_to_range: item.hologram_to_range || item.hologramToRange || '',
+          hologram_ranges: item.hologram_ranges || item.hologramRanges || [],
+          damaged_total: Number(item.damaged_total ?? item.damagedTotal ?? 0),
           arrival_date: item.arrival_date || item.arrivalDate || item.created_at || item.createdAt || '',
           recorded_by_name: item.recorded_by_name || item.recordedByName || item.received_by_username || item.receivedByUsername || 'OIC Officer',
           status: item.status || 'PENDING_SERIALS'

@@ -1402,10 +1402,10 @@
                   <td>
                     <span
                       class="badge px-2.5 py-1 rounded-pill fw-semibold"
-                      [ngClass]="item.hologram_from_range ? 'bg-success text-white' : 'bg-warning text-dark'"
+                      [ngClass]="isHologramArrivalUpdated(item) ? 'bg-success text-white' : 'bg-warning text-dark'"
                     >
-                      <i class="bi me-1" [ngClass]="item.hologram_from_range ? 'bi-check-circle-fill' : 'bi-clock-history'"></i>
-                      {{ item.hologram_from_range ? (item.status || 'RECEIVED') : 'Awaiting Serials' }}
+                      <i class="bi me-1" [ngClass]="isHologramArrivalUpdated(item) ? 'bi-check-circle-fill' : 'bi-clock-history'"></i>
+                      {{ isHologramArrivalUpdated(item) ? 'Updated' : 'Awaiting Serials' }}
                     </span>
                   </td>
                   <td class="text-center pe-3">
@@ -1413,20 +1413,11 @@
                       <button
                         type="button"
                         class="btn btn-sm btn-success fw-bold px-2.5 py-1 shadow-sm text-white"
-                        *ngIf="isOfficerUser && !item.hologram_from_range"
+                        *ngIf="isOfficerUser && !isHologramArrivalUpdated(item)"
                         (click)="openEnterSerialsModal(item)"
                         title="Enter Serial Numbers"
                       >
                         <i class="bi bi-pencil-fill me-1"></i> Write Serials
-                      </button>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-secondary fw-bold px-2 py-1 shadow-sm"
-                        *ngIf="isOfficerUser && item.hologram_from_range"
-                        (click)="openEnterSerialsModal(item)"
-                        title="Edit Serial Numbers"
-                      >
-                        <i class="bi bi-pencil"></i> Edit Serials
                       </button>
                       <button
                         type="button"
