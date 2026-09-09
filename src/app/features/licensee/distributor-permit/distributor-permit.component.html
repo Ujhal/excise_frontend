@@ -1726,6 +1726,22 @@
                 >
                   <i class="bi bi-list-columns-reverse me-1"></i> Range Breakdown ({{ (hologramOverviewData?.all_ranges || []).length }})
                 </button>
+                <button
+                  type="button"
+                  class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold"
+                  [ngClass]="activeOverviewViewMode === 'available' ? 'btn-primary text-white shadow-xs' : 'btn-light text-muted'"
+                  (click)="activeOverviewViewMode = 'available'"
+                >
+                  <i class="bi bi-check2-circle me-1"></i> Available Holograms ({{ availableHologramsList.length }})
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold"
+                  [ngClass]="activeOverviewViewMode === 'usage' ? 'btn-primary text-white shadow-xs' : 'btn-light text-muted'"
+                  (click)="activeOverviewViewMode = 'usage'"
+                >
+                  <i class="bi bi-diagram-3 me-1"></i> Usage Details ({{ usageDetailsList.length }})
+                </button>
               </div>
             </div>
 
@@ -1744,6 +1760,8 @@
                 <option value="all">All Status</option>
                 <option value="received">Received</option>
                 <option value="available">Available</option>
+                <option value="utilized">Utilized</option>
+                <option value="damaged">Damaged</option>
                 <option value="pending_serials">Pending</option>
               </select>
             </div>
@@ -1885,11 +1903,135 @@
             </table>
           </div>
 
-          <!-- Empty State -->
-          <div class="p-5 text-center text-muted" *ngIf="!isLoadingHologramOverview && filteredOverviewBatches.length === 0">
+          <!-- View Mode 3: Available Holograms Table -->
+          <div class="table-responsive" *ngIf="activeOverviewViewMode === 'available' && !isLoadingHologramOverview && filteredAvailableHolograms.length > 0">
+            <table class="table table-hover align-middle mb-0 dp-table">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">Sl. No</th>
+                  <th>Available Serial Range</th>
+                  <th>Available Quantity</th>
+                  <th>Batch Ref No</th>
+                  <th>Allocated Establishment</th>
+                  <th>Recorded By (OIC)</th>
+                  <th>Arrival Timestamp</th>
+                  <th class="pe-4 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let seg of filteredAvailableHolograms; let i = index">
+                  <td class="ps-4 fw-semibold text-muted">{{ i + 1 }}</td>
+                  <td>
+                    <div class="fw-bold text-dark font-monospace fs-6 d-flex align-items-center gap-2">
+                      <span class="badge bg-success bg-opacity-10 text-success p-1 rounded-circle"><i class="bi bi-check"></i></span>
+                      {{ seg.from }} &nbsp;&rarr;&nbsp; {{ seg.to }}
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge bg-emerald-gradient text-white fw-bold px-3 py-1.5 fs-6 font-monospace shadow-xs">
+                      {{ seg.count | number }} pcs
+                    </span>
+                  </td>
+                  <td>
+                    <span class="font-monospace text-primary fw-semibold">{{ seg.ref_no }}</span>
+                  </td>
+                  <td>
+                    <span class="small fw-semibold text-dark">{{ hologramOverviewData?.distributor_info?.establishment_name || 'Distributor Warehouse' }}</span>
+                  </td>
+                  <td>
+                    <span class="small fw-semibold text-dark">{{ seg.recorded_by_name || 'OIC Officer' }}</span>
+                  </td>
+                  <td>
+                    <span class="small text-muted">{{ seg.arrival_date | date:'dd MMM yyyy, hh:mm a' }}</span>
+                  </td>
+                  <td class="pe-4 text-center">
+                    <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 px-3 py-1.5 rounded-pill fw-bold">
+                      <i class="bi bi-shield-check me-1"></i> AVAILABLE / READY
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- View Mode 4: Usage Details Table -->
+          <div class="table-responsive" *ngIf="activeOverviewViewMode === 'usage' && !isLoadingHologramOverview && filteredUsageDetails.length > 0">
+            <table class="table table-hover align-middle mb-0 dp-table">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">Sl. No</th>
+                  <th>Activity / Event</th>
+                  <th>Serial Range / Batch Used</th>
+                  <th>Quantity Consumed</th>
+                  <th>Consignment Ref</th>
+                  <th>Establishment</th>
+                  <th>Authorized Officer</th>
+                  <th>Timestamp</th>
+                  <th class="pe-4">Usage Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of filteredUsageDetails; let i = index">
+                  <td class="ps-4 fw-semibold text-muted">{{ i + 1 }}</td>
+                  <td>
+                    <div class="fw-bold text-dark d-flex align-items-center gap-2">
+                      <i class="bi" [ngClass]="item.status === 'DAMAGED' ? 'bi-exclamation-triangle-fill text-danger' : item.status === 'DISPATCHED' ? 'bi-truck text-purple' : 'bi-boxes text-primary'"></i>
+                      <span>{{ item.activity_label }}</span>
+                    </div>
+                    <small class="text-muted">{{ item.notes }}</small>
+                  </td>
+                  <td>
+                    <span class="font-monospace fw-bold text-dark">{{ item.serial_range }}</span>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="item.status === 'DAMAGED' ? 'bg-danger bg-opacity-10 text-danger' : 'bg-primary bg-opacity-10 text-primary'" style="font-size: 13px;">
+                      {{ item.quantity | number }} pcs
+                    </span>
+                  </td>
+                  <td>
+                    <span class="font-monospace text-primary fw-semibold">{{ item.ref_no }}</span>
+                  </td>
+                  <td>
+                    <span class="small text-dark fw-semibold">{{ item.establishment_name }}</span>
+                  </td>
+                  <td>
+                    <span class="small fw-semibold text-dark">{{ item.recorded_by_name || 'OIC Officer' }}</span>
+                  </td>
+                  <td>
+                    <span class="small text-muted">{{ item.activity_date | date:'dd MMM yyyy, hh:mm a' }}</span>
+                  </td>
+                  <td class="pe-4">
+                    <span class="badge px-2.5 py-1.5 rounded-pill fw-bold" [ngClass]="item.status === 'DAMAGED' ? 'bg-danger text-white' : item.status === 'DISPATCHED' ? 'bg-purple text-white' : 'bg-primary text-white'">
+                      {{ item.status }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State for Usage Details -->
+          <div class="p-5 text-center text-muted" *ngIf="activeOverviewViewMode === 'usage' && !isLoadingHologramOverview && filteredUsageDetails.length === 0">
+            <div class="p-3 bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;">
+              <i class="bi bi-shield-check fs-2"></i>
+            </div>
+            <h6 class="fw-bold text-dark">No Hologram Consumption / Void Recorded Yet</h6>
+            <p class="small text-muted mb-0" style="max-width: 480px; margin: 0 auto;">
+              All {{ (hologramOverviewData?.summary_stats?.total_received || 0) | number }} received holograms are currently in pristine <strong>AVAILABLE</strong> stock ready for brand case affixing and warehouse storage.
+            </p>
+          </div>
+
+          <!-- Empty State for Batches / Ranges -->
+          <div class="p-5 text-center text-muted" *ngIf="!isLoadingHologramOverview && activeOverviewViewMode === 'batches' && filteredOverviewBatches.length === 0">
             <i class="bi bi-qr-code fs-1 d-block mb-2 text-secondary"></i>
-            <h6 class="fw-bold text-dark">No Hologram Overview Records Found</h6>
+            <h6 class="fw-bold text-dark">No Hologram Consignments Found</h6>
             <p class="small text-muted">No hologram arrivals or procurements match the filter criteria.</p>
+          </div>
+
+          <div class="p-5 text-center text-muted" *ngIf="!isLoadingHologramOverview && activeOverviewViewMode === 'ranges' && filteredOverviewRanges.length === 0">
+            <i class="bi bi-list-columns fs-1 d-block mb-2 text-secondary"></i>
+            <h6 class="fw-bold text-dark">No Range Segments Found</h6>
+            <p class="small text-muted">No hologram range segments match the filter criteria.</p>
           </div>
 
           <!-- Loading State -->

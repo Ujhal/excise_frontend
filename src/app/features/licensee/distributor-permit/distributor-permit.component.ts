@@ -7429,7 +7429,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   selectedOverviewBatch: any = null;
   showOverviewBatchModal = false;
   showHoloInfoDetailsModal = false;
-  activeOverviewViewMode: 'batches' | 'ranges' = 'batches';
+  activeOverviewViewMode: 'batches' | 'ranges' | 'available' | 'usage' = 'batches';
 
   loadHologramOverview(silent = false): void {
     if (!silent) this.isLoadingHologramOverview = true;
@@ -7664,6 +7664,117 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
 
       const matchesSearch = !q || ref.includes(q) || fromR.includes(q) || toR.includes(q) || officer.includes(q);
       return matchesStatus && matchesSearch;
+    });
+  }
+
+  get availableHologramsList(): any[] {
+    const allRanges: any[] = this.hologramOverviewData?.all_ranges || this.hologramOverviewData?.allRanges || [];
+    return allRanges.filter((r: any) => String(r.status || 'AVAILABLE').toUpperCase() === 'AVAILABLE');
+  }
+
+  get filteredAvailableHolograms(): any[] {
+    const list = this.availableHologramsList;
+    const q = this.overviewSearchFilter.trim().toLowerCase();
+    return list.filter((r) => {
+      const ref = String(r.ref_no || r.refNo || '').toLowerCase();
+      const fromR = String(r.from || '').toLowerCase();
+      const toR = String(r.to || '').toLowerCase();
+      const officer = String(r.recorded_by_name || r.recordedByName || '').toLowerCase();
+      return !q || ref.includes(q) || fromR.includes(q) || toR.includes(q) || officer.includes(q);
+    });
+  }
+
+  get usageDetailsList(): any[] {
+    const usageItems: any[] = [];
+    const batches: any[] = this.hologramOverviewData?.batches || [];
+
+    for (const b of batches) {
+      // Damaged / Void
+      if (Number(b.damaged_total || b.damagedTotal || 0) > 0) {
+        usageItems.push({
+          activity_type: 'DAMAGED',
+          activity_label: 'Damaged / Void Holograms',
+          ref_no: b.imfl_hologram_ref_no || b.imflHologramRefNo,
+          serial_range: Array.isArray(b.damaged_holograms_range) && b.damaged_holograms_range.length ? b.damaged_holograms_range.join(', ') : 'Reported during consignment arrival',
+          quantity: Number(b.damaged_total || b.damagedTotal || 0),
+          establishment_name: b.establishment_name || b.establishmentName || b.distributor_name,
+          recorded_by_name: b.recorded_by_name || b.recordedByName || 'OIC Officer',
+          activity_date: b.arrival_date || b.arrivalDate,
+          status: 'DAMAGED',
+          notes: b.remarks || 'Holograms damaged or voided during receipt'
+        });
+      }
+
+      // Utilized / Affixed / Dispatched ranges
+      for (const r of (b.hologram_ranges || b.hologramRanges || [])) {
+        const st = String(r.status || 'AVAILABLE').toUpperCase();
+        if (st !== 'AVAILABLE') {
+          usageItems.push({
+            activity_type: st,
+            activity_label: st === 'UTILIZED' ? 'Affixed to Warehouse Stock' : st === 'DISPATCHED' ? 'Dispatched to Retailer' : st,
+            ref_no: b.imfl_hologram_ref_no || b.imflHologramRefNo,
+            serial_range: `${r.from} → ${r.to}`,
+            quantity: Number(r.count || 0),
+            establishment_name: b.establishment_name || b.establishmentName || b.distributor_name,
+            recorded_by_name: b.recorded_by_name || b.recordedByName || 'OIC Officer',
+            activity_date: b.arrival_date || b.arrivalDate,
+            status: st,
+            notes: `Holograms (${r.from} - ${r.to}) utilized in bottling/dispatch`
+          });
+        }
+      }
+    }
+
+    // Also include warehouse / dispatch metrics if recorded
+    const stats = this.hologramOverviewData?.summary_stats || this.hologramOverviewData?.summaryStats;
+    if (usageItems.length === 0 && stats && (Number(stats.total_utilized_in_warehouse || 0) > 0 || Number(stats.total_dispatched_to_retailers || 0) > 0)) {
+      if (Number(stats.total_utilized_in_warehouse || 0) > 0) {
+        usageItems.push({
+          activity_type: 'UTILIZED',
+          activity_label: 'Affixed in Warehouse Stock',
+          ref_no: batches[0]?.imfl_hologram_ref_no || 'IMFL-STOCK-UTIL',
+          serial_range: `1 → ${stats.total_utilized_in_warehouse}`,
+          quantity: stats.total_utilized_in_warehouse,
+          establishment_name: this.hologramOverviewData?.distributor_info?.establishment_name || 'Distributor',
+          recorded_by_name: this.hologramOverviewData?.distributor_info?.mapped_oic?.name || 'OIC Officer',
+          activity_date: batches[0]?.arrival_date || new Date().toISOString(),
+          status: 'UTILIZED',
+          notes: 'Affixed on brand cases in warehouse'
+        });
+      }
+      if (Number(stats.total_dispatched_to_retailers || 0) > 0) {
+        usageItems.push({
+          activity_type: 'DISPATCHED',
+          activity_label: 'Dispatched to Retail Outlets',
+          ref_no: batches[0]?.imfl_hologram_ref_no || 'IMFL-RETAIL-DISP',
+          serial_range: `Retailer Batch`,
+          quantity: stats.total_dispatched_to_retailers,
+          establishment_name: this.hologramOverviewData?.distributor_info?.establishment_name || 'Distributor',
+          recorded_by_name: this.hologramOverviewData?.distributor_info?.mapped_oic?.name || 'OIC Officer',
+          activity_date: batches[0]?.arrival_date || new Date().toISOString(),
+          status: 'DISPATCHED',
+          notes: 'Dispatched with retailer invoice'
+        });
+      }
+    }
+
+    return usageItems;
+  }
+
+  get filteredUsageDetails(): any[] {
+    const list = this.usageDetailsList;
+    const q = this.overviewSearchFilter.trim().toLowerCase();
+    const st = this.overviewStatusFilter.trim().toLowerCase();
+
+    return list.filter((u) => {
+      const ref = String(u.ref_no || '').toLowerCase();
+      const type = String(u.activity_label || u.activity_type || '').toLowerCase();
+      const range = String(u.serial_range || '').toLowerCase();
+      const notes = String(u.notes || '').toLowerCase();
+      const officer = String(u.recorded_by_name || '').toLowerCase();
+      const stMatch = st === 'all' || String(u.status || '').toLowerCase() === st;
+      const qMatch = !q || ref.includes(q) || type.includes(q) || range.includes(q) || notes.includes(q) || officer.includes(q);
+      return stMatch && qMatch;
     });
   }
 
