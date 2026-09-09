@@ -537,8 +537,8 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       dispatchedLooseBottles: 0,
       dispatchedBottles: 0,
       hologramRanges: [
-        { from: '', to: '', count: 0 }
-      ],
+        { from: '', to: '', count: 0, isLoose: false, label: '' }
+      ] as Array<{ from: string; to: string; count: number; isLoose?: boolean; label?: string }>,
       hologramFrom: '',
       hologramTo: '',
       hologramCount: 0,
@@ -2119,7 +2119,19 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     if (!this.dispatchForm.hologramRanges) {
       this.dispatchForm.hologramRanges = [];
     }
-    this.dispatchForm.hologramRanges.push({ from: '', to: '', count: 0 });
+    const isPureLoose = Number(this.dispatchForm.dispatchedCases || 0) === 0;
+    const nextIdx = this.dispatchForm.hologramRanges.length + 1;
+    this.dispatchForm.hologramRanges.push({
+      from: '',
+      to: '',
+      count: isPureLoose ? 1 : 0,
+      isLoose: isPureLoose,
+      label: isPureLoose ? `Bottle #${nextIdx}` : `Range #${nextIdx}`
+    });
+    if (isPureLoose) {
+      this.dispatchForm.dispatchedLooseBottles = this.dispatchForm.hologramRanges.length;
+      this.dispatchForm.dispatchedBottles = this.dispatchForm.hologramRanges.length;
+    }
     this.syncHologramRangesToMainFields();
     this.cdr.detectChanges();
   }
@@ -2127,6 +2139,11 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   removeHologramRangeRow(index: number): void {
     if (this.dispatchForm.hologramRanges && this.dispatchForm.hologramRanges.length > 1) {
       this.dispatchForm.hologramRanges.splice(index, 1);
+      const isPureLoose = Number(this.dispatchForm.dispatchedCases || 0) === 0;
+      if (isPureLoose) {
+        this.dispatchForm.dispatchedLooseBottles = this.dispatchForm.hologramRanges.length;
+        this.dispatchForm.dispatchedBottles = this.dispatchForm.hologramRanges.length;
+      }
       this.syncHologramRangesToMainFields();
       this.cdr.detectChanges();
     }
@@ -2156,39 +2173,109 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  onLooseBottleChange(row: any, val: any): void {
+    const cleanVal = String(val ?? '').trim();
+    row.from = cleanVal;
+    row.to = cleanVal;
+    row.count = cleanVal ? 1 : 0;
+    this.syncHologramRangesToMainFields();
+  }
+
   autoDistributeHologramRanges(): void {
-    const needed = Number(this.dispatchForm.dispatchedBottles || 0);
-    if (needed <= 0) {
-      this.dispatchForm.hologramRanges = [{ from: '', to: '', count: 0 }];
-      this.syncHologramRangesToMainFields();
-      return;
-    }
-    const hgInfo = this.getHologramValidationInfo();
-    const availableNums = hgInfo.availableNums || [];
-    if (availableNums.length === 0) {
-      this.dispatchForm.hologramRanges = [{ from: '', to: '', count: needed }];
+    const cases = Number(this.dispatchForm.dispatchedCases || 0);
+    const loose = Number(this.dispatchForm.dispatchedLooseBottles || 0);
+    const pieces = Number(this.dispatchForm.piecesPerCase || 12);
+    const totalNeeded = (cases * pieces) + loose;
+
+    if (totalNeeded <= 0) {
+      this.dispatchForm.hologramRanges = [{ from: '', to: '', count: 0, isLoose: false, label: 'Range #1' }];
       this.syncHologramRangesToMainFields();
       return;
     }
 
-    const takeNums = availableNums.slice(0, needed);
-    const newRanges: Array<{ from: string; to: string; count: number }> = [];
-    
-    let rangeStart = takeNums[0];
-    let prevNum = takeNums[0];
-    for (let i = 1; i < takeNums.length; i++) {
-      const cur = takeNums[i];
-      if (cur === prevNum + 1) {
-        prevNum = cur;
-      } else {
-        const count = prevNum - rangeStart + 1;
-        newRanges.push({ from: String(rangeStart), to: String(prevNum), count });
-        rangeStart = cur;
-        prevNum = cur;
+    const hgInfo = this.getHologramValidationInfo();
+    const availableNums = hgInfo.availableNums || [];
+    const takeNums = availableNums.slice(0, totalNeeded);
+    const newRanges: Array<{ from: string; to: string; count: number; isLoose?: boolean; label?: string }> = [];
+
+    // Case 1: Pure Loose Bottles mode (0 cases, N loose bottles) -> Create N individual bottle boxes
+    if (cases === 0 && loose > 0) {
+      for (let i = 0; i < loose; i++) {
+        const num = takeNums[i];
+        const valStr = num !== undefined ? String(num) : '';
+        newRanges.push({
+          from: valStr,
+          to: valStr,
+          count: valStr ? 1 : 0,
+          isLoose: true,
+          label: `Bottle #${i + 1}`
+        });
+      }
+    } else if (cases > 0 && loose === 0) {
+      // Case 2: Pure Cases mode -> Group by case pieces
+      let numIndex = 0;
+      for (let c = 0; c < cases; c++) {
+        const caseNums = takeNums.slice(numIndex, numIndex + pieces);
+        numIndex += caseNums.length;
+        if (caseNums.length > 0) {
+          const cStart = caseNums[0];
+          const cEnd = caseNums[caseNums.length - 1];
+          newRanges.push({
+            from: String(cStart),
+            to: String(cEnd),
+            count: caseNums.length,
+            isLoose: false,
+            label: `Case #${c + 1} (${caseNums.length} btls)`
+          });
+        } else {
+          newRanges.push({
+            from: '',
+            to: '',
+            count: pieces,
+            isLoose: false,
+            label: `Case #${c + 1} (${pieces} btls)`
+          });
+        }
+      }
+    } else {
+      // Case 3: Both Cases & Loose Bottles
+      let numIndex = 0;
+      for (let c = 0; c < cases; c++) {
+        const caseNums = takeNums.slice(numIndex, numIndex + pieces);
+        numIndex += caseNums.length;
+        if (caseNums.length > 0) {
+          const cStart = caseNums[0];
+          const cEnd = caseNums[caseNums.length - 1];
+          newRanges.push({
+            from: String(cStart),
+            to: String(cEnd),
+            count: caseNums.length,
+            isLoose: false,
+            label: `Case #${c + 1} (${caseNums.length} btls)`
+          });
+        } else {
+          newRanges.push({
+            from: '',
+            to: '',
+            count: pieces,
+            isLoose: false,
+            label: `Case #${c + 1} (${pieces} btls)`
+          });
+        }
+      }
+      for (let l = 0; l < loose; l++) {
+        const num = takeNums[numIndex];
+        numIndex++;
+        const valStr = num !== undefined ? String(num) : '';
+        newRanges.push({
+          from: valStr,
+          to: valStr,
+          count: valStr ? 1 : 0,
+          isLoose: true,
+          label: `Loose Bottle #${l + 1}`
+        });
       }
     }
-    const finalCount = prevNum - rangeStart + 1;
-    newRanges.push({ from: String(rangeStart), to: String(prevNum), count: finalCount });
 
     this.dispatchForm.hologramRanges = newRanges;
     this.syncHologramRangesToMainFields();
@@ -2196,26 +2283,34 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
 
   isRangeRowValid(row: any): { isValid: boolean; statusClass: string; errorMsg: string } {
     const fStr = String(row.from || '').trim();
-    const tStr = String(row.to || '').trim();
-    if (!fStr || !tStr) {
-      return { isValid: false, statusClass: '', errorMsg: 'Enter Hologram Range' };
+    const tStr = String(row.to || '').trim() || fStr;
+    if (!fStr) {
+      return { isValid: false, statusClass: '', errorMsg: 'Enter Hologram Serial' };
     }
     const startNum = parseInt(fStr.match(/\d+$/)?.[0] || '0', 10);
     const endNum = parseInt(tStr.match(/\d+$/)?.[0] || '0', 10);
     if (startNum <= 0 || endNum < startNum) {
-      return { isValid: false, statusClass: 'is-invalid border-danger bg-danger bg-opacity-10 text-danger', errorMsg: 'Invalid Hologram Range' };
+      return { isValid: false, statusClass: 'is-invalid border-danger bg-danger bg-opacity-10 text-danger', errorMsg: 'Invalid Hologram Serial' };
     }
 
     const hgInfo = this.getHologramValidationInfo();
     const availableSet = new Set(hgInfo.availableNums || []);
     const damagedSet = new Set(hgInfo.damagedHologramNums || []);
+    const dispatchedSet = new Set<number>();
+    (hgInfo.dispatchedRanges || []).forEach(d => {
+      for (let i = d.from; i <= d.to; i++) dispatchedSet.add(i);
+    });
 
     const damagedInRow: number[] = [];
+    const dispatchedInRow: number[] = [];
     let allAvailable = true;
 
     for (let i = startNum; i <= endNum; i++) {
       if (damagedSet.has(i)) {
         damagedInRow.push(i);
+      }
+      if (dispatchedSet.has(i)) {
+        dispatchedInRow.push(i);
       }
       if (!availableSet.has(i)) {
         allAvailable = false;
@@ -2226,7 +2321,15 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       return {
         isValid: false,
         statusClass: 'is-invalid border-danger bg-danger bg-opacity-10 text-danger',
-        errorMsg: `HG ${damagedInRow.join(', ')} is Damaged`
+        errorMsg: `HG #${damagedInRow.join(', ')} is DAMAGED`
+      };
+    }
+
+    if (dispatchedInRow.length > 0) {
+      return {
+        isValid: false,
+        statusClass: 'is-invalid border-warning bg-warning bg-opacity-10 text-warning',
+        errorMsg: `HG #${dispatchedInRow.join(', ')} already dispatched`
       };
     }
 
@@ -2234,7 +2337,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       return {
         isValid: false,
         statusClass: 'is-invalid border-danger bg-danger bg-opacity-10 text-danger',
-        errorMsg: 'Range outside usable stock'
+        errorMsg: 'Serial outside warehouse stock'
       };
     }
 
@@ -2484,8 +2587,28 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
 
   selectAvailableHologramRange(range: any): void {
     if (!range) return;
-    this.dispatchForm.hologramFrom = String(range.from);
-    this.onDispatchHologramFromChange();
+    const hgInfo = this.getHologramValidationInfo();
+    const rFrom = Number(range.from || 0);
+    const rTo = Number(range.to || rFrom);
+    const availNums = (hgInfo.availableNums || []).filter(n => n >= rFrom && n <= rTo);
+
+    const isPureLoose = Number(this.dispatchForm.dispatchedCases || 0) === 0 && Number(this.dispatchForm.dispatchedLooseBottles || 0) > 0;
+    if (isPureLoose && this.dispatchForm.hologramRanges && this.dispatchForm.hologramRanges.length > 0) {
+      let numIdx = 0;
+      for (const row of this.dispatchForm.hologramRanges) {
+        if (numIdx < availNums.length) {
+          const val = String(availNums[numIdx]);
+          row.from = val;
+          row.to = val;
+          row.count = 1;
+          numIdx++;
+        }
+      }
+      this.syncHologramRangesToMainFields();
+    } else {
+      this.dispatchForm.hologramFrom = String(range.from);
+      this.onDispatchHologramFromChange();
+    }
     this.cdr.detectChanges();
   }
 
