@@ -2783,6 +2783,46 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   selectedPermitDetailsRow: any = null;
   selectedPermitWiseItems: any[] = [];
 
+  showPermitHologramDetailsModal = false;
+  selectedPermitHologramDetailsRow: any = null;
+
+  openPermitHologramDetailsModal(row: DistributorPermitRow | any, event?: Event): void {
+    if (event) {
+      try { event.preventDefault(); } catch {}
+      try { event.stopPropagation(); } catch {}
+    }
+    this.selectedPermitHologramDetailsRow = row;
+    this.showPermitHologramDetailsModal = true;
+  }
+
+  closePermitHologramDetailsModal(): void {
+    this.showPermitHologramDetailsModal = false;
+    this.selectedPermitHologramDetailsRow = null;
+  }
+
+  getHologramsAssignedCount(row: DistributorPermitRow | any): number {
+    const app = row?.application || row;
+    return Number(
+      app?.totalHologramsAssigned ??
+      app?.total_holograms_assigned ??
+      app?.totalHolograms ??
+      app?.total_holograms ??
+      0
+    );
+  }
+
+  getHologramRanges(row: DistributorPermitRow | any): any[] {
+    const app = row?.application || row;
+    const raw = app?.assignedHologramRanges || app?.assigned_hologram_ranges || [];
+    if (!Array.isArray(raw)) return [];
+    return raw.map((rng: any) => ({
+      ref_no: rng?.refNo || rng?.ref_no || rng?.procurement_ref_no || rng?.procurementRefNo || '',
+      from: String(rng?.from || ''),
+      to: String(rng?.to || ''),
+      count: Number(rng?.count || 0)
+    }));
+  }
+
   openPermitDetailsModal(row: DistributorPermitRow | any, event?: Event): void {
     if (event) {
       try { event.preventDefault(); } catch {}

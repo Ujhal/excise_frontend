@@ -576,6 +576,7 @@
                   <th>Submitted On</th>
                   <th>Payment</th>
                   <th>Applicant</th>
+                  <th style="min-width: 170px;">Hologram Details</th>
                   <th style="min-width: 270px;">Permit Status</th>
                   <th>Current Stage</th>
                   <th style="min-width: 240px;">Action</th>
@@ -596,6 +597,27 @@
                     </span>
                   </td>
                   <td>{{ resolveApplicantName(row) }}</td>
+                  <td class="hologram-details-cell" (click)="$event.stopPropagation()">
+                    <div *ngIf="getHologramsAssignedCount(row) > 0; else noHologramsAssigned">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5 py-1 px-2.5 rounded-pill shadow-xs"
+                        (click)="openPermitHologramDetailsModal(row)"
+                        title="Click to view full hologram allocation and serial ranges"
+                      >
+                        <i class="bi bi-upc-scan text-primary"></i>
+                        <span class="fw-bold">{{ getHologramsAssignedCount(row) | number }} Pcs</span>
+                        <span class="badge bg-primary text-white" style="font-size: 10px;">{{ getHologramRanges(row).length }} Batch(es)</span>
+                      </button>
+                      <div class="small text-muted font-monospace mt-1 text-truncate" style="max-width: 170px;" *ngIf="getHologramRanges(row).length > 0">
+                        <span class="text-primary fw-semibold">{{ getHologramRanges(row)[0].from }} &rarr; {{ getHologramRanges(row)[0].to }}</span>
+                        <span class="text-muted ms-1" *ngIf="getHologramRanges(row).length > 1">+{{ getHologramRanges(row).length - 1 }} more</span>
+                      </div>
+                    </div>
+                    <ng-template #noHologramsAssigned>
+                      <span class="text-muted small fst-italic">Pending Allocation</span>
+                    </ng-template>
+                  </td>
                   <td class="permit-status" style="min-width: 270px;">
                     <div class="d-flex flex-column gap-1 align-items-start" style="font-size: 0.82rem;">
                       <!-- Show current requisition permit numbers if available -->
@@ -3851,6 +3873,101 @@
       </div>
       <div class="modal-footer bg-light py-2 px-4">
         <button type="button" class="btn btn-secondary px-4 btn-sm" (click)="closePermitDetailsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hologram Allocation Details Modal Popup -->
+<div class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.6); z-index: 1060;" *ngIf="showPermitHologramDetailsModal">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-gradient bg-primary text-white py-3 px-4">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-upc-scan me-2"></i>
+          IMFL Hologram Allocation Details &mdash; {{ selectedPermitHologramDetailsRow?.applicationId || selectedPermitHologramDetailsRow?.referenceNo }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closePermitHologramDetailsModal()"></button>
+      </div>
+      <div class="modal-body p-4" style="max-height: 75vh; overflow-y: auto;">
+        <!-- Summary Info Header -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <div class="p-3 bg-light rounded border h-100">
+              <small class="text-muted d-block fw-semibold text-uppercase" style="font-size: 11px;">Import Requisition Reference</small>
+              <strong class="fs-5 text-dark font-monospace">{{ selectedPermitHologramDetailsRow?.applicationId || selectedPermitHologramDetailsRow?.referenceNo }}</strong>
+              <div class="text-muted small mt-1">Applicant: <strong>{{ resolveApplicantName(selectedPermitHologramDetailsRow) }}</strong></div>
+              <div class="text-muted small" *ngIf="selectedPermitHologramDetailsRow?.supplierName">Supplier: <strong>{{ selectedPermitHologramDetailsRow?.supplierName }}</strong></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 bg-primary bg-opacity-10 rounded border border-primary border-opacity-25 h-100 d-flex flex-column justify-content-between">
+              <div>
+                <small class="text-primary d-block fw-bold text-uppercase" style="font-size: 11px;">Total Holograms Assigned &amp; Reserved</small>
+                <strong class="fs-3 text-primary font-monospace">{{ getHologramsAssignedCount(selectedPermitHologramDetailsRow) | number }} Pieces</strong>
+              </div>
+              <div class="mt-2 d-flex align-items-center justify-content-between">
+                <span class="badge bg-success py-1.5 px-2.5 shadow-xs"><i class="bi bi-check-circle-fill me-1"></i> Allocated &amp; Reserved</span>
+                <span class="small text-muted font-monospace">{{ getHologramRanges(selectedPermitHologramDetailsRow).length }} Serial Range(s)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Serial Numbers Table -->
+        <div class="card border shadow-sm rounded overflow-hidden">
+          <div class="card-header bg-light py-2 px-3 d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-primary fs-7"><i class="bi bi-list-ol me-1"></i> Sequential Serial Numbers Assigned</span>
+            <span class="badge bg-primary fs-7">{{ getHologramRanges(selectedPermitHologramDetailsRow).length }} Batch Allocation(s)</span>
+          </div>
+          <div class="table-responsive" *ngIf="getHologramRanges(selectedPermitHologramDetailsRow).length > 0; else noRangesBlock">
+            <table class="table table-hover align-middle mb-0" style="font-size: 13px;">
+              <thead class="table-light text-secondary">
+                <tr>
+                  <th class="ps-3" style="width: 50px;">#</th>
+                  <th>Consignment Batch Ref</th>
+                  <th>Starting Serial (From)</th>
+                  <th>Ending Serial (To)</th>
+                  <th class="text-center">Quantity (Pieces)</th>
+                  <th class="text-center pe-3">Reservation Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let rng of getHologramRanges(selectedPermitHologramDetailsRow); let idx = index">
+                  <td class="ps-3 fw-semibold text-muted">{{ idx + 1 }}</td>
+                  <td>
+                    <span class="font-monospace fw-bold text-primary">{{ rng.ref_no || 'IMFL_HOLO_PRO' }}</span>
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-dark border font-monospace fs-6 px-2.5 py-1">{{ rng.from }}</span>
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-dark border font-monospace fs-6 px-2.5 py-1">{{ rng.to }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 fs-6 px-3 py-1 font-monospace fw-bold">
+                      {{ rng.count | number }} pcs
+                    </span>
+                  </td>
+                  <td class="text-center pe-3">
+                    <span class="badge bg-success text-white py-1 px-2">
+                      <i class="bi bi-check-circle-fill me-1"></i> RESERVED
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <ng-template #noRangesBlock>
+            <div class="p-4 text-center text-muted">
+              <i class="bi bi-info-circle fs-3 d-block mb-2 text-secondary"></i>
+              <p class="mb-0">No specific serial ranges recorded for this application.</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+      <div class="modal-footer bg-light py-2 px-4">
+        <button type="button" class="btn btn-secondary px-4 btn-sm" (click)="closePermitHologramDetailsModal()">Close</button>
       </div>
     </div>
   </div>
