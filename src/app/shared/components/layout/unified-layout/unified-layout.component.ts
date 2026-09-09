@@ -1030,6 +1030,8 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
         section = 'distributor-permit-brand-arrival';
       } else if (queryTab === 'hologram-arrival') {
         section = 'distributor-permit-hologram-arrival';
+      } else if (queryTab === 'hologram-overview') {
+        section = 'distributor-permit-hologram-overview';
       } else if (queryTab === 'brand-warehouse') {
         section = 'brand-warehouse-stock';
       } else if (queryTab === 'requisition') {
@@ -1052,9 +1054,7 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
       'special-permit-apply': 'special-permit',
       'company-registration-apply': 'company-registration',
       'company-collaboration-apply': 'company-collaboration',
-      'salesman-barman-registration-apply': 'salesman-barman-registration',
-      // Officer nested page
-      'hologram-overview': 'hologram-inventory'
+      'salesman-barman-registration-apply': 'salesman-barman-registration'
     };
 
     return parentSectionMap[value] || value;

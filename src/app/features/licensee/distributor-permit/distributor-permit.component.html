@@ -1451,90 +1451,49 @@
 
       <!-- Tab 7: IMFL Hologram Overview Dashboard -->
       <div class="hologram-overview-wrapper mb-4" *ngIf="activeTab === 'hologram-overview'">
-        <!-- Hero License & Mapped OIC Banner -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden holo-hero-banner">
-          <div class="row g-0 align-items-stretch">
-            <!-- Left: License & Distributor Info -->
-            <div class="col-lg-7 p-4 p-md-4 d-flex flex-column justify-content-between holo-hero-left">
-              <div class="d-flex align-items-center gap-2 mb-3">
-                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-1.5 rounded-pill fs-7 d-inline-flex align-items-center gap-1">
-                  <i class="bi bi-shield-check"></i> IMFL Distributor License
-                </span>
-                <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-1.5 rounded-pill fs-7">
-                  <i class="bi bi-check-circle-fill me-1"></i> Active Status
-                </span>
+        <!-- Compact Header Toolbar with Info Details & Actions -->
+        <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex flex-wrap align-items-center gap-3">
+              <div class="p-2.5 rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                <i class="bi bi-qr-code-scan fs-4"></i>
               </div>
-
-              <div class="mb-3">
-                <h3 class="fw-bolder text-dark mb-1 d-flex align-items-center gap-2">
-                  <i class="bi bi-building text-primary"></i>
-                  {{ hologramOverviewData?.distributor_info?.establishment_name || hologramOverviewData?.distributor_info?.distributor_name || 'Distributor Establishment' }}
-                </h3>
-                <p class="text-muted mb-0 small">
-                  {{ hologramOverviewData?.distributor_info?.distributor_name || 'Distributor Licensee' }} &bull; Government of Sikkim Excise Department
-                </p>
-              </div>
-
-              <div class="d-flex flex-wrap gap-3 pt-2 border-top border-light">
-                <div class="info-pill px-3 py-2 bg-white rounded-3 border shadow-xs">
-                  <span class="text-muted d-block small" style="font-size: 11px;">License Number</span>
-                  <strong class="text-primary font-monospace fs-6">{{ hologramOverviewData?.distributor_info?.license_number || 'IMFL-DIST-SKM-2026-01' }}</strong>
+              <div>
+                <div class="d-flex align-items-center gap-2">
+                  <h5 class="fw-bold text-dark m-0">{{ hologramOverviewData?.distributor_info?.establishment_name || 'IMFL Hologram Overview' }}</h5>
+                  <span class="badge bg-success bg-opacity-10 text-success fw-bold px-2.5 py-1 rounded-pill" style="font-size: 11px;">
+                    <i class="bi bi-shield-check me-1"></i> Active
+                  </span>
                 </div>
-                <div class="info-pill px-3 py-2 bg-white rounded-3 border shadow-xs">
-                  <span class="text-muted d-block small" style="font-size: 11px;">State / Jurisdiction</span>
-                  <strong class="text-dark fs-6"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Sikkim, India</strong>
-                </div>
-                <div class="info-pill px-3 py-2 bg-white rounded-3 border shadow-xs">
-                  <span class="text-muted d-block small" style="font-size: 11px;">Consignments</span>
-                  <strong class="text-success fs-6">{{ hologramOverviewData?.summary_stats?.total_batches_count || 0 }} Batches</strong>
+                <div class="text-muted small mt-0.5 d-flex flex-wrap align-items-center gap-2">
+                  <span class="font-monospace text-primary fw-semibold"><i class="bi bi-card-text me-1"></i>{{ hologramOverviewData?.distributor_info?.license_number || 'IMFL-DIST-SKM' }}</span>
+                  <span class="text-muted">&bull;</span>
+                  <span><i class="bi bi-person-badge text-secondary me-1"></i>OIC: <strong>{{ hologramOverviewData?.distributor_info?.mapped_oic?.name || 'OIC Officer' }}</strong></span>
+                  <span class="text-muted">&bull;</span>
+                  <span class="text-success"><i class="bi bi-box-seam me-1"></i>{{ hologramOverviewData?.summary_stats?.total_batches_count || 0 }} Consignment Batches</span>
                 </div>
               </div>
             </div>
 
-            <!-- Right: Mapped OIC Officer Profile Card -->
-            <div class="col-lg-5 p-4 holo-hero-right bg-gradient-oic d-flex flex-column justify-content-between">
-              <div>
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <span class="text-white-50 text-uppercase fw-bold small letter-spacing-1" style="font-size: 11px;">
-                    <i class="bi bi-person-badge-fill me-1 text-warning"></i> Mapped Officer in Charge
-                  </span>
-                  <span class="badge bg-white bg-opacity-25 text-white fw-semibold rounded-pill px-2.5 py-1" style="font-size: 11px;">
-                    <i class="bi bi-link-45deg me-1"></i> Mapped
-                  </span>
-                </div>
-
-                <div class="d-flex align-items-center gap-3 mb-3">
-                  <div class="oic-avatar rounded-circle bg-white text-primary fw-bolder d-flex align-items-center justify-content-center shadow-sm" style="width: 52px; height: 52px; font-size: 20px;">
-                    <i class="bi bi-person-fill"></i>
-                  </div>
-                  <div>
-                    <h5 class="text-white fw-bold m-0">{{ hologramOverviewData?.distributor_info?.mapped_oic?.name || 'oic Officer' }}</h5>
-                    <div class="text-white text-opacity-75 small">{{ hologramOverviewData?.distributor_info?.mapped_oic?.designation || 'Officer in Charge (Distributor)' }}</div>
-                  </div>
-                </div>
-
-                <div class="oic-meta-list text-white text-opacity-90 small">
-                  <div class="d-flex align-items-center gap-2 mb-1.5" *ngIf="hologramOverviewData?.distributor_info?.mapped_oic?.email && hologramOverviewData?.distributor_info?.mapped_oic?.email !== 'N/A'">
-                    <i class="bi bi-envelope-fill text-warning"></i>
-                    <span>{{ hologramOverviewData?.distributor_info?.mapped_oic?.email }}</span>
-                  </div>
-                  <div class="d-flex align-items-center gap-2 mb-1.5" *ngIf="hologramOverviewData?.distributor_info?.mapped_oic?.phone && hologramOverviewData?.distributor_info?.mapped_oic?.phone !== 'N/A'">
-                    <i class="bi bi-telephone-fill text-warning"></i>
-                    <span>{{ hologramOverviewData?.distributor_info?.mapped_oic?.phone }}</span>
-                  </div>
-                  <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-building-check text-warning"></i>
-                    <span>Assigned to: <strong>{{ hologramOverviewData?.distributor_info?.establishment_name || 'Distributor' }}</strong></span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mt-3 pt-2 border-top border-white border-opacity-15 d-flex justify-content-between align-items-center">
-                <small class="text-white-50" style="font-size: 11px;">Authority verified by Excise Dept</small>
-                <button type="button" class="btn btn-sm btn-light py-1 px-2.5 rounded-pill fw-semibold shadow-xs" (click)="loadHologramOverview(false)" title="Refresh Data">
-                  <i class="bi bi-arrow-clockwise me-1"></i> Refresh
-                </button>
-              </div>
+            <div class="d-flex align-items-center gap-2">
+              <button
+                type="button"
+                class="btn btn-primary btn-sm px-3.5 py-2 rounded-pill fw-bold shadow-xs d-inline-flex align-items-center gap-2 text-white"
+                (click)="openHoloInfoDetailsModal()"
+                title="View Full License & Mapped OIC Officer Details"
+              >
+                <i class="bi bi-info-circle-fill fs-6"></i>
+                <span>Info Details</span>
+              </button>
+              <button
+                type="button"
+                class="btn btn-light btn-sm px-3 py-2 rounded-pill fw-semibold border shadow-xs d-inline-flex align-items-center gap-1.5"
+                (click)="loadHologramOverview(false)"
+                title="Refresh Overview Data"
+              >
+                <i class="bi bi-arrow-clockwise"></i>
+                <span>Refresh</span>
+              </button>
             </div>
           </div>
         </div>
@@ -6255,6 +6214,125 @@
 
     <div class="dp-modal-footer p-3 bg-white border-top d-flex justify-content-end">
       <button type="button" class="btn btn-secondary btn-sm px-4" (click)="closeOverviewBatchModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Hologram Info Details Modal: Distributor & Mapped OIC Details -->
+<div class="dp-modal-backdrop" *ngIf="showHoloInfoDetailsModal">
+  <div class="dp-modal" style="max-width: 820px;">
+    <div class="dp-modal-header d-flex justify-content-between align-items-center p-3.5 bg-white border-bottom">
+      <div class="d-flex align-items-center gap-2.5">
+        <div class="p-2 rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center">
+          <i class="bi bi-shield-check fs-5"></i>
+        </div>
+        <div>
+          <h5 class="m-0 fw-bold text-dark">Distributor & Mapped Officer in Charge</h5>
+          <small class="text-muted">License authorization & official assignment registry</small>
+        </div>
+      </div>
+      <button type="button" class="btn-close" (click)="closeHoloInfoDetailsModal()"></button>
+    </div>
+
+    <div class="dp-modal-body p-4 bg-light">
+      <div class="row g-3">
+        <!-- Left: License & Distributor Profile -->
+        <div class="col-md-6">
+          <div class="card h-100 p-3.5 bg-white border-0 shadow-sm rounded-3">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-1.5 rounded-pill fs-7">
+                <i class="bi bi-building me-1"></i> Distributor License
+              </span>
+              <span class="badge bg-success bg-opacity-10 text-success fw-bold px-2.5 py-1 rounded-pill" style="font-size: 11px;">
+                <i class="bi bi-check-circle-fill me-1"></i> Active
+              </span>
+            </div>
+
+            <div class="mb-3">
+              <h5 class="fw-bolder text-dark mb-1">
+                {{ hologramOverviewData?.distributor_info?.establishment_name || hologramOverviewData?.distributor_info?.distributor_name || 'Distributor Establishment' }}
+              </h5>
+              <div class="text-muted small">
+                {{ hologramOverviewData?.distributor_info?.distributor_name || 'Distributor Licensee' }}
+              </div>
+              <div class="text-muted small" style="font-size: 11.5px;">
+                Government of Sikkim Excise Department
+              </div>
+            </div>
+
+            <div class="space-y-2 pt-2 border-top">
+              <div class="d-flex justify-content-between align-items-center py-1.5 border-bottom border-light">
+                <span class="text-muted small">License Number</span>
+                <strong class="text-primary font-monospace fs-6">{{ hologramOverviewData?.distributor_info?.license_number || 'IMFL-DIST-SKM-2026-01' }}</strong>
+              </div>
+              <div class="d-flex justify-content-between align-items-center py-1.5 border-bottom border-light">
+                <span class="text-muted small">Jurisdiction</span>
+                <strong class="text-dark small"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Sikkim, India</strong>
+              </div>
+              <div class="d-flex justify-content-between align-items-center py-1.5 border-bottom border-light">
+                <span class="text-muted small">Consignments</span>
+                <strong class="text-success small">{{ hologramOverviewData?.summary_stats?.total_batches_count || 0 }} Batches</strong>
+              </div>
+              <div class="d-flex justify-content-between align-items-center py-1.5">
+                <span class="text-muted small">Total Procured</span>
+                <strong class="text-dark small font-monospace">{{ (hologramOverviewData?.summary_stats?.total_procured || 0) | number }} pcs</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Mapped OIC Officer Profile -->
+        <div class="col-md-6">
+          <div class="card h-100 p-3.5 bg-gradient-oic text-white border-0 shadow-sm rounded-3 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-white-50 text-uppercase fw-bold small" style="font-size: 11px;">
+                  <i class="bi bi-person-badge-fill me-1 text-warning"></i> Mapped Officer in Charge
+                </span>
+                <span class="badge bg-white bg-opacity-25 text-white fw-semibold rounded-pill px-2.5 py-1" style="font-size: 11px;">
+                  <i class="bi bi-link-45deg me-1"></i> Assigned
+                </span>
+              </div>
+
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="oic-avatar rounded-circle bg-white text-primary fw-bolder d-flex align-items-center justify-content-center shadow-sm" style="width: 50px; height: 50px; font-size: 22px;">
+                  <i class="bi bi-person-fill"></i>
+                </div>
+                <div>
+                  <h5 class="text-white fw-bold m-0">{{ hologramOverviewData?.distributor_info?.mapped_oic?.name || 'oic Officer' }}</h5>
+                  <div class="text-white text-opacity-75 small">{{ hologramOverviewData?.distributor_info?.mapped_oic?.designation || 'Officer in Charge (Distributor)' }}</div>
+                </div>
+              </div>
+
+              <div class="oic-meta-list text-white text-opacity-90 small pt-2 border-top border-white border-opacity-15">
+                <div class="d-flex align-items-center gap-2 mb-2" *ngIf="hologramOverviewData?.distributor_info?.mapped_oic?.email && hologramOverviewData?.distributor_info?.mapped_oic?.email !== 'N/A'">
+                  <i class="bi bi-envelope-fill text-warning"></i>
+                  <span>{{ hologramOverviewData?.distributor_info?.mapped_oic?.email }}</span>
+                </div>
+                <div class="d-flex align-items-center gap-2 mb-2" *ngIf="hologramOverviewData?.distributor_info?.mapped_oic?.phone && hologramOverviewData?.distributor_info?.mapped_oic?.phone !== 'N/A'">
+                  <i class="bi bi-telephone-fill text-warning"></i>
+                  <span>{{ hologramOverviewData?.distributor_info?.mapped_oic?.phone }}</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-building-check text-warning"></i>
+                  <span>Assigned to: <strong>{{ hologramOverviewData?.distributor_info?.establishment_name || 'Distributor' }}</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-top border-white border-opacity-15 d-flex justify-content-between align-items-center text-white-50 small" style="font-size: 11px;">
+              <span>Official Authority by Sikkim Excise</span>
+              <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-2 py-0.5 font-monospace">VERIFIED</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dp-modal-footer p-3 bg-white border-top d-flex justify-content-end">
+      <button type="button" class="btn btn-primary btn-sm px-4 rounded-pill" (click)="closeHoloInfoDetailsModal()">
         Close
       </button>
     </div>

@@ -7428,6 +7428,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   isSearchingSerial = false;
   selectedOverviewBatch: any = null;
   showOverviewBatchModal = false;
+  showHoloInfoDetailsModal = false;
   activeOverviewViewMode: 'batches' | 'ranges' = 'batches';
 
   loadHologramOverview(silent = false): void {
@@ -7736,6 +7737,16 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   closeOverviewBatchModal(): void {
     this.showOverviewBatchModal = false;
     this.selectedOverviewBatch = null;
+    this.cdr.markForCheck();
+  }
+
+  openHoloInfoDetailsModal(): void {
+    this.showHoloInfoDetailsModal = true;
+    this.cdr.markForCheck();
+  }
+
+  closeHoloInfoDetailsModal(): void {
+    this.showHoloInfoDetailsModal = false;
     this.cdr.markForCheck();
   }
 }
