@@ -128,6 +128,15 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   pageSize = 5;
   pageIndex = 0;
 
+  // Hologram Stock & Allocation State
+  availableHologramStock = 0;
+  isCheckingHologramStock = false;
+  isHologramStockSufficient = true;
+  assignedHologramRangesPreview: any[] = [];
+  hologramStockBatches: any[] = [];
+  hologramStockRemaining = 0;
+  hologramStockErrorMessage = '';
+
   ngOnInit(): void {
     this.addLineItem();
     this.brandStepForm.setValidators(() => this.isBrandStepValidPublic ? null : { lineItemsInvalid: true });
@@ -213,7 +222,10 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
 
     this.lineItems.valueChanges
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.syncBrandStepValidity());
+      .subscribe(() => {
+        this.checkHologramStockAllocation();
+        this.syncBrandStepValidity();
+      });
   }
 
   onTabChange(tab: ImflTabType): void {
@@ -265,6 +277,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
 
   openApplyForm(): void {
     this.isFormView = true;
+    this.checkHologramStockAllocation();
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { mode: 'apply' },
@@ -4961,6 +4974,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       brandKey: ['', Validators.required],
       cases: [1, [Validators.required, Validators.min(1)]]
     }) as FormGroup);
+    this.checkHologramStockAllocation();
     this.syncBrandStepValidity();
   }
 
@@ -4969,12 +4983,14 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       return;
     }
     this.lineItems.removeAt(index);
+    this.checkHologramStockAllocation();
     this.syncBrandStepValidity();
   }
 
   onBrandNameChange(index: number): void {
     const row = this.lineItems.at(index);
-    row.patchValue({ brandKey: '' }, { emitEvent: false });
+    row.patchValue({ brandKey: '' }, { emitEvent: true });
+    this.checkHologramStockAllocation();
     this.syncBrandStepValidity();
   }
 
@@ -4983,8 +4999,14 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     const value = row.value as any;
     const master = this.getBrandMasterByKey(value.brandKey);
     if (master) {
-      row.patchValue({ selectedBrandName: master.brandName }, { emitEvent: false });
+      row.patchValue({ selectedBrandName: master.brandName }, { emitEvent: true });
     }
+    this.checkHologramStockAllocation();
+    this.syncBrandStepValidity();
+  }
+
+  onCasesChange(): void {
+    this.checkHologramStockAllocation();
     this.syncBrandStepValidity();
   }
 
@@ -5753,6 +5775,72 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     return this.getLineCess(index);
   }
 
+  getLinePiecesPerCase(index: number): number {
+    const master = this.getLineSummary(index);
+    return master ? Number(master.piecesPerCase || 12) : 12;
+  }
+
+  getLineHologramsRequired(index: number): number {
+    return this.getLineCases(index) * this.getLinePiecesPerCase(index);
+  }
+
+  get totalRequiredHolograms(): number {
+    return this.lineItems.controls.reduce((sum, _, index) => {
+      return sum + this.getLineHologramsRequired(index);
+    }, 0);
+  }
+
+  checkHologramStockAllocation(): void {
+    const required = this.totalRequiredHolograms;
+    this.isCheckingHologramStock = true;
+    this.permitService.getHologramStock(required)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.isCheckingHologramStock = false;
+          this.syncBrandStepValidity();
+          this.cdr.markForCheck();
+        })
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.availableHologramStock = Number(
+            res?.availableStock ??
+            res?.totalAvailableStock ??
+            res?.available_stock ??
+            res?.total_available_stock ??
+            0
+          );
+          this.hologramStockBatches = res?.batches || [];
+          const rawRanges = res?.assignedRanges || res?.allocatedRanges || res?.assigned_ranges || res?.allocated_ranges || [];
+          this.assignedHologramRangesPreview = (Array.isArray(rawRanges) ? rawRanges : []).map((rng: any) => ({
+            ref_no: rng?.refNo || rng?.ref_no || rng?.procurement_ref_no || rng?.procurementRefNo || '',
+            from: String(rng?.from || ''),
+            to: String(rng?.to || ''),
+            count: Number(rng?.count || 0),
+            batch_label: rng?.batchLabel || rng?.batch_label || ''
+          }));
+          this.hologramStockRemaining = Number(
+            res?.remainingStockAfterAllocation ??
+            res?.remainingStock ??
+            res?.remaining_stock_after_allocation ??
+            res?.remaining_stock ??
+            0
+          );
+          this.isHologramStockSufficient = res?.isSufficient ?? res?.is_sufficient ?? (this.availableHologramStock >= required);
+          this.hologramStockErrorMessage = res?.errorMessage || res?.error_message || '';
+          this.syncBrandStepValidity();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Failed to check hologram stock:', err);
+          this.isHologramStockSufficient = false;
+          this.hologramStockErrorMessage = 'Unable to check hologram stock availability.';
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
   getUniqueBrandNames(): string[] {
     const names = new Set<string>();
     const selectedSupId = this.supplierForm.controls.selectedSupplierId.value;
@@ -6435,13 +6523,23 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    return this.lineItems.controls.every((control) => {
+    const itemsValid = this.lineItems.controls.every((control) => {
       const value = control.value as any;
       const hasBrandName = !!value.selectedBrandName;
       const hasBrandKey = !!this.getBrandMasterByKey(String(value.brandKey || ''));
       const cases = Number(value.cases || 0);
       return hasBrandName && hasBrandKey && cases > 0 && control.valid;
     });
+
+    if (!itemsValid) {
+      return false;
+    }
+
+    if (this.totalRequiredHolograms > 0 && !this.isHologramStockSufficient) {
+      return false;
+    }
+
+    return true;
   }
 
   private syncBrandStepValidity(): void {

@@ -227,5 +227,10 @@ export class DistributorPermitService {
     }
     return this.http.get<any>(`${this.baseUrl}/retailer-stock/`, { params: httpParams });
   }
+
+  getHologramStock(requiredCount: number = 0): Observable<any> {
+    const params = new HttpParams().set('required_count', requiredCount.toString());
+    return this.http.get<any>(`${this.baseUrl}/hologram-stock/`, { params });
+  }
 }
 
