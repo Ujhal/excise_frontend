@@ -199,7 +199,7 @@ export class SidebarPendingBadgeService {
   }
 
   private fetchDistributorPermitDashboardCounts(
-    tab: 'requisition' | 'revalidation' | 'cancellation' | 'brand-arrival',
+    tab: 'requisition' | 'revalidation' | 'cancellation' | 'brand-arrival' | 'hologram-procurement',
     audience: BadgeAudience,
     force = false
   ): Observable<{ total: number; payment: number }> {

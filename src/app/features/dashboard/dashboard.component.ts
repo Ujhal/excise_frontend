@@ -527,10 +527,11 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     const isITCell = roleId === 6;
     const isJointCommissioner = roleId === 9;
 
-    // IT Cell only deals with Hologram Procurement
+    // IT Cell deals with IMFL Hologram Procurement and Distillery Hologram Procurement
     if (isITCell) {
       this.availableChartModules = [
         { value: 'all', label: 'All Modules' },
+        { value: 'distributor-permit-hologram-procurement', label: 'IMFL Hologram Procurement' },
         { value: 'hologram', label: 'Hologram Procurement' }
       ];
       return;
@@ -583,14 +584,15 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    // Officer in Charge handles ONLY: Transit Applications, Bulk Spirit Details, Hologram Procurement, Hologram Requests
+    // Officer in Charge handles: Transit Applications, Bulk Spirit Details, IMFL Hologram Procurement, Hologram Procurement, Hologram Requests
     const isOIC = this.isOicUser();
     if (isOIC) {
       if (this.isDistributorOic()) {
         this.availableChartModules = [
           { value: 'all', label: 'All Modules' },
           { value: 'distributor-permit-requisition', label: 'IMFL Requisition Cases' },
-          { value: 'distributor-permit-brand-arrival', label: 'Update Brands Arrival' }
+          { value: 'distributor-permit-brand-arrival', label: 'Update Brands Arrival' },
+          { value: 'distributor-permit-hologram-procurement', label: 'IMFL Hologram Procurement' }
         ];
         this.selectedChartModule = 'all';
         return;
@@ -600,13 +602,14 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         { value: 'all', label: 'All Modules' },
         { value: 'transit', label: 'Transit Applications' },
         { value: 'bldetails', label: 'Bulk Spirit Details' },
+        { value: 'distributor-permit-hologram-procurement', label: 'IMFL Hologram Procurement' },
         { value: 'hologram', label: 'Hologram Procurement' },
         { value: 'hologramRequests', label: 'Hologram Requests' }
       ];
       return;
     }
 
-    // Distributor user handles: New Licenses, Renewals, IMFL Requisition, IMFL Revalidation, IMFL Cancellation, Company Reg, Company Collab, Salesman/Barman, Label Reg
+    // Distributor user handles: New Licenses, Renewals, IMFL Requisition, IMFL Revalidation, IMFL Cancellation, IMFL Hologram Procurement, Company Reg, Company Collab, Salesman/Barman, Label Reg
     if (this.isDistributorUser()) {
       this.availableChartModules = [
         { value: 'all', label: 'All Modules' },
@@ -615,6 +618,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         { value: 'distributor-permit-requisition', label: 'IMFL Requisition' },
         { value: 'distributor-permit-revalidation', label: 'IMFL Revalidation' },
         { value: 'distributor-permit-cancellation', label: 'IMFL Cancellation' },
+        { value: 'distributor-permit-hologram-procurement', label: 'IMFL Hologram Procurement' },
         { value: 'company', label: 'Company Reg.' },
         { value: 'company-collaboration', label: 'Company Collab.' },
         { value: 'salesman', label: 'Salesman / Barman' },
@@ -642,7 +646,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       modules.push(
         { value: 'distributor-permit-requisition', label: 'IMFL Requisition' },
         { value: 'distributor-permit-revalidation', label: 'IMFL Revalidation' },
-        { value: 'distributor-permit-cancellation', label: 'IMFL Cancellation' }
+        { value: 'distributor-permit-cancellation', label: 'IMFL Cancellation' },
+        { value: 'distributor-permit-hologram-procurement', label: 'IMFL Hologram Procurement' }
       );
     }
 
@@ -672,15 +677,25 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.isOicUser()) {
       if (this.isDistributorOic()) {
         if (this.selectedChartModule === 'all') {
-          const distOicModules = ['distributor-permit-requisition', 'distributor-permit-brand-arrival'];
+          const distOicModules = ['distributor-permit-requisition', 'distributor-permit-brand-arrival', 'distributor-permit-hologram-procurement'];
           return distOicModules.reduce((sum, m) => sum + ((this.supplyChainModuleCounts[m] as any)?.[status] || 0), 0);
         }
         const sourceCounts = this.supplyChainModuleCounts[this.selectedChartModule] || { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0 };
         return (sourceCounts as any)[status] || 0;
       }
       if (this.selectedChartModule === 'all') {
-        const oicModules = ['transit', 'bldetails', 'hologram', 'hologramRequests'];
+        const oicModules = ['transit', 'bldetails', 'distributor-permit-hologram-procurement', 'hologram', 'hologramRequests'];
         return oicModules.reduce((sum, m) => sum + ((this.supplyChainModuleCounts[m] as any)?.[status] || 0), 0);
+      }
+      const sourceCounts = this.supplyChainModuleCounts[this.selectedChartModule] || { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0 };
+      return (sourceCounts as any)[status] || 0;
+    }
+
+    const isITCell = this.currentUser?.roleId === 6;
+    if (isITCell) {
+      if (this.selectedChartModule === 'all') {
+        const itCellModules = ['hologram', 'distributor-permit-hologram-procurement'];
+        return itCellModules.reduce((sum, m) => sum + ((this.supplyChainModuleCounts[m] as any)?.[status] || 0), 0);
       }
       const sourceCounts = this.supplyChainModuleCounts[this.selectedChartModule] || { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0 };
       return (sourceCounts as any)[status] || 0;
@@ -776,24 +791,26 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     const isITCell        = this.currentUser?.roleId === 6;
     const skipTransit     = isCommissioner || isJointComm || isPermitSection;
 
-    // Distributor OIC only processes Distributor Permit Requisition and Brand Arrival
+    // Distributor OIC only processes Distributor Permit Requisition, Brand Arrival, and IMFL Hologram Procurement
     if (this.isDistributorOic()) {
       const distReq$ = this.distributorPermitService.getDashboardCounts('requisition').pipe(catchError(() => of(null)));
       const distArr$ = this.distributorPermitService.getDashboardCounts('brand-arrival').pipe(catchError(() => of(null)));
+      const distHolo$ = this.distributorPermitService.getDashboardCounts('hologram-procurement').pipe(catchError(() => of(null)));
 
-      forkJoin({ distReq: distReq$, distArr: distArr$ })
+      forkJoin({ distReq: distReq$, distArr: distArr$, distHolo: distHolo$ })
         .pipe(
           takeUntil(this.destroy$),
           finalize(() => onComplete?.())
         )
-        .subscribe(({ distReq, distArr }) => {
+        .subscribe(({ distReq, distArr, distHolo }) => {
           if (distReq) {
             this.supplyChainModuleCounts['distributor-permit-requisition'] = {
               applied: distReq.total || 0,
               pending: distReq.pending || 0,
               approved: distReq.approved || 0,
               objection: distReq.objection || 0,
-              rejected: distReq.rejected || 0
+              rejected: distReq.rejected || 0,
+              awaitingPayment: distReq.awaiting_payment || distReq.awaitingPayment || 0
             };
             this.supplyChainPendingCounts['distributor-permit-requisition'] = distReq.pending || 0;
           }
@@ -803,9 +820,23 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
               pending: distArr.pending || 0,
               approved: distArr.approved || 0,
               objection: distArr.objection || 0,
-              rejected: distArr.rejected || 0
+              rejected: distArr.rejected || 0,
+              awaitingPayment: distArr.awaiting_payment || distArr.awaitingPayment || 0
             };
             this.supplyChainPendingCounts['distributor-permit-brand-arrival'] = distArr.pending || 0;
+          }
+          if (distHolo) {
+            this.supplyChainModuleCounts['distributor-permit-hologram-procurement'] = {
+              applied: distHolo.total || distHolo.applied || 0,
+              pending: distHolo.pending || 0,
+              approved: distHolo.approved || 0,
+              objection: distHolo.objection || 0,
+              rejected: distHolo.rejected || 0,
+              awaitingPayment: distHolo.awaiting_payment || distHolo.awaitingPayment || 0
+            };
+            this.supplyChainModuleCounts['imfl-hologram-procurement'] = this.supplyChainModuleCounts['distributor-permit-hologram-procurement'];
+            this.supplyChainPendingCounts['distributor-permit-hologram-procurement'] = distHolo.pending || 0;
+            this.supplyChainPendingCounts['imfl-hologram-procurement'] = distHolo.pending || 0;
           }
           this.updateSingleWindowChart();
         });
@@ -867,7 +898,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       ? this.hologramService.getRequests().pipe(catchError(() => of([])))
       : of([] as any[]);
 
-    const shouldLoadDistributorPermitCounts = this.isDistributorUser() || isAdminOrOfficer;
+    const shouldLoadDistributorPermitCounts = this.isDistributorUser() || isAdminOrOfficer || isITCell || isCommissioner;
     const distReq$ = shouldLoadDistributorPermitCounts
       ? this.distributorPermitService.getDashboardCounts('requisition').pipe(catchError(() => of(null)))
       : of(null as any);
@@ -880,13 +911,16 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     const distArr$ = shouldLoadDistributorPermitCounts
       ? this.distributorPermitService.getDashboardCounts('brand-arrival').pipe(catchError(() => of(null)))
       : of(null as any);
+    const distHolo$ = shouldLoadDistributorPermitCounts
+      ? this.distributorPermitService.getDashboardCounts('hologram-procurement').pipe(catchError(() => of(null)))
+      : of(null as any);
 
-    forkJoin({ req: req$, rev: rev$, can: can$, tra: tra$, hol: hol$, comp: comp$, collab: collab$, bld: bld$, holReq: holReq$, distReq: distReq$, distRev: distRev$, distCan: distCan$, distArr: distArr$ })
+    forkJoin({ req: req$, rev: rev$, can: can$, tra: tra$, hol: hol$, comp: comp$, collab: collab$, bld: bld$, holReq: holReq$, distReq: distReq$, distRev: distRev$, distCan: distCan$, distArr: distArr$, distHolo: distHolo$ })
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => onComplete?.())
       )
-      .subscribe(({ req, rev, can, tra, hol, comp, collab, bld, holReq, distReq, distRev, distCan, distArr }) => {
+      .subscribe(({ req, rev, can, tra, hol, comp, collab, bld, holReq, distReq, distRev, distCan, distArr, distHolo }) => {
 
         // ── REQUISITIONS ──────────────────────────────────────────────────────
         {
@@ -1162,12 +1196,15 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
           const revStats = toDashboardCount(distRev);
           const canStats = toDashboardCount(distCan);
           const arrStats = toDashboardCount(distArr);
+          const holoStats = toDashboardCount(distHolo);
 
           this.supplyChainModuleCounts['distributor-permit'] = reqStats;
           this.supplyChainModuleCounts['distributor-permit-requisition'] = reqStats;
           this.supplyChainModuleCounts['distributor-permit-revalidation'] = revStats;
           this.supplyChainModuleCounts['distributor-permit-cancellation'] = canStats;
           this.supplyChainModuleCounts['distributor-permit-brand-arrival'] = arrStats;
+          this.supplyChainModuleCounts['distributor-permit-hologram-procurement'] = holoStats;
+          this.supplyChainModuleCounts['imfl-hologram-procurement'] = holoStats;
 
           // Set sidebar badge count for IMFL permit modules from cached dashboard counts.
           if (this.isDistributorUser()) {
@@ -1176,6 +1213,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
             this.supplyChainPendingCounts['distributor-permit-revalidation'] = revStats.pending;
             this.supplyChainPendingCounts['distributor-permit-cancellation'] = canStats.pending;
             this.supplyChainPendingCounts['distributor-permit-brand-arrival'] = arrStats.pending;
+            this.supplyChainPendingCounts['distributor-permit-hologram-procurement'] = holoStats.pending;
+            this.supplyChainPendingCounts['imfl-hologram-procurement'] = holoStats.pending;
           } else {
             this.supplyChainPendingCounts['distributor-permit'] = reqStats.pending + (reqStats.objection ?? 0);
             this.supplyChainPendingCounts['distributor-permit-requisition'] = reqStats.pending + (reqStats.objection ?? 0);
@@ -1183,6 +1222,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
             this.supplyChainPendingCounts['distributor-permit-revalidation'] = revStats.pending + (revStats.objection ?? 0);
             this.supplyChainPendingCounts['distributor-permit-cancellation'] = canStats.pending + (canStats.objection ?? 0);
             this.supplyChainPendingCounts['distributor-permit-brand-arrival'] = arrStats.pending;
+            this.supplyChainPendingCounts['distributor-permit-hologram-procurement'] = holoStats.pending;
+            this.supplyChainPendingCounts['imfl-hologram-procurement'] = holoStats.pending;
           }
         }
 
@@ -2769,26 +2810,35 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     if (roleId === 4 || roleId === 8 || roleId === 9) return 0;
     if (this.isDistributorOic()) {
       return this.getSupplyChainPendingCount('distributor-permit-requisition') +
-             this.getSupplyChainPendingCount('distributor-permit-brand-arrival');
+             this.getSupplyChainPendingCount('distributor-permit-brand-arrival') +
+             this.getSupplyChainPendingCount('distributor-permit-hologram-procurement');
     }
     if (this.isDistributorUser()) {
       return this.getSupplyChainPendingCount('distributor-permit-requisition') +
              this.getSupplyChainPendingCount('distributor-permit-revalidation') +
-             this.getSupplyChainPendingCount('distributor-permit-cancellation');
+             this.getSupplyChainPendingCount('distributor-permit-cancellation') +
+             this.getSupplyChainPendingCount('distributor-permit-hologram-procurement');
+    }
+    if (roleId === 6) {
+      return this.getSupplyChainPendingCount('hologram') +
+             this.getSupplyChainPendingCount('distributor-permit-hologram-procurement');
     }
     if (roleId === 5) {
       const modules = ['requisition', 'distributor-permit-requisition', 'company', 'company-collaboration'];
       return modules.reduce((sum, m) => sum + this.getSupplyChainPendingCount(m), 0);
     }
-    if (this.isCommissionerUser()) return 0;
+    if (this.isCommissionerUser()) {
+      return this.getSupplyChainPendingCount('distributor-permit-hologram-procurement');
+    }
     if (this.isLicenseeUser()) {
-      const licModules = ['requisition', 'revalidation', 'cancellation', 'transit', 'hologram'];
+      const licModules = ['requisition', 'revalidation', 'cancellation', 'transit', 'hologram', 'distributor-permit-hologram-procurement'];
       return licModules.reduce((sum, m) => sum + this.getSupplyChainPendingCount(m), 0);
     }
     return this.getSupplyChainPendingCount('requisition') +
            this.getSupplyChainPendingCount('revalidation') +
            this.getSupplyChainPendingCount('cancellation') +
            this.getSupplyChainPendingCount('hologram') +
+           this.getSupplyChainPendingCount('distributor-permit-hologram-procurement') +
            this.getSupplyChainPendingCount('transit');
   }
 
@@ -2797,17 +2847,26 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     if (roleId === 4 || roleId === 8 || roleId === 9) return 0;
     const isCommissioner = this.isCommissionerUser();
     if (isCommissioner) return 0;
+    if (this.isDistributorOic()) {
+      return (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.awaitingPayment || 0);
+    }
     if (this.isDistributorUser()) {
       return (this.supplyChainModuleCounts['distributor-permit-requisition']?.awaitingPayment || 0) +
              (this.supplyChainModuleCounts['distributor-permit-revalidation']?.awaitingPayment || 0) +
-             (this.supplyChainModuleCounts['distributor-permit-cancellation']?.awaitingPayment || 0);
+             (this.supplyChainModuleCounts['distributor-permit-cancellation']?.awaitingPayment || 0) +
+             (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.awaitingPayment || 0);
+    }
+    if (roleId === 6) {
+      return (this.supplyChainModuleCounts['hologram']?.awaitingPayment || 0) +
+             (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.awaitingPayment || 0);
     }
     if (this.isLicenseeUser()) {
-      const licModules = ['requisition', 'revalidation', 'cancellation', 'transit', 'hologram'];
+      const licModules = ['requisition', 'revalidation', 'cancellation', 'transit', 'hologram', 'distributor-permit-hologram-procurement'];
       return licModules.reduce((sum, m) => sum + (this.supplyChainModuleCounts[m]?.awaitingPayment || 0), 0);
     }
     return (this.supplyChainModuleCounts['requisition']?.awaitingPayment || 0) +
-           (this.supplyChainModuleCounts['hologram']?.awaitingPayment || 0);
+           (this.supplyChainModuleCounts['hologram']?.awaitingPayment || 0) +
+           (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.awaitingPayment || 0);
   }
 
   getSupplyChainAppliedTotal(): number {
@@ -2815,24 +2874,30 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     if (roleId === 4 || roleId === 8 || roleId === 9) return 0;
     if (this.isDistributorOic()) {
       return (this.supplyChainModuleCounts['distributor-permit-requisition']?.applied || 0) +
-             (this.supplyChainModuleCounts['distributor-permit-brand-arrival']?.applied || 0);
+             (this.supplyChainModuleCounts['distributor-permit-brand-arrival']?.applied || 0) +
+             (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.applied || 0);
     }
     if (this.isDistributorUser()) {
       return (this.supplyChainModuleCounts['distributor-permit-requisition']?.applied || 0) +
              (this.supplyChainModuleCounts['distributor-permit-revalidation']?.applied || 0) +
-             (this.supplyChainModuleCounts['distributor-permit-cancellation']?.applied || 0);
+             (this.supplyChainModuleCounts['distributor-permit-cancellation']?.applied || 0) +
+             (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.applied || 0);
+    }
+    if (roleId === 6) {
+      return (this.supplyChainModuleCounts['hologram']?.applied || 0) +
+             (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.applied || 0);
     }
     if (roleId === 5) {
       const modules = ['requisition', 'distributor-permit-requisition', 'company', 'company-collaboration'];
       return modules.reduce((sum, m) => sum + (this.supplyChainModuleCounts[m]?.applied || 0), 0);
     }
     if (this.isLicenseeUser()) {
-      const licModules = ['requisition', 'revalidation', 'cancellation', 'transit', 'hologram'];
+      const licModules = ['requisition', 'revalidation', 'cancellation', 'transit', 'hologram', 'distributor-permit-hologram-procurement'];
       return licModules.reduce((sum, m) => sum + (this.supplyChainModuleCounts[m]?.applied || 0), 0);
     }
     const isCommissioner = this.isCommissionerUser();
     const modules = ['requisition', 'revalidation', 'cancellation', 'hologram',
-                     'distributor-permit-requisition', 'distributor-permit-revalidation', 'distributor-permit-cancellation', 'distributor-permit-brand-arrival'];
+                     'distributor-permit-requisition', 'distributor-permit-revalidation', 'distributor-permit-cancellation', 'distributor-permit-brand-arrival', 'distributor-permit-hologram-procurement'];
     if (!isCommissioner) {
       modules.push('transit');
     }
@@ -2844,24 +2909,30 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     if (roleId === 4 || roleId === 8 || roleId === 9) return 0;
     if (this.isDistributorOic()) {
       return (this.supplyChainModuleCounts['distributor-permit-requisition']?.approved || 0) +
-             (this.supplyChainModuleCounts['distributor-permit-brand-arrival']?.approved || 0);
+             (this.supplyChainModuleCounts['distributor-permit-brand-arrival']?.approved || 0) +
+             (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.approved || 0);
     }
     if (this.isDistributorUser()) {
       return (this.supplyChainModuleCounts['distributor-permit-requisition']?.approved || 0) +
              (this.supplyChainModuleCounts['distributor-permit-revalidation']?.approved || 0) +
-             (this.supplyChainModuleCounts['distributor-permit-cancellation']?.approved || 0);
+             (this.supplyChainModuleCounts['distributor-permit-cancellation']?.approved || 0) +
+             (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.approved || 0);
+    }
+    if (roleId === 6) {
+      return (this.supplyChainModuleCounts['hologram']?.approved || 0) +
+             (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.approved || 0);
     }
     if (roleId === 5) {
       const modules = ['requisition', 'distributor-permit-requisition', 'company', 'company-collaboration'];
       return modules.reduce((sum, m) => sum + (this.supplyChainModuleCounts[m]?.approved || 0), 0);
     }
     if (this.isLicenseeUser()) {
-      const licModules = ['requisition', 'revalidation', 'cancellation', 'transit', 'hologram'];
+      const licModules = ['requisition', 'revalidation', 'cancellation', 'transit', 'hologram', 'distributor-permit-hologram-procurement'];
       return licModules.reduce((sum, m) => sum + (this.supplyChainModuleCounts[m]?.approved || 0), 0);
     }
     const isCommissioner = this.isCommissionerUser();
     const approvedModules = ['requisition', 'revalidation', 'cancellation', 'hologram',
-                             'distributor-permit-requisition', 'distributor-permit-revalidation', 'distributor-permit-cancellation', 'distributor-permit-brand-arrival'];
+                             'distributor-permit-requisition', 'distributor-permit-revalidation', 'distributor-permit-cancellation', 'distributor-permit-brand-arrival', 'distributor-permit-hologram-procurement'];
     if (!isCommissioner) {
       approvedModules.push('transit');
     }
@@ -2873,24 +2944,30 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     if (roleId === 4 || roleId === 8 || roleId === 9) return 0;
     if (this.isDistributorOic()) {
       return (this.supplyChainModuleCounts['distributor-permit-requisition']?.rejected || 0) +
-             (this.supplyChainModuleCounts['distributor-permit-brand-arrival']?.rejected || 0);
+             (this.supplyChainModuleCounts['distributor-permit-brand-arrival']?.rejected || 0) +
+             (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.rejected || 0);
     }
     if (this.isDistributorUser()) {
       return (this.supplyChainModuleCounts['distributor-permit-requisition']?.rejected || 0) +
              (this.supplyChainModuleCounts['distributor-permit-revalidation']?.rejected || 0) +
-             (this.supplyChainModuleCounts['distributor-permit-cancellation']?.rejected || 0);
+             (this.supplyChainModuleCounts['distributor-permit-cancellation']?.rejected || 0) +
+             (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.rejected || 0);
+    }
+    if (roleId === 6) {
+      return (this.supplyChainModuleCounts['hologram']?.rejected || 0) +
+             (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.rejected || 0);
     }
     if (roleId === 5) {
       const modules = ['requisition', 'distributor-permit-requisition', 'company', 'company-collaboration'];
       return modules.reduce((sum, m) => sum + (this.supplyChainModuleCounts[m]?.rejected || 0), 0);
     }
     if (this.isLicenseeUser()) {
-      const licModules = ['requisition', 'revalidation', 'cancellation', 'transit', 'hologram'];
+      const licModules = ['requisition', 'revalidation', 'cancellation', 'transit', 'hologram', 'distributor-permit-hologram-procurement'];
       return licModules.reduce((sum, m) => sum + (this.supplyChainModuleCounts[m]?.rejected || 0), 0);
     }
     const isCommissioner = this.isCommissionerUser();
     const rejectedModules = ['requisition', 'revalidation', 'cancellation', 'hologram',
-                             'distributor-permit-requisition', 'distributor-permit-revalidation', 'distributor-permit-cancellation', 'distributor-permit-brand-arrival'];
+                             'distributor-permit-requisition', 'distributor-permit-revalidation', 'distributor-permit-cancellation', 'distributor-permit-brand-arrival', 'distributor-permit-hologram-procurement'];
     if (!isCommissioner) {
       rejectedModules.push('transit');
     }
@@ -2902,24 +2979,30 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     if (roleId === 4 || roleId === 8 || roleId === 9) return 0;
     if (this.isDistributorOic()) {
       return (this.supplyChainModuleCounts['distributor-permit-requisition']?.objection || 0) +
-             (this.supplyChainModuleCounts['distributor-permit-brand-arrival']?.objection || 0);
+             (this.supplyChainModuleCounts['distributor-permit-brand-arrival']?.objection || 0) +
+             (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.objection || 0);
     }
     if (this.isDistributorUser()) {
       return (this.supplyChainModuleCounts['distributor-permit-requisition']?.objection || 0) +
              (this.supplyChainModuleCounts['distributor-permit-revalidation']?.objection || 0) +
-             (this.supplyChainModuleCounts['distributor-permit-cancellation']?.objection || 0);
+             (this.supplyChainModuleCounts['distributor-permit-cancellation']?.objection || 0) +
+             (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.objection || 0);
+    }
+    if (roleId === 6) {
+      return (this.supplyChainModuleCounts['hologram']?.objection || 0) +
+             (this.supplyChainModuleCounts['distributor-permit-hologram-procurement']?.objection || 0);
     }
     if (roleId === 5) {
       const modules = ['requisition', 'distributor-permit-requisition', 'company', 'company-collaboration'];
       return modules.reduce((sum, m) => sum + (this.supplyChainModuleCounts[m]?.objection || 0), 0);
     }
     if (this.isLicenseeUser()) {
-      const licModules = ['requisition', 'revalidation', 'cancellation', 'transit', 'hologram'];
+      const licModules = ['requisition', 'revalidation', 'cancellation', 'transit', 'hologram', 'distributor-permit-hologram-procurement'];
       return licModules.reduce((sum, m) => sum + (this.supplyChainModuleCounts[m]?.objection || 0), 0);
     }
     const isCommissioner = this.isCommissionerUser();
     const objectionModules = ['requisition', 'revalidation', 'cancellation', 'hologram',
-                              'distributor-permit-requisition', 'distributor-permit-revalidation', 'distributor-permit-cancellation', 'distributor-permit-brand-arrival'];
+                              'distributor-permit-requisition', 'distributor-permit-revalidation', 'distributor-permit-cancellation', 'distributor-permit-brand-arrival', 'distributor-permit-hologram-procurement'];
     if (!isCommissioner) {
       objectionModules.push('transit');
     }

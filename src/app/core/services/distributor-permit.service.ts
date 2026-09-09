@@ -56,7 +56,7 @@ export class DistributorPermitService {
     this.inflightRequests.clear();
   }
 
-  getDashboardCounts(tab: 'requisition' | 'revalidation' | 'cancellation' | 'brand-arrival' = 'requisition', force = false): Observable<any> {
+  getDashboardCounts(tab: 'requisition' | 'revalidation' | 'cancellation' | 'brand-arrival' | 'hologram-procurement' = 'requisition', force = false): Observable<any> {
     const cacheKey = `dashboard-counts:${tab}`;
     if (!force) {
       return this.getCachedOrFetch(cacheKey, () => {
