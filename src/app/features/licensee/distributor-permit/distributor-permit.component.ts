@@ -2092,6 +2092,32 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     return { shortfallBottles, message };
   }
 
+  get isPureLooseDispatch(): boolean {
+    const c = Number(this.dispatchForm.dispatchedCases || 0);
+    const l = Number(this.dispatchForm.dispatchedLooseBottles || 0);
+    return c <= 0 && l > 0;
+  }
+
+  get isSingleCaseDispatch(): boolean {
+    const c = Number(this.dispatchForm.dispatchedCases || 0);
+    const l = Number(this.dispatchForm.dispatchedLooseBottles || 0);
+    const ranges = this.dispatchForm.hologramRanges || [];
+    return c > 0 && l <= 0 && ranges.length <= 1;
+  }
+
+  get isMultiCaseOrMixedDispatch(): boolean {
+    const c = Number(this.dispatchForm.dispatchedCases || 0);
+    const l = Number(this.dispatchForm.dispatchedLooseBottles || 0);
+    const ranges = this.dispatchForm.hologramRanges || [];
+    return c > 0 && (ranges.length > 1 || l > 0);
+  }
+
+  get isZeroQuantityDispatch(): boolean {
+    const c = Number(this.dispatchForm.dispatchedCases || 0);
+    const l = Number(this.dispatchForm.dispatchedLooseBottles || 0);
+    return c <= 0 && l <= 0;
+  }
+
   getDispatchedCasesInputBg(): string {
     if (this.isDispatchedCasesExceeded()) return '#fef2f2';
     const cases = Number(this.dispatchForm.dispatchedCases || 0);

@@ -5438,13 +5438,13 @@
             <div class="row g-3">
 
               <!-- Case 1: Loose Bottles Allocation View (Individual Box per Bottle) -->
-              <ng-container *ngIf="dispatchForm.dispatchedCases === 0 && dispatchForm.dispatchedLooseBottles > 0">
+              <ng-container *ngIf="isPureLooseDispatch">
                 <div class="col-12">
                   <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
                     <span class="small fw-bold text-dark d-flex align-items-center gap-1.5">
                       <i class="bi bi-box2-heart-fill text-primary"></i>
                       <span>Loose Bottle Serial Allocation</span>
-                      <span class="badge bg-light text-muted border ms-1 font-monospace">{{ dispatchForm.dispatchedLooseBottles }} Box(es)</span>
+                      <span class="badge bg-light text-muted border ms-1 font-monospace">{{ dispatchForm.dispatchedLooseBottles || dispatchForm.hologramRanges.length }} Box(es)</span>
                     </span>
                     <span class="text-muted" style="font-size: 11px;">
                       Allocated: <strong class="text-dark">{{ dispatchForm.hologramCount }}</strong> / <strong class="text-primary">{{ dispatchForm.dispatchedBottles }}</strong> Bottles
@@ -5502,7 +5502,7 @@
               </ng-container>
 
               <!-- Case 2: Standard Single Range View (When Dispatched Cases > 0 with single range) -->
-              <ng-container *ngIf="dispatchForm.dispatchedCases > 0 && dispatchForm.hologramRanges.length <= 1 && dispatchForm.dispatchedLooseBottles === 0">
+              <ng-container *ngIf="isSingleCaseDispatch">
                 <div class="col-md-4">
                   <label class="form-label small fw-bold text-dark mb-1">Hologram From <span class="text-danger">*</span></label>
                   <input
@@ -5535,7 +5535,7 @@
               </ng-container>
 
               <!-- Case 3: Multiple Ranges / Mixed Cases & Loose View -->
-              <ng-container *ngIf="(dispatchForm.dispatchedCases > 0 && dispatchForm.hologramRanges.length > 1) || (dispatchForm.dispatchedCases > 0 && dispatchForm.dispatchedLooseBottles > 0)">
+              <ng-container *ngIf="isMultiCaseOrMixedDispatch">
                 <div class="col-12">
                   <label class="form-label small fw-bold text-dark mb-1 d-flex justify-content-between">
                     <span>Hologram Series Allocation (Cases & Loose)</span>
@@ -5602,7 +5602,7 @@
               </ng-container>
 
               <!-- Fallback View (when 0 quantity entered) -->
-              <ng-container *ngIf="dispatchForm.dispatchedCases === 0 && dispatchForm.dispatchedLooseBottles === 0">
+              <ng-container *ngIf="isZeroQuantityDispatch">
                 <div class="col-md-4">
                   <label class="form-label small fw-bold text-dark mb-1">Hologram From <span class="text-danger">*</span></label>
                   <input
