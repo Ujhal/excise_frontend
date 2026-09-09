@@ -81,7 +81,7 @@ import { DailyhologramrecordregisterComponent } from '../admin/commissioner/dail
 
 // Role-specific Dashboard Components
 import { PermitSectionDashboardComponent } from './role-components/permit-section-dashboard.component';
-import { CommissionerDashboardComponent as CommissionerDashboard } from '../admin/commissioner/commissioner-dashboard/commissioner-dashboard.component';
+import { CommissionerDashboardComponent as CommissionerDashboard } from './role-components/commissioner-dashboard.component';
 import { ITCellDashboardComponent } from './role-components/itcell-dashboard.component';
 import { OfficerInChargeDashboardComponent } from './role-components/officer-in-charge-dashboard.component';
 import { PrepareApplicationComponent as CompanyPrepareApplicationComponent } from '../licensee/company-registration-and-collaboration/company-registration/prepare-application/prepare-application.component';
@@ -429,69 +429,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateSingleWindowChart(): void {
-    if (this.isOicUser()) {
-      this.singleWindowChartData = {
-        ...this.singleWindowChartData,
-        datasets: [
-          {
-            ...this.singleWindowChartData.datasets[0],
-            data: [
-              this.getFilteredCount('applied'),
-              this.getFilteredCount('pending'),
-              this.getFilteredCount('approved'),
-              this.getFilteredCount('objection'),
-              this.getFilteredCount('rejected')
-            ]
-          }
-        ]
-      };
-      return;
-    }
-
-    const isITCell = this.currentUser?.roleId === 6;
-    const isPermitSection = Number(this.currentUser?.roleId || 0) === 5;
-    const isCommissioner  = this.isCommissionerUser();
-
-    // For IT Cell, "All Modules" means hologram only — redirect to hologram counts
-    const effectiveModule = (isITCell && this.selectedChartModule === 'all')
-      ? 'hologram'
-      : this.selectedChartModule;
-
-    let sourceCounts = this.dashboardCounts;
-    if (effectiveModule === 'newLicense') {
-      sourceCounts = this.detailedCounts.newLicense;
-    } else if (effectiveModule === 'renewal') {
-      sourceCounts = this.detailedCounts.renewal;
-    } else if (effectiveModule === 'salesman') {
-      sourceCounts = this.detailedCounts.salesman;
-    } else if (effectiveModule === 'company' && (this.supplyChainModuleCounts['company']?.applied ?? 0) > 0) {
-      // For permit section: company counts come from supplyChainModuleCounts (loaded from list API)
-      sourceCounts = this.supplyChainModuleCounts['company'];
-    } else if (effectiveModule === 'company') {
-      sourceCounts = this.detailedCounts.company;
-    } else if (effectiveModule === 'company-collaboration' && (this.supplyChainModuleCounts['company-collaboration']?.applied ?? 0) > 0) {
-      sourceCounts = this.supplyChainModuleCounts['company-collaboration'];
-    } else if (effectiveModule === 'company-collaboration') {
-      sourceCounts = this.detailedCounts.companyCollaboration;
-    } else if (effectiveModule === 'specialPermit') {
-      sourceCounts = this.detailedCounts.specialPermit;
-    } else if (effectiveModule === 'label-registration') {
-      sourceCounts = this.detailedCounts.labelRegistration || { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0 };
-    } else if (this.supplyChainModuleCounts[effectiveModule]) {
-      sourceCounts = this.supplyChainModuleCounts[effectiveModule];
-    }
-
-    const isAllModules = this.selectedChartModule === 'all' && !isITCell;
-
-
-
-    // For the Applied bar, use getModuleTotal() which accounts for roles where
-    // the API returns applied=0 (admin/officer roles) by summing all statuses.
-    // For supply chain modules, always use the stored count (0 if not yet loaded).
-    const appliedValue = isAllModules
-      ? (isPermitSection ? this.getSupplyChainAppliedTotal() : (this.getModuleTotal('all') + this.getSupplyChainAppliedTotal()))
-      : this.getModuleTotal(effectiveModule);
-
     this.singleWindowChartData = {
       ...this.singleWindowChartData,
       datasets: [
@@ -507,6 +444,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       ]
     };
+    this.cdr.markForCheck();
   }
 
   onChartModuleChange(moduleName: string): void {
@@ -691,7 +629,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       return (sourceCounts as any)[status] || 0;
     }
 
-    const isITCell = this.currentUser?.roleId === 6;
+    const isITCell = this.isITCellUser();
     if (isITCell) {
       if (this.selectedChartModule === 'all') {
         const itCellModules = ['hologram', 'distributor-permit-hologram-procurement'];
@@ -699,6 +637,17 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       const sourceCounts = this.supplyChainModuleCounts[this.selectedChartModule] || { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0 };
       return (sourceCounts as any)[status] || 0;
+    }
+
+    if (this.selectedChartModule !== 'all' && this.supplyChainModuleCounts[this.selectedChartModule]) {
+      const sourceCounts = this.supplyChainModuleCounts[this.selectedChartModule];
+      if (status === 'pending') {
+        const awaiting = (this.isLicenseeUser() || this.isDistributorUser()) && !this.shouldShowStatCard('awaitingPayment')
+          ? ((sourceCounts as any).awaitingPayment || (sourceCounts as any)?.awaiting_payment || 0)
+          : 0;
+        return (sourceCounts.pending || 0) + awaiting;
+      }
+      return (sourceCounts as any)?.[status] || 0;
     }
 
     let sourceCounts = this.dashboardCounts;
@@ -788,7 +737,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     const isPermitSection = Number(this.currentUser?.roleId || 0) === 5;
     const isCommissioner  = this.isCommissionerUser();
     const isJointComm     = Number(this.currentUser?.roleId || 0) === 9;
-    const isITCell        = this.currentUser?.roleId === 6;
+    const isITCell        = this.isITCellUser();
     const skipTransit     = isCommissioner || isJointComm || isPermitSection;
 
     // Distributor OIC only processes Distributor Permit Requisition, Brand Arrival, and IMFL Hologram Procurement
@@ -900,19 +849,19 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const shouldLoadDistributorPermitCounts = this.isDistributorUser() || isAdminOrOfficer || isITCell || isCommissioner;
     const distReq$ = shouldLoadDistributorPermitCounts
-      ? this.distributorPermitService.getDashboardCounts('requisition').pipe(catchError(() => of(null)))
+      ? this.distributorPermitService.getDashboardCounts('requisition', true).pipe(catchError(() => of(null)))
       : of(null as any);
     const distRev$ = shouldLoadDistributorPermitCounts
-      ? this.distributorPermitService.getDashboardCounts('revalidation').pipe(catchError(() => of(null)))
+      ? this.distributorPermitService.getDashboardCounts('revalidation', true).pipe(catchError(() => of(null)))
       : of(null as any);
     const distCan$ = shouldLoadDistributorPermitCounts
-      ? this.distributorPermitService.getDashboardCounts('cancellation').pipe(catchError(() => of(null)))
+      ? this.distributorPermitService.getDashboardCounts('cancellation', true).pipe(catchError(() => of(null)))
       : of(null as any);
     const distArr$ = shouldLoadDistributorPermitCounts
-      ? this.distributorPermitService.getDashboardCounts('brand-arrival').pipe(catchError(() => of(null)))
+      ? this.distributorPermitService.getDashboardCounts('brand-arrival', true).pipe(catchError(() => of(null)))
       : of(null as any);
     const distHolo$ = shouldLoadDistributorPermitCounts
-      ? this.distributorPermitService.getDashboardCounts('hologram-procurement').pipe(catchError(() => of(null)))
+      ? this.distributorPermitService.getDashboardCounts('hologram-procurement', true).pipe(catchError(() => of(null)))
       : of(null as any);
 
     forkJoin({ req: req$, rev: rev$, can: can$, tra: tra$, hol: hol$, comp: comp$, collab: collab$, bld: bld$, holReq: holReq$, distReq: distReq$, distRev: distRev$, distCan: distCan$, distArr: distArr$, distHolo: distHolo$ })
@@ -1235,7 +1184,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   onChartDateFilterChange(): void {
     const month = this.selectedChartMonth !== '' ? Number(this.selectedChartMonth) : undefined;
     const year  = this.selectedChartYear  !== '' ? Number(this.selectedChartYear)  : undefined;
-    const isITCell = this.currentUser?.roleId === 6;
+    const isITCell = this.isITCellUser();
     this.isChartLoading = true;
 
     if (this.isOicUser()) {
@@ -1247,52 +1196,67 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (isITCell) {
       // IT Cell: filter hologram items client-side by month/year then recount
-      this.hologramService.getProcurements().pipe(
-        catchError(() => of([])),
-        finalize(() => { this.isChartLoading = false; })
-      ).subscribe((res: any[]) => {
-        let items = Array.isArray(res) ? res : [];
+      const holo$ = this.hologramService.getProcurements().pipe(catchError(() => of([])));
+      const distHolo$ = this.distributorPermitService.getDashboardCounts('hologram-procurement', true).pipe(catchError(() => of(null)));
 
-        // Apply month/year filter on the date field
-        if (month !== undefined || year !== undefined) {
-          items = items.filter(item => {
-            const d = new Date(item.date || item.created_at || item.submissionDate || '');
-            if (isNaN(d.getTime())) return false;
-            if (month !== undefined && (d.getMonth() + 1) !== month) return false;
-            if (year  !== undefined && d.getFullYear() !== year)         return false;
-            return true;
-          });
-        }
+      forkJoin({ res: holo$, distHolo: distHolo$ })
+        .pipe(finalize(() => { this.isChartLoading = false; }))
+        .subscribe(({ res, distHolo }) => {
+          let items = Array.isArray(res) ? res : [];
 
-        const pending = items.filter(item => {
-          const t = String(item?.status ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
-          const isApproved = t.includes('approved') || t.includes('cartoonassigned') || t.includes('cartonassigned');
-          if (isApproved) return false;
-          return t.includes('submit') || t.includes('underitcellreview') ||
-                 t.includes('itcellreview') || t.includes('pending') || t.includes('review');
-        }).length;
-        // approved = everything NOT pending and NOT rejected (all downstream stages count as IT Cell approved)
-        const approved = items.filter(x => {
-          const t = String(x.status || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-          if (t.includes('rejected') || t.includes('cancelled')) return false;
-          const isPending = t.includes('submittedhp') || t.includes('submitted') ||
-                            t.includes('underitcellreview') || t.includes('itcellreview');
-          return !isPending;
-        }).length;
-        const rejected = items.filter(x => {
-          const s = String(x.status || '').toLowerCase();
-          return s.includes('rejected') || s.includes('cancelled');
-        }).length;
+          // Apply month/year filter on the date field
+          if (month !== undefined || year !== undefined) {
+            items = items.filter((item: any) => {
+              const d = new Date(item?.date || item?.created_at || item?.submissionDate || '');
+              if (isNaN(d.getTime())) return false;
+              if (month !== undefined && (d.getMonth() + 1) !== month) return false;
+              if (year  !== undefined && d.getFullYear() !== year)         return false;
+              return true;
+            });
+          }
 
-        this.supplyChainModuleCounts['hologram'] = {
-          applied: items.length,
-          pending,
-          approved,
-          objection: 0,
-          rejected
-        };
-        this.updateSingleWindowChart();
-      });
+          const pending = items.filter(item => {
+            const t = String(item?.status ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const isApproved = t.includes('approved') || t.includes('cartoonassigned') || t.includes('cartonassigned');
+            if (isApproved) return false;
+            return t.includes('submit') || t.includes('underitcellreview') ||
+                   t.includes('itcellreview') || t.includes('pending') || t.includes('review');
+          }).length;
+          // approved = everything NOT pending and NOT rejected (all downstream stages count as IT Cell approved)
+          const approved = items.filter(x => {
+            const t = String(x.status || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (t.includes('rejected') || t.includes('cancelled')) return false;
+            const isPending = t.includes('submittedhp') || t.includes('submitted') ||
+                              t.includes('underitcellreview') || t.includes('itcellreview');
+            return !isPending;
+          }).length;
+          const rejected = items.filter(x => {
+            const s = String(x.status || '').toLowerCase();
+            return s.includes('rejected') || s.includes('cancelled');
+          }).length;
+
+          this.supplyChainModuleCounts['hologram'] = {
+            applied: items.length,
+            pending,
+            approved,
+            objection: 0,
+            rejected
+          };
+          if (distHolo) {
+            const holoStats = {
+              applied: Number(distHolo.applied ?? distHolo.total ?? 0),
+              pending: Number(distHolo.pending ?? 0),
+              underProcess: Number(distHolo.under_process ?? distHolo.underProcess ?? 0),
+              approved: Number(distHolo.approved ?? 0),
+              objection: Number(distHolo.objection ?? 0),
+              rejected: Number(distHolo.rejected ?? 0),
+              awaitingPayment: Number(distHolo.awaitingPayment ?? distHolo.awaiting_payment ?? 0)
+            };
+            this.supplyChainModuleCounts['distributor-permit-hologram-procurement'] = holoStats;
+            this.supplyChainModuleCounts['imfl-hologram-procurement'] = holoStats;
+          }
+          this.updateSingleWindowChart();
+        });
       return;
     }
 
@@ -3837,6 +3801,15 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     ).toLowerCase();
     const normalized = roleName.replace(/[^a-z0-9]/g, '');
     return normalized === 'commissioner' || normalized === 'excisecommissioner';
+  }
+
+  isITCellUser(): boolean {
+    const roleId = this.getCurrentRoleId();
+    if (roleId === 6) return true;
+    const user = (this.currentUser || this.roleService.getCurrentUser() || this.accountService?.getCurrentUser()) as any;
+    const roleName = String(user?.role?.name || user?.role?.displayName || user?.role || '').toLowerCase();
+    const normalized = roleName.replace(/[^a-z0-9]/g, '');
+    return normalized === 'itcell' || normalized.includes('itcell');
   }
 
   canRenderWalletSection(): boolean {

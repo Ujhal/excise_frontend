@@ -88,6 +88,8 @@ export interface CommissionerTableData {
 export class CommissionerDashboardComponent implements OnInit {
   @Input() embeddedHologramOnly = false;
   @Input() supplyChainHologramPending = 0;
+  @Input() selectedModule: string = 'all';
+  @Input() moduleCounts: Record<string, any> = {};
   Math = Math;
   activeTab = "requisition"; // Start with requisition tab as default
   private isBrowser = false;

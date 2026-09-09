@@ -873,6 +873,8 @@ export class CommissionerDashboardComponent implements OnInit {
 
   @Input() embeddedHologramOnly = false;
   @Input() supplyChainHologramPending = 0; // Passed from parent dashboard when available
+  @Input() selectedModule: string = 'all';
+  @Input() moduleCounts: Record<string, any> = {};
 
   // Services
   public accountService = inject(AccountService);
@@ -1293,6 +1295,19 @@ export class CommissionerDashboardComponent implements OnInit {
 
   // Dashboard statistics methods
   getDashboardStatistics() {
+    if (this.selectedModule && this.selectedModule !== 'all') {
+      const mc = this.moduleCounts?.[this.selectedModule];
+      if (mc) {
+        return {
+          applied: Number(mc.applied || 0),
+          pending: Number(mc.pending || 0),
+          objection: Number(mc.objection || 0),
+          approved: Number(mc.approved || 0),
+          rejected: Number(mc.rejected || 0)
+        };
+      }
+    }
+
     // Non-hologram actionable pending (requisitions, revalidations, etc.)
     // Count items with allowedActions APPROVE/REJECT (commissioner has action to take)
     const countedByActions = this.allApplications

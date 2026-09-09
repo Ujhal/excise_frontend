@@ -1,8 +1,11 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { HologramDataService } from '../../licensee/supplyChain/services/hologram-data.service';
+import { DistributorPermitService } from '../../../core/services/distributor-permit.service';
 import { AccountService } from '../../../core/services/account.service';
 import { DashboardStatisticsComponent } from '../../../shared/components/dashboard-statistics/dashboard-statistics.component';
 import { UnifiedActionButtonsComponent } from '../../../shared/components/unified-action-buttons/unified-action-buttons.component';
@@ -169,10 +172,14 @@ interface ITCellData {
   `]
 })
 export class ITCellDashboardComponent implements OnInit {
+  @Input() selectedModule: string = 'all';
+  @Input() moduleCounts: Record<string, any> = {};
+
   // Services
   public accountService = inject(AccountService);
   private router = inject(Router);
   private hologramService = inject(HologramDataService);
+  private distributorPermitService = inject(DistributorPermitService);
   private unifiedActionsService = inject(UnifiedActionsService);
 
   // Data properties
@@ -192,32 +199,56 @@ export class ITCellDashboardComponent implements OnInit {
   }
 
   loadHologramApplications(): void {
-    this.hologramService.getProcurements().subscribe({
-      next: (data: any[]) => {
-        const mapItem = (item: any): ITCellData => ({
-          id: item.id,
-          referenceNo: item.refNo || `HOL-${item.id}`,
-          submissionDate: this.formatDate(item.date),
-          companyName: item.licenseeName || item.manufacturingUnit || 'N/A',
-          status: item.status || 'SUBMITTED',
-          amount: '0.00',
-          type: 'hologram',
-          allowedActions: item.allowedActions || item.allowed_actions || [],
-          allowedActionConfigs: item.allowedActionConfigs || item.allowed_action_configs || [],
-          workflowId: item.workflow || item.workflow_id || item.workflowId,
-          currentStage: item.current_stage || item.currentStage || item.stage_id || item.stageId,
-          localQtyLakh: Number(item.localQty || 0),
-          exportQtyLakh: Number(item.exportQty || 0),
-          defenceQtyLakh: Number(item.defenceQty || 0)
-        });
+    const mapDistilleryItem = (item: any): ITCellData => ({
+      id: item.id,
+      referenceNo: item.refNo || `HOL-${item.id}`,
+      submissionDate: this.formatDate(item.date || item.created_at),
+      companyName: item.licenseeName || item.manufacturingUnit || 'N/A',
+      status: item.status || 'SUBMITTED',
+      amount: '0.00',
+      type: 'hologram',
+      allowedActions: item.allowedActions || item.allowed_actions || [],
+      allowedActionConfigs: item.allowedActionConfigs || item.allowed_action_configs || [],
+      workflowId: item.workflow || item.workflow_id || item.workflowId,
+      currentStage: item.current_stage || item.currentStage || item.stage_id || item.stageId,
+      localQtyLakh: Number(item.localQty || 0),
+      exportQtyLakh: Number(item.exportQty || 0),
+      defenceQtyLakh: Number(item.defenceQty || 0)
+    });
+
+    const mapDistributorItem = (item: any): ITCellData => ({
+      id: item.id,
+      referenceNo: item.reference_no || item.referenceNo || `DHP-${item.id}`,
+      submissionDate: this.formatDate(item.created_at || item.submission_date || item.submissionDate),
+      companyName: item.distributor_name || item.distributorName || item.licensee_name || 'N/A',
+      status: item.current_stage_name || item.currentStageName || item.status || 'SUBMITTED',
+      amount: '0.00',
+      type: 'hologram',
+      allowedActions: item.allowedActions || item.allowed_actions || [],
+      allowedActionConfigs: item.allowedActionConfigs || item.allowed_action_configs || [],
+      workflowId: item.workflow || item.workflow_id || item.workflowId,
+      currentStage: item.current_stage || item.currentStage || item.stage_id || item.stageId,
+      localQtyLakh: Number(item.total_cases || 0),
+      exportQtyLakh: 0,
+      defenceQtyLakh: 0
+    });
+
+    forkJoin({
+      distillery: this.hologramService.getProcurements().pipe(catchError(() => of([]))),
+      distributor: this.distributorPermitService.getHologramProcurements().pipe(catchError(() => of([])))
+    }).subscribe({
+      next: (res: any) => {
+        const distilleryList = Array.isArray(res.distillery) ? res.distillery : (res.distillery?.results || res.distillery?.data || []);
+        const distributorList = Array.isArray(res.distributor) ? res.distributor : (res.distributor?.results || res.distributor?.data || []);
+
+        const mappedDistillery = distilleryList.map(mapDistilleryItem);
+        const mappedDistributor = distributorList.map(mapDistributorItem);
 
         // All items for stat counts
-        this.allHologramItems = data.map(mapItem);
+        this.allHologramItems = [...mappedDistillery, ...mappedDistributor];
 
         // Only actionable items for the review table
-        this.allApplications = data
-          .filter((item: any) => this.requiresITCellReview(item.status))
-          .map(mapItem);
+        this.allApplications = this.allHologramItems.filter((item: any) => this.requiresITCellReview(item.status));
 
         this.applyFilters();
       },
@@ -275,10 +306,45 @@ export class ITCellDashboardComponent implements OnInit {
   }
 
   getDashboardStatistics() {
+    if (this.selectedModule && this.selectedModule !== 'all') {
+      const mc = this.moduleCounts?.[this.selectedModule];
+      if (mc) {
+        return {
+          applied: Number(mc.applied || 0),
+          pending: Number(mc.pending || 0),
+          approved: Number(mc.approved || 0),
+          rejected: Number(mc.rejected || 0)
+        };
+      }
+    }
+
+    if (this.moduleCounts) {
+      const itCellModules = ['hologram', 'distributor-permit-hologram-procurement'];
+      let applied = 0;
+      let pending = 0;
+      let approved = 0;
+      let rejected = 0;
+      let hasModuleCounts = false;
+
+      itCellModules.forEach(m => {
+        const mc = this.moduleCounts?.[m];
+        if (mc) {
+          hasModuleCounts = true;
+          applied += Number(mc.applied || 0);
+          pending += Number(mc.pending || 0);
+          approved += Number(mc.approved || 0);
+          rejected += Number(mc.rejected || 0);
+        }
+      });
+
+      if (hasModuleCounts && (applied > 0 || pending > 0 || approved > 0 || rejected > 0)) {
+        return { applied, pending, approved, rejected };
+      }
+    }
+
     return {
       applied:  this.allHologramItems.length,
       pending:  this.allHologramItems.filter(app => this.isPending(app.status)).length,
-      // Approved = everything IT Cell has processed (not pending, not rejected)
       approved: this.allHologramItems.filter(app => this.isApproved(app.status)).length,
       rejected: this.allHologramItems.filter(app => {
                   const t = this.normalizeToken(app.status);
