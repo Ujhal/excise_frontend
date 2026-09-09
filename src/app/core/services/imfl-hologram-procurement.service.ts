@@ -162,4 +162,8 @@ export class ImflHologramProcurementService {
   getApprovedProcurementsForArrival(): Observable<any[]> {
     return this.http.get<any[]>(`${this.arrivalUrl}/approved-procurements/`);
   }
+
+  getHologramOverview(): Observable<any> {
+    return this.http.get<any>(`${this.arrivalUrl}/overview/`);
+  }
 }

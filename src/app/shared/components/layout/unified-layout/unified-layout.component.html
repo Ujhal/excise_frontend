@@ -98,6 +98,11 @@
                   <mat-icon class="nav-icon">qr_code_2</mat-icon>
                   <span class="nav-text">IMFL Hologram Procurement</span>
                 </button>
+
+                <button class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('hologram-overview')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('hologram-overview')">
+                  <mat-icon class="nav-icon">analytics</mat-icon>
+                  <span class="nav-text">IMFL Hologram Overview</span>
+                </button>
               </ng-container>
             </ng-container>
 
@@ -315,6 +320,11 @@
                   <button *ngIf="isDistributorOic()" class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('hologram-arrival')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('hologram-arrival')">
                     <mat-icon class="nav-icon">qr_code_scanner</mat-icon>
                     <span class="nav-text">IMFL Holograms Arrival</span>
+                  </button>
+
+                  <button *ngIf="isDistributorOic()" class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('hologram-overview')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('hologram-overview')">
+                    <mat-icon class="nav-icon">analytics</mat-icon>
+                    <span class="nav-text">IMFL Hologram Overview</span>
                   </button>
 
                   <button *ngIf="isDistributorOic()" class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('brand-warehouse')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('brand-warehouse')">

@@ -1449,6 +1449,498 @@
         </div>
       </div>
 
+      <!-- Tab 7: IMFL Hologram Overview Dashboard -->
+      <div class="hologram-overview-wrapper mb-4" *ngIf="activeTab === 'hologram-overview'">
+        <!-- Hero License & Mapped OIC Banner -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden holo-hero-banner">
+          <div class="row g-0 align-items-stretch">
+            <!-- Left: License & Distributor Info -->
+            <div class="col-lg-7 p-4 p-md-4 d-flex flex-column justify-content-between holo-hero-left">
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-1.5 rounded-pill fs-7 d-inline-flex align-items-center gap-1">
+                  <i class="bi bi-shield-check"></i> IMFL Distributor License
+                </span>
+                <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-1.5 rounded-pill fs-7">
+                  <i class="bi bi-check-circle-fill me-1"></i> Active Status
+                </span>
+              </div>
+
+              <div class="mb-3">
+                <h3 class="fw-bolder text-dark mb-1 d-flex align-items-center gap-2">
+                  <i class="bi bi-building text-primary"></i>
+                  {{ hologramOverviewData?.distributor_info?.establishment_name || hologramOverviewData?.distributor_info?.distributor_name || 'Distributor Establishment' }}
+                </h3>
+                <p class="text-muted mb-0 small">
+                  {{ hologramOverviewData?.distributor_info?.distributor_name || 'Distributor Licensee' }} &bull; Government of Sikkim Excise Department
+                </p>
+              </div>
+
+              <div class="d-flex flex-wrap gap-3 pt-2 border-top border-light">
+                <div class="info-pill px-3 py-2 bg-white rounded-3 border shadow-xs">
+                  <span class="text-muted d-block small" style="font-size: 11px;">License Number</span>
+                  <strong class="text-primary font-monospace fs-6">{{ hologramOverviewData?.distributor_info?.license_number || 'IMFL-DIST-SKM-2026-01' }}</strong>
+                </div>
+                <div class="info-pill px-3 py-2 bg-white rounded-3 border shadow-xs">
+                  <span class="text-muted d-block small" style="font-size: 11px;">State / Jurisdiction</span>
+                  <strong class="text-dark fs-6"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Sikkim, India</strong>
+                </div>
+                <div class="info-pill px-3 py-2 bg-white rounded-3 border shadow-xs">
+                  <span class="text-muted d-block small" style="font-size: 11px;">Consignments</span>
+                  <strong class="text-success fs-6">{{ hologramOverviewData?.summary_stats?.total_batches_count || 0 }} Batches</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Mapped OIC Officer Profile Card -->
+            <div class="col-lg-5 p-4 holo-hero-right bg-gradient-oic d-flex flex-column justify-content-between">
+              <div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <span class="text-white-50 text-uppercase fw-bold small letter-spacing-1" style="font-size: 11px;">
+                    <i class="bi bi-person-badge-fill me-1 text-warning"></i> Mapped Officer in Charge
+                  </span>
+                  <span class="badge bg-white bg-opacity-25 text-white fw-semibold rounded-pill px-2.5 py-1" style="font-size: 11px;">
+                    <i class="bi bi-link-45deg me-1"></i> Mapped
+                  </span>
+                </div>
+
+                <div class="d-flex align-items-center gap-3 mb-3">
+                  <div class="oic-avatar rounded-circle bg-white text-primary fw-bolder d-flex align-items-center justify-content-center shadow-sm" style="width: 52px; height: 52px; font-size: 20px;">
+                    <i class="bi bi-person-fill"></i>
+                  </div>
+                  <div>
+                    <h5 class="text-white fw-bold m-0">{{ hologramOverviewData?.distributor_info?.mapped_oic?.name || 'oic Officer' }}</h5>
+                    <div class="text-white text-opacity-75 small">{{ hologramOverviewData?.distributor_info?.mapped_oic?.designation || 'Officer in Charge (Distributor)' }}</div>
+                  </div>
+                </div>
+
+                <div class="oic-meta-list text-white text-opacity-90 small">
+                  <div class="d-flex align-items-center gap-2 mb-1.5" *ngIf="hologramOverviewData?.distributor_info?.mapped_oic?.email && hologramOverviewData?.distributor_info?.mapped_oic?.email !== 'N/A'">
+                    <i class="bi bi-envelope-fill text-warning"></i>
+                    <span>{{ hologramOverviewData?.distributor_info?.mapped_oic?.email }}</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2 mb-1.5" *ngIf="hologramOverviewData?.distributor_info?.mapped_oic?.phone && hologramOverviewData?.distributor_info?.mapped_oic?.phone !== 'N/A'">
+                    <i class="bi bi-telephone-fill text-warning"></i>
+                    <span>{{ hologramOverviewData?.distributor_info?.mapped_oic?.phone }}</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-building-check text-warning"></i>
+                    <span>Assigned to: <strong>{{ hologramOverviewData?.distributor_info?.establishment_name || 'Distributor' }}</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-3 pt-2 border-top border-white border-opacity-15 d-flex justify-content-between align-items-center">
+                <small class="text-white-50" style="font-size: 11px;">Authority verified by Excise Dept</small>
+                <button type="button" class="btn btn-sm btn-light py-1 px-2.5 rounded-pill fw-semibold shadow-xs" (click)="loadHologramOverview(false)" title="Refresh Data">
+                  <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI Summary Cards Grid -->
+        <div class="row g-3 mb-4">
+          <!-- Total Procured -->
+          <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+            <div class="summary-card holo-stat-card border-top-primary">
+              <div class="card-icon bg-primary-gradient"><i class="bi bi-bag-check-fill text-white"></i></div>
+              <div class="card-content">
+                <h3 class="card-value text-primary">{{ (hologramOverviewData?.summary_stats?.total_procured || 0) | number }}</h3>
+                <p class="card-label">Total Procured</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Received -->
+          <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+            <div class="summary-card holo-stat-card border-top-success">
+              <div class="card-icon bg-success-gradient"><i class="bi bi-qr-code-scan text-white"></i></div>
+              <div class="card-content">
+                <h3 class="card-value text-success">{{ (hologramOverviewData?.summary_stats?.total_received || 0) | number }}</h3>
+                <p class="card-label">Received & Serialized</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Available Usable Balance -->
+          <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+            <div class="summary-card holo-stat-card border-top-emerald">
+              <div class="card-icon bg-emerald-gradient"><i class="bi bi-shield-fill-check text-white"></i></div>
+              <div class="card-content">
+                <h3 class="card-value text-emerald">{{ (hologramOverviewData?.summary_stats?.total_available || 0) | number }}</h3>
+                <p class="card-label">Available Balance</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Affixed in Warehouse -->
+          <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+            <div class="summary-card holo-stat-card border-top-indigo">
+              <div class="card-icon bg-indigo-gradient"><i class="bi bi-boxes text-white"></i></div>
+              <div class="card-content">
+                <h3 class="card-value text-indigo">{{ (hologramOverviewData?.summary_stats?.total_utilized_in_warehouse || 0) | number }}</h3>
+                <p class="card-label">Affixed in Stock</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dispatched to Retailers -->
+          <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+            <div class="summary-card holo-stat-card border-top-purple">
+              <div class="card-icon bg-purple-gradient"><i class="bi bi-truck text-white"></i></div>
+              <div class="card-content">
+                <h3 class="card-value text-purple">{{ (hologramOverviewData?.summary_stats?.total_dispatched_to_retailers || 0) | number }}</h3>
+                <p class="card-label">Dispatched to Retail</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Damaged Holograms -->
+          <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+            <div class="summary-card holo-stat-card border-top-danger">
+              <div class="card-icon bg-danger-gradient"><i class="bi bi-exclamation-triangle-fill text-white"></i></div>
+              <div class="card-content">
+                <h3 class="card-value text-danger">{{ (hologramOverviewData?.summary_stats?.total_damaged || 0) | number }}</h3>
+                <p class="card-label">Damaged / Void</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hologram Allocation Visual Progress Bar -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <h6 class="fw-bold text-dark m-0 d-flex align-items-center gap-2">
+                <i class="bi bi-pie-chart-fill text-primary"></i> Hologram Stock Allocation & Utilization
+              </h6>
+              <small class="text-muted">Proportional breakdown of total received holograms across lifecycle stages.</small>
+            </div>
+            <span class="badge bg-light text-dark border px-3 py-1.5 rounded-pill fw-semibold font-monospace">
+              Total: {{ (hologramOverviewData?.summary_stats?.total_received || 0) | number }} Holograms
+            </span>
+          </div>
+
+          <!-- Stacked Progress Bar -->
+          <div class="progress rounded-pill shadow-inner my-3" style="height: 18px; background-color: #e2e8f0;">
+            <div
+              class="progress-bar bg-success bg-gradient"
+              role="progressbar"
+              [style.width.%]="getOverviewStockPercentage(hologramOverviewData?.summary_stats?.total_available, hologramOverviewData?.summary_stats?.total_received)"
+              [title]="'Available: ' + (hologramOverviewData?.summary_stats?.total_available | number)"
+            ></div>
+            <div
+              class="progress-bar bg-primary bg-gradient"
+              role="progressbar"
+              [style.width.%]="getOverviewStockPercentage(hologramOverviewData?.summary_stats?.total_utilized_in_warehouse, hologramOverviewData?.summary_stats?.total_received)"
+              [title]="'Affixed: ' + (hologramOverviewData?.summary_stats?.total_utilized_in_warehouse | number)"
+            ></div>
+            <div
+              class="progress-bar bg-info bg-gradient"
+              role="progressbar"
+              [style.width.%]="getOverviewStockPercentage(hologramOverviewData?.summary_stats?.total_dispatched_to_retailers, hologramOverviewData?.summary_stats?.total_received)"
+              [title]="'Dispatched: ' + (hologramOverviewData?.summary_stats?.total_dispatched_to_retailers | number)"
+            ></div>
+            <div
+              class="progress-bar bg-danger bg-gradient"
+              role="progressbar"
+              [style.width.%]="getOverviewStockPercentage(hologramOverviewData?.summary_stats?.total_damaged, hologramOverviewData?.summary_stats?.total_received)"
+              [title]="'Damaged: ' + (hologramOverviewData?.summary_stats?.total_damaged | number)"
+            ></div>
+          </div>
+
+          <!-- Progress Legend -->
+          <div class="d-flex flex-wrap gap-4 pt-2 small">
+            <div class="d-flex align-items-center gap-2">
+              <span class="rounded-circle d-inline-block" style="width: 12px; height: 12px; background-color: #10b981;"></span>
+              <span class="fw-semibold text-dark">Available ({{ getOverviewStockPercentage(hologramOverviewData?.summary_stats?.total_available, hologramOverviewData?.summary_stats?.total_received) }}%)</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="rounded-circle d-inline-block" style="width: 12px; height: 12px; background-color: #3b82f6;"></span>
+              <span class="fw-semibold text-dark">Affixed in Stock ({{ getOverviewStockPercentage(hologramOverviewData?.summary_stats?.total_utilized_in_warehouse, hologramOverviewData?.summary_stats?.total_received) }}%)</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="rounded-circle d-inline-block" style="width: 12px; height: 12px; background-color: #06b6d4;"></span>
+              <span class="fw-semibold text-dark">Dispatched to Retail ({{ getOverviewStockPercentage(hologramOverviewData?.summary_stats?.total_dispatched_to_retailers, hologramOverviewData?.summary_stats?.total_received) }}%)</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="rounded-circle d-inline-block" style="width: 12px; height: 12px; background-color: #ef4444;"></span>
+              <span class="fw-semibold text-dark">Damaged / Void ({{ getOverviewStockPercentage(hologramOverviewData?.summary_stats?.total_damaged, hologramOverviewData?.summary_stats?.total_received) }}%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Serial Number Search & Range Inspector Tool -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 holo-inspector-card">
+          <div class="row align-items-center g-3">
+            <div class="col-lg-5">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-search text-primary fs-5"></i>
+                <h6 class="fw-bold text-dark m-0">Hologram Serial Range Inspector</h6>
+              </div>
+              <p class="text-muted small m-0">Enter any serial number (e.g. <code>250</code>, <code>501</code>) to trace consignment batch, status, and verification.</p>
+            </div>
+            <div class="col-lg-7">
+              <div class="input-group shadow-sm rounded-pill overflow-hidden border">
+                <span class="input-group-text bg-white border-0 ps-3 text-muted"><i class="bi bi-upc-scan"></i></span>
+                <input
+                  type="text"
+                  class="form-control border-0 py-2.5 px-2"
+                  placeholder="Enter hologram serial number to verify..."
+                  [(ngModel)]="serialLookupQuery"
+                  (keyup.enter)="lookupSerialNumber()"
+                />
+                <button class="btn btn-primary px-4 fw-bold" type="button" (click)="lookupSerialNumber()">
+                  <i class="bi bi-search me-1"></i> Verify Serial
+                </button>
+                <button class="btn btn-outline-secondary px-3" type="button" *ngIf="serialLookupQuery" (click)="clearSerialLookup()">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lookup Result Display Banner -->
+          <div class="mt-4 pt-3 border-top" *ngIf="serialLookupResult">
+            <!-- Result: Found Match -->
+            <div class="alert alert-success border-success bg-success bg-opacity-10 rounded-3 p-3 mb-0" *ngIf="!serialLookupResult.notFound">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="p-3 bg-success text-white rounded-circle fs-4 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                    <i class="bi bi-check2-circle"></i>
+                  </div>
+                  <div>
+                    <h6 class="fw-bold text-success mb-0">Hologram #{{ serialLookupResult.serialNumber }} Found in Inventory</h6>
+                    <div class="small text-dark mt-0.5">
+                      Batch Ref: <strong class="text-primary font-monospace">{{ serialLookupResult.batchRefNo }}</strong> &bull; Range: <strong>{{ serialLookupResult.rangeChunk }}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                  <span class="badge bg-success text-white px-3 py-2 rounded-pill fw-bold">
+                    <i class="bi bi-shield-check me-1"></i> {{ serialLookupResult.chunkStatus }}
+                  </span>
+                  <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">
+                    <i class="bi bi-person-check me-1"></i> Recorded by: {{ serialLookupResult.recordedBy }}
+                  </span>
+                  <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">
+                    <i class="bi bi-calendar-event me-1"></i> {{ serialLookupResult.arrivalDate | date:'dd MMM yyyy' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Result: Not Found -->
+            <div class="alert alert-warning border-warning bg-warning bg-opacity-10 rounded-3 p-3 mb-0" *ngIf="serialLookupResult.notFound">
+              <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-exclamation-triangle-fill text-warning fs-3"></i>
+                <div>
+                  <h6 class="fw-bold text-dark mb-0">Hologram Serial Not Found in Active Stock</h6>
+                  <small class="text-muted">Serial number "{{ serialLookupResult.searchedSerial }}" does not match any received hologram range for this distributor.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Registry & Consignment Ranges Table Section -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+          <!-- Toolbar & View Switcher -->
+          <div class="p-3 p-md-4 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3 bg-light bg-opacity-50">
+            <div class="d-flex align-items-center gap-2">
+              <div class="btn-group p-1 bg-white rounded-pill border shadow-xs" role="group">
+                <button
+                  type="button"
+                  class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold"
+                  [ngClass]="activeOverviewViewMode === 'batches' ? 'btn-primary text-white shadow-xs' : 'btn-light text-muted'"
+                  (click)="activeOverviewViewMode = 'batches'"
+                >
+                  <i class="bi bi-box-seam me-1"></i> Consignment Batches ({{ (hologramOverviewData?.batches || []).length }})
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold"
+                  [ngClass]="activeOverviewViewMode === 'ranges' ? 'btn-primary text-white shadow-xs' : 'btn-light text-muted'"
+                  (click)="activeOverviewViewMode = 'ranges'"
+                >
+                  <i class="bi bi-list-columns-reverse me-1"></i> Range Breakdown ({{ (hologramOverviewData?.all_ranges || []).length }})
+                </button>
+              </div>
+            </div>
+
+            <div class="d-flex flex-wrap align-items-center gap-2">
+              <div class="input-group input-group-sm rounded-pill overflow-hidden border shadow-xs" style="width: 260px;">
+                <span class="input-group-text bg-white border-0 ps-3 text-muted"><i class="bi bi-search"></i></span>
+                <input
+                  type="text"
+                  class="form-control border-0 py-1.5"
+                  placeholder="Filter by ref, serial, status..."
+                  [(ngModel)]="overviewSearchFilter"
+                />
+              </div>
+
+              <select class="form-select form-select-sm rounded-pill border shadow-xs" style="width: 140px;" [(ngModel)]="overviewStatusFilter">
+                <option value="all">All Status</option>
+                <option value="received">Received</option>
+                <option value="available">Available</option>
+                <option value="pending_serials">Pending</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- View Mode 1: Consignment Batches Table -->
+          <div class="table-responsive" *ngIf="activeOverviewViewMode === 'batches' && !isLoadingHologramOverview && filteredOverviewBatches.length > 0">
+            <table class="table table-hover align-middle mb-0 dp-table">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">Sl. No</th>
+                  <th>Procurement Reference</th>
+                  <th>Total Holograms</th>
+                  <th>Full Serial Range</th>
+                  <th>Breakdown Segments</th>
+                  <th>Damaged</th>
+                  <th>Arrival Timestamp</th>
+                  <th>Recorded By (OIC)</th>
+                  <th>Status</th>
+                  <th class="text-center pe-4">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let batch of filteredOverviewBatches; let i = index">
+                  <td class="ps-4 fw-semibold text-muted">{{ i + 1 }}</td>
+                  <td>
+                    <div class="fw-bold text-primary font-monospace">{{ batch.imfl_hologram_ref_no }}</div>
+                    <small class="text-muted">{{ batch.distributor_name || batch.establishment_name }}</small>
+                  </td>
+                  <td>
+                    <span class="badge bg-primary bg-opacity-10 text-primary fw-bolder px-2.5 py-1.5 fs-6 font-monospace">
+                      {{ batch.total_holograms | number }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="fw-bold text-dark font-monospace" *ngIf="batch.hologram_from_range && batch.hologram_to_range">
+                      {{ batch.hologram_from_range }} &nbsp;&rarr;&nbsp; {{ batch.hologram_to_range }}
+                    </div>
+                    <span class="badge bg-warning text-dark" *ngIf="!batch.hologram_from_range">Pending Serials</span>
+                  </td>
+                  <td>
+                    <div class="d-flex flex-wrap gap-1" style="max-width: 240px;">
+                      <span
+                        *ngFor="let seg of (batch.hologram_ranges || [])"
+                        class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1 font-monospace"
+                        style="font-size: 11px;"
+                      >
+                        {{ seg.from }}-{{ seg.to }} ({{ seg.count || seg.status || 'AVAIL' }})
+                      </span>
+                      <span *ngIf="!batch.hologram_ranges || batch.hologram_ranges.length === 0" class="text-muted small">-</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="batch.damaged_total > 0 ? 'bg-danger text-white' : 'bg-light text-muted border'">
+                      {{ batch.damaged_total || 0 }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="small fw-semibold text-dark">{{ batch.arrival_date | date:'dd MMM yyyy' }}</div>
+                    <div class="small text-muted" style="font-size: 11px;">{{ batch.arrival_date | date:'hh:mm a' }}</div>
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center gap-1.5">
+                      <i class="bi bi-person-badge text-primary"></i>
+                      <span class="small fw-semibold text-dark">{{ batch.recorded_by_name || 'OIC Officer' }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span
+                      class="badge px-2.5 py-1 rounded-pill fw-semibold"
+                      [ngClass]="batch.status === 'RECEIVED' || (batch.hologram_from_range && batch.hologram_to_range) ? 'bg-success text-white' : 'bg-warning text-dark'"
+                    >
+                      <i class="bi me-1" [ngClass]="batch.status === 'RECEIVED' || (batch.hologram_from_range && batch.hologram_to_range) ? 'bi-check-circle-fill' : 'bi-clock'"></i>
+                      {{ batch.status === 'RECEIVED' || (batch.hologram_from_range && batch.hologram_to_range) ? 'RECEIVED' : 'PENDING_SERIALS' }}
+                    </span>
+                  </td>
+                  <td class="text-center pe-4">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary fw-semibold px-2.5 py-1 rounded-pill shadow-xs"
+                      (click)="openOverviewBatchModal(batch)"
+                      title="View Detailed Range Breakdown"
+                    >
+                      <i class="bi bi-eye-fill me-1"></i> Details
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- View Mode 2: Range Segments Table -->
+          <div class="table-responsive" *ngIf="activeOverviewViewMode === 'ranges' && !isLoadingHologramOverview && filteredOverviewRanges.length > 0">
+            <table class="table table-hover align-middle mb-0 dp-table">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">Sl. No</th>
+                  <th>Segment Serial Range</th>
+                  <th>Hologram Quantity</th>
+                  <th>Batch Ref No</th>
+                  <th>Recorded By (OIC)</th>
+                  <th>Arrival Timestamp</th>
+                  <th class="pe-4">Availability Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let seg of filteredOverviewRanges; let i = index">
+                  <td class="ps-4 fw-semibold text-muted">{{ i + 1 }}</td>
+                  <td>
+                    <div class="fw-bold text-dark font-monospace fs-6">
+                      {{ seg.from }} &nbsp;&rarr;&nbsp; {{ seg.to }}
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge bg-primary bg-opacity-10 text-primary fw-bolder px-2.5 py-1 fs-6 font-monospace">
+                      {{ seg.count | number }} pcs
+                    </span>
+                  </td>
+                  <td>
+                    <span class="font-monospace text-primary fw-semibold">{{ seg.ref_no }}</span>
+                  </td>
+                  <td>
+                    <span class="small fw-semibold text-dark">{{ seg.recorded_by_name || 'OIC Officer' }}</span>
+                  </td>
+                  <td>
+                    <span class="small text-muted">{{ seg.arrival_date | date:'dd MMM yyyy, hh:mm a' }}</span>
+                  </td>
+                  <td class="pe-4">
+                    <span
+                      class="badge px-3 py-1.5 rounded-pill fw-bold"
+                      [ngClass]="seg.status === 'AVAILABLE' ? 'bg-success text-white' : seg.status === 'UTILIZED' ? 'bg-primary text-white' : seg.status === 'DAMAGED' ? 'bg-danger text-white' : 'bg-info text-white'"
+                    >
+                      <i class="bi me-1" [ngClass]="seg.status === 'AVAILABLE' ? 'bi-check-circle-fill' : 'bi-shield'"></i>
+                      {{ seg.status || 'AVAILABLE' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State -->
+          <div class="p-5 text-center text-muted" *ngIf="!isLoadingHologramOverview && filteredOverviewBatches.length === 0">
+            <i class="bi bi-qr-code fs-1 d-block mb-2 text-secondary"></i>
+            <h6 class="fw-bold text-dark">No Hologram Overview Records Found</h6>
+            <p class="small text-muted">No hologram arrivals or procurements match the filter criteria.</p>
+          </div>
+
+          <!-- Loading State -->
+          <div class="p-5 text-center text-muted" *ngIf="isLoadingHologramOverview">
+            <mat-progress-spinner mode="indeterminate" diameter="34" class="mx-auto mb-2"></mat-progress-spinner>
+            <span>Loading hologram stock overview...</span>
+          </div>
+        </div>
+      </div>
+
     </section>
 
     <section class="dp-form-view" *ngIf="isFormView">
@@ -5667,5 +6159,107 @@
     </div>
   </div>
 </div>
+
+<!-- ========================================== -->
+<!-- --- Hologram Overview Batch Details Modal - -->
+<!-- ========================================== -->
+<div class="dp-modal-backdrop" *ngIf="showOverviewBatchModal && selectedOverviewBatch">
+  <div class="dp-modal" style="max-width: 680px;">
+    <div class="dp-modal-header d-flex justify-content-between align-items-center p-3 bg-white border-bottom">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-qr-code-2 text-primary fs-5"></i>
+        <h5 class="m-0 fw-bold text-dark">IMFL Hologram Consignment Breakdown</h5>
+      </div>
+      <button type="button" class="btn-close" (click)="closeOverviewBatchModal()"></button>
+    </div>
+
+    <div class="dp-modal-body p-4 bg-light">
+      <!-- Batch Summary Banner -->
+      <div class="card p-3 mb-3 bg-white border-0 shadow-sm rounded-3">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <span class="badge bg-primary bg-opacity-10 text-primary font-monospace fw-bold px-2.5 py-1 mb-1">
+              Ref: {{ selectedOverviewBatch.imfl_hologram_ref_no }}
+            </span>
+            <h6 class="m-0 fw-bold text-dark">{{ selectedOverviewBatch.establishment_name || selectedOverviewBatch.distributor_name }}</h6>
+            <small class="text-muted" *ngIf="selectedOverviewBatch.license_number">License: {{ selectedOverviewBatch.license_number }}</small>
+          </div>
+          <span class="badge bg-success text-white px-3 py-1.5 rounded-pill fw-semibold">
+            {{ selectedOverviewBatch.status || 'RECEIVED' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Hologram Serial Range Segment Breakdown -->
+      <div class="card p-3 mb-3 bg-white border-0 shadow-sm rounded-3">
+        <h6 class="fw-bold text-dark mb-3 border-bottom pb-2 d-flex justify-content-between align-items-center" style="font-size: 13.5px;">
+          <span><i class="bi bi-layers-fill me-1 text-primary"></i> Serial Range Segments</span>
+          <span class="badge bg-light text-dark border font-monospace">Total: {{ selectedOverviewBatch.total_holograms | number }} pcs</span>
+        </h6>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered align-middle mb-0">
+            <thead class="table-light small">
+              <tr>
+                <th>Segment #</th>
+                <th>From Serial</th>
+                <th>To Serial</th>
+                <th>Quantity</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let chunk of (selectedOverviewBatch.hologram_ranges || []); let idx = index">
+                <td class="fw-semibold text-muted small">{{ idx + 1 }}</td>
+                <td class="font-monospace fw-bold text-dark">{{ chunk.from }}</td>
+                <td class="font-monospace fw-bold text-dark">{{ chunk.to }}</td>
+                <td class="font-monospace fw-bold text-primary">{{ chunk.count || (selectedOverviewBatch.total_holograms) | number }}</td>
+                <td>
+                  <span class="badge bg-success text-white px-2 py-0.5 rounded-pill" style="font-size: 11px;">
+                    {{ chunk.status || 'AVAILABLE' }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="!selectedOverviewBatch.hologram_ranges || selectedOverviewBatch.hologram_ranges.length === 0">
+                <td colspan="5" class="text-center text-muted small py-2">
+                  Full Range: {{ selectedOverviewBatch.hologram_from_range }} &rarr; {{ selectedOverviewBatch.hologram_to_range }} ({{ selectedOverviewBatch.total_holograms }} pcs)
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Verification and OIC Metadata -->
+      <div class="card p-3 bg-white border-0 shadow-sm rounded-3">
+        <div class="row g-2 small text-muted">
+          <div class="col-sm-6">
+            <span>Recorded & Verified By (OIC):</span>
+            <strong class="text-dark d-block">{{ selectedOverviewBatch.recorded_by_name || 'OIC Officer' }}</strong>
+          </div>
+          <div class="col-sm-6">
+            <span>Arrival Timestamp:</span>
+            <strong class="text-dark d-block">{{ selectedOverviewBatch.arrival_date | date:'dd MMM yyyy, hh:mm a' }}</strong>
+          </div>
+          <div class="col-sm-6 mt-2" *ngIf="selectedOverviewBatch.damaged_total">
+            <span>Damaged Holograms:</span>
+            <strong class="text-danger d-block">{{ selectedOverviewBatch.damaged_total }} pcs</strong>
+          </div>
+          <div class="col-sm-6 mt-2" *ngIf="selectedOverviewBatch.remarks">
+            <span>Remarks / Notes:</span>
+            <p class="m-0 text-dark">{{ selectedOverviewBatch.remarks }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dp-modal-footer p-3 bg-white border-top d-flex justify-content-end">
+      <button type="button" class="btn btn-secondary btn-sm px-4" (click)="closeOverviewBatchModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
 
 

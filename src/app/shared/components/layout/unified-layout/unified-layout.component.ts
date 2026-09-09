@@ -140,6 +140,7 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
     { section: 'imfl-requisition-cases', label: 'IMFL Requisition Cases', icon: 'assignment_turned_in', showOnlyForOic: true },
     { section: 'distributor-permit-brand-arrival', label: 'Update Brands Arrival', icon: 'local_shipping', showOnlyForOic: true },
     { section: 'distributor-permit-hologram-arrival', label: 'IMFL Holograms Arrival', icon: 'qr_code_scanner', showOnlyForOic: true },
+    { section: 'distributor-permit-hologram-overview', label: 'IMFL Hologram Overview', icon: 'analytics', showOnlyForOic: true },
     { section: 'brand-warehouse-stock', label: 'Brand Warehouse Stock', icon: 'inventory_2', showOnlyForOic: true },
     { section: 'stock-inventory', label: 'Stock Inventory', icon: 'inventory' },
     { section: 'single-window', label: 'User Details', icon: 'manage_search', hideForSiteAdmin: true, hideForOic: true },
@@ -444,7 +445,7 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
   isImflTabActive(tab: string): boolean {
     const url = this.router.url || '';
     if (tab === 'requisition') {
-      return !url.includes('tab=revalidation') && !url.includes('tab=cancellation') && !url.includes('tab=brand-warehouse') && !url.includes('tab=hologram-procurement');
+      return !url.includes('tab=revalidation') && !url.includes('tab=cancellation') && !url.includes('tab=brand-warehouse') && !url.includes('tab=hologram-procurement') && !url.includes('tab=hologram-arrival') && !url.includes('tab=hologram-overview');
     }
     return url.includes(`tab=${tab}`);
   }
@@ -557,7 +558,10 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
         'update-brands-arrival',
         'distributor-permit-hologram-arrival',
         'imfl-hologram-arrival',
-        'hologram-arrival'
+        'hologram-arrival',
+        'distributor-permit-hologram-overview',
+        'imfl-hologram-overview',
+        'hologram-overview'
       ];
       for (const item of this.officerSectionItems) {
         if (!this.shouldShowOfficerSectionItem(item)) continue;
@@ -635,6 +639,7 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
         item.section === 'imfl-requisition-cases' ||
         item.section === 'distributor-permit-brand-arrival' ||
         item.section === 'distributor-permit-hologram-arrival' ||
+        item.section === 'distributor-permit-hologram-overview' ||
         item.section === 'brand-warehouse-stock' ||
         item.section === 'officer-activity'
       ) {
@@ -649,6 +654,7 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
         item.section === 'imfl-requisition-cases' ||
         item.section === 'distributor-permit-brand-arrival' ||
         item.section === 'distributor-permit-hologram-arrival' ||
+        item.section === 'distributor-permit-hologram-overview' ||
         item.section === 'brand-warehouse-stock'
       ) {
         return false;
@@ -854,6 +860,10 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
     } else if (section === 'distributor-permit-hologram-arrival' || section === 'imfl-hologram-arrival' || section === 'hologram-arrival') {
       this.router.navigate(['/dashboard'], {
         queryParams: { section: 'distributor-permit', tab: 'hologram-arrival' }
+      });
+    } else if (section === 'distributor-permit-hologram-overview' || section === 'imfl-hologram-overview' || section === 'hologram-overview') {
+      this.router.navigate(['/dashboard'], {
+        queryParams: { section: 'distributor-permit', tab: 'hologram-overview' }
       });
     } else if (section === 'brand-warehouse-stock' || section === 'distributor-permit-brand-warehouse' || section === 'brand-warehouse') {
       this.router.navigate(['/dashboard'], {

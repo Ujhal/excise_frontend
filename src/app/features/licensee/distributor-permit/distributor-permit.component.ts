@@ -140,7 +140,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       .subscribe((params) => {
         this.isFormView = String(params?.['mode'] || '').toLowerCase() === 'apply';
         const tabParam = String(params?.['tab'] || '').toLowerCase() as ImflTabType;
-        if (['requisition', 'brand-arrival', 'revalidation', 'cancellation', 'brand-warehouse', 'hologram-procurement', 'hologram-arrival'].includes(tabParam)) {
+        if (['requisition', 'brand-arrival', 'revalidation', 'cancellation', 'brand-warehouse', 'hologram-procurement', 'hologram-arrival', 'hologram-overview'].includes(tabParam)) {
           this.activeTab = tabParam;
           if (tabParam === 'brand-warehouse') {
             this.loadBrandWarehouseStock();
@@ -148,11 +148,16 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
             this.loadHologramProcurements();
           } else if (tabParam === 'hologram-arrival') {
             this.loadHologramArrivals();
+          } else if (tabParam === 'hologram-overview') {
+            this.loadHologramOverview();
           }
         } else {
           // Also resolve from the 'section' param (e.g. distributor-permit-cancellation, distributor-permit-brand-arrival)
           const sectionParam = String(params?.['section'] || '').toLowerCase();
-          if (sectionParam.includes('hologram-arrival') || sectionParam.includes('hologram_arrival')) {
+          if (sectionParam.includes('hologram-overview') || sectionParam.includes('hologram_overview')) {
+            this.activeTab = 'hologram-overview';
+            this.loadHologramOverview();
+          } else if (sectionParam.includes('hologram-arrival') || sectionParam.includes('hologram_arrival')) {
             this.activeTab = 'hologram-arrival';
             this.loadHologramArrivals();
           } else if (this.isItCellUser || sectionParam.includes('hologram')) {
@@ -191,6 +196,8 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
           this.loadHologramProcurements(true);
         } else if (this.activeTab === 'hologram-arrival') {
           this.loadHologramArrivals(true);
+        } else if (this.activeTab === 'hologram-overview') {
+          this.loadHologramOverview(true);
         }
       });
 
@@ -217,6 +224,8 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       this.loadHologramProcurements();
     } else if (tab === 'hologram-arrival') {
       this.loadHologramArrivals();
+    } else if (tab === 'hologram-overview') {
+      this.loadHologramOverview();
     } else if (tab === 'brand-warehouse') {
       this.loadBrandWarehouseStock();
     }
@@ -6026,6 +6035,9 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   }
 
   getHeaderTitle(): string {
+    if (this.activeTab === 'hologram-overview') {
+      return 'IMFL / Hologram Overview';
+    }
     if (this.activeTab === 'hologram-arrival') {
       return 'IMFL Holograms Arrival Register';
     }
@@ -7399,6 +7411,155 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   closeHologramArrivalDetailsModal(): void {
     this.showHologramArrivalDetailsModal = false;
     this.selectedHologramArrivalItem = null;
+    this.cdr.markForCheck();
+  }
+
+  // ==========================================
+  // --- IMFL HOLOGRAM OVERVIEW FEATURE ---
+  // ==========================================
+  hologramOverviewData: any = null;
+  isLoadingHologramOverview = false;
+  overviewSearchFilter = '';
+  overviewStatusFilter = 'all';
+  serialLookupQuery = '';
+  serialLookupResult: any = null;
+  isSearchingSerial = false;
+  selectedOverviewBatch: any = null;
+  showOverviewBatchModal = false;
+  activeOverviewViewMode: 'batches' | 'ranges' = 'batches';
+
+  loadHologramOverview(silent = false): void {
+    if (!silent) this.isLoadingHologramOverview = true;
+    this.imflHoloService.getHologramOverview().subscribe({
+      next: (data) => {
+        this.hologramOverviewData = data || null;
+        this.isLoadingHologramOverview = false;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Error loading hologram overview:', err);
+        this.isLoadingHologramOverview = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  get filteredOverviewBatches(): any[] {
+    const batches: any[] = this.hologramOverviewData?.batches || [];
+    const q = this.overviewSearchFilter.trim().toLowerCase();
+    const st = this.overviewStatusFilter.trim().toLowerCase();
+
+    return batches.filter((b) => {
+      const ref = String(b.imfl_hologram_ref_no || '').toLowerCase();
+      const dist = String(b.distributor_name || '').toLowerCase();
+      const lic = String(b.license_number || '').toLowerCase();
+      const fromR = String(b.hologram_from_range || '').toLowerCase();
+      const toR = String(b.hologram_to_range || '').toLowerCase();
+      const officer = String(b.recorded_by_name || '').toLowerCase();
+      const status = String(b.status || 'RECEIVED').toLowerCase();
+
+      let matchesStatus = true;
+      if (st !== 'all') {
+        matchesStatus = status === st;
+      }
+
+      const matchesSearch = !q || ref.includes(q) || dist.includes(q) || lic.includes(q) || fromR.includes(q) || toR.includes(q) || officer.includes(q);
+      return matchesStatus && matchesSearch;
+    });
+  }
+
+  get filteredOverviewRanges(): any[] {
+    const ranges: any[] = this.hologramOverviewData?.all_ranges || [];
+    const q = this.overviewSearchFilter.trim().toLowerCase();
+    const st = this.overviewStatusFilter.trim().toLowerCase();
+
+    return ranges.filter((r) => {
+      const ref = String(r.ref_no || '').toLowerCase();
+      const fromR = String(r.from || '').toLowerCase();
+      const toR = String(r.to || '').toLowerCase();
+      const officer = String(r.recorded_by_name || '').toLowerCase();
+      const status = String(r.status || 'AVAILABLE').toLowerCase();
+
+      let matchesStatus = true;
+      if (st !== 'all') {
+        matchesStatus = status === st;
+      }
+
+      const matchesSearch = !q || ref.includes(q) || fromR.includes(q) || toR.includes(q) || officer.includes(q);
+      return matchesStatus && matchesSearch;
+    });
+  }
+
+  getOverviewStockPercentage(part: number, total: number): number {
+    if (!total || total <= 0) return 0;
+    const pct = Math.round(((part || 0) / total) * 100);
+    return Math.min(100, Math.max(0, pct));
+  }
+
+  lookupSerialNumber(): void {
+    const query = this.serialLookupQuery.trim();
+    if (!query) {
+      this.serialLookupResult = null;
+      return;
+    }
+
+    this.isSearchingSerial = true;
+    const num = parseInt(query.replace(/\D/g, ''), 10);
+    const batches = this.hologramOverviewData?.batches || [];
+    let foundMatch: any = null;
+
+    if (!isNaN(num)) {
+      for (const b of batches) {
+        const ranges = b.hologram_ranges || [];
+        for (const r of ranges) {
+          const fromNum = parseInt(String(r.from || '').replace(/\D/g, ''), 10);
+          const toNum = parseInt(String(r.to || '').replace(/\D/g, ''), 10);
+          if (!isNaN(fromNum) && !isNaN(toNum) && num >= Math.min(fromNum, toNum) && num <= Math.max(fromNum, toNum)) {
+            foundMatch = {
+              searchedSerial: query,
+              serialNumber: num,
+              batchRefNo: b.imfl_hologram_ref_no,
+              distributorName: b.distributor_name,
+              licenseNumber: b.license_number,
+              establishmentName: b.establishment_name,
+              rangeChunk: `${r.from} → ${r.to}`,
+              chunkCount: r.count || (Math.max(fromNum, toNum) - Math.min(fromNum, toNum) + 1),
+              chunkStatus: r.status || 'AVAILABLE',
+              overallStatus: b.status || 'RECEIVED',
+              recordedBy: b.recorded_by_name || 'OIC Officer',
+              arrivalDate: b.arrival_date,
+              batchId: b.id
+            };
+            break;
+          }
+        }
+        if (foundMatch) break;
+      }
+    }
+
+    this.serialLookupResult = foundMatch || {
+      searchedSerial: query,
+      notFound: true
+    };
+    this.isSearchingSerial = false;
+    this.cdr.markForCheck();
+  }
+
+  clearSerialLookup(): void {
+    this.serialLookupQuery = '';
+    this.serialLookupResult = null;
+    this.cdr.markForCheck();
+  }
+
+  openOverviewBatchModal(batch: any): void {
+    this.selectedOverviewBatch = batch;
+    this.showOverviewBatchModal = true;
+    this.cdr.markForCheck();
+  }
+
+  closeOverviewBatchModal(): void {
+    this.showOverviewBatchModal = false;
+    this.selectedOverviewBatch = null;
     this.cdr.markForCheck();
   }
 }
