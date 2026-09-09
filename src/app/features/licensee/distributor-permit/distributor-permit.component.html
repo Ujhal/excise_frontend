@@ -211,7 +211,7 @@
         </div>
 
         <!-- Statistics Row for Application Requests (Requisition, Revalidation, Cancellation, Brand Arrival) -->
-        <div class="row g-3 mb-4 stats-row" *ngIf="activeTab !== 'brand-warehouse' && activeTab !== 'hologram-procurement' && activeTab !== 'hologram-arrival'">
+        <div class="row g-3 mb-4 stats-row" *ngIf="activeTab !== 'brand-warehouse' && activeTab !== 'hologram-procurement' && activeTab !== 'hologram-arrival' && activeTab !== 'hologram-overview'">
           <div class="col-xl col-lg-6 col-md-6">
             <div
               class="summary-card total-application-requests summary-card-clickable"
@@ -378,7 +378,7 @@
       </div>
 
       <!-- Application Filters (Only for Requisition / Revalidation / Cancellation / Brand Arrival tabs) -->
-      <div class="compact-filter-section mb-3" *ngIf="activeTab !== 'brand-warehouse' && activeTab !== 'hologram-procurement' && activeTab !== 'hologram-arrival'">
+      <div class="compact-filter-section mb-3" *ngIf="activeTab !== 'brand-warehouse' && activeTab !== 'hologram-procurement' && activeTab !== 'hologram-arrival' && activeTab !== 'hologram-overview'">
         <div class="filter-row">
           <span class="filter-label-text">
             <i class="bi bi-funnel me-1"></i>

@@ -6022,6 +6022,8 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
             this.processLoadedApplications(requisitions, revalidations, cancellations);
             if (this.activeTab === 'brand-warehouse') {
               this.loadBrandWarehouseStock();
+            } else if (this.activeTab === 'hologram-overview') {
+              this.loadHologramOverview();
             }
           } catch (err) {
             console.error('Error processing permit initial data:', err);
@@ -7431,8 +7433,182 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   loadHologramOverview(silent = false): void {
     if (!silent) this.isLoadingHologramOverview = true;
     this.imflHoloService.getHologramOverview().subscribe({
-      next: (data) => {
-        this.hologramOverviewData = data || null;
+      next: (res: any) => {
+        if (res) {
+          const distInfo = res.distributorInfo || res.distributor_info || {};
+          const mappedOic = distInfo.mappedOic || distInfo.mapped_oic || {};
+          const stats = res.summaryStats || res.summary_stats || {};
+
+          const rawBatches = res.batches || [];
+          const batches = rawBatches.map((b: any) => {
+            let ranges = b.hologramRanges ?? b.hologram_ranges;
+            if (typeof ranges === 'string') {
+              try { ranges = JSON.parse(ranges); } catch { ranges = []; }
+            }
+            const fromR = b.hologramFromRange ?? b.hologram_from_range ?? '';
+            const toR = b.hologramToRange ?? b.hologram_to_range ?? '';
+            const totalHolo = b.totalHolograms ?? b.total_holograms ?? 0;
+            const refNo = b.imflHologramRefNo || b.imfl_hologram_ref_no || b.refNo || b.ref_no || b.procurementRefNo || b.procurement_ref_no || 'N/A';
+            const recordedBy = b.recordedByName || b.recorded_by_name || 'OIC Officer';
+            const arrDate = b.arrivalDate || b.arrival_date || b.createdAt || b.created_at;
+            const damaged = b.damagedTotal ?? b.damaged_total ?? 0;
+            const st = b.status || (fromR && toR ? 'RECEIVED' : 'PENDING_SERIALS');
+
+            if (!Array.isArray(ranges) || ranges.length === 0) {
+              if (fromR && toR) {
+                ranges = [{
+                  from: fromR,
+                  to: toR,
+                  count: totalHolo,
+                  status: 'AVAILABLE'
+                }];
+              } else {
+                ranges = [];
+              }
+            } else {
+              ranges = ranges.map((r: any) => ({
+                from: r.from ?? r.fromRange ?? r.from_range ?? '',
+                to: r.to ?? r.toRange ?? r.to_range ?? '',
+                count: Number(r.count ?? r.quantity ?? (parseInt(String(r.to || '0'), 10) - parseInt(String(r.from || '0'), 10) + 1)) || 0,
+                status: r.status || 'AVAILABLE'
+              }));
+            }
+
+            const distName = b.distributorName || b.distributor_name || distInfo.distributorName || distInfo.distributor_name || '';
+            const estName = b.establishmentName || b.establishment_name || distInfo.establishmentName || distInfo.establishment_name || '';
+            const licNo = b.licenseNumber || b.license_number || distInfo.licenseNumber || distInfo.license_number || '';
+
+            return {
+              ...b,
+              id: b.id,
+              ref_no: refNo,
+              refNo: refNo,
+              imfl_hologram_ref_no: refNo,
+              imflHologramRefNo: refNo,
+              total_holograms: totalHolo,
+              totalHolograms: totalHolo,
+              hologram_from_range: fromR,
+              hologramFromRange: fromR,
+              hologram_to_range: toR,
+              hologramToRange: toR,
+              hologram_ranges: ranges,
+              hologramRanges: ranges,
+              damaged_total: damaged,
+              damagedTotal: damaged,
+              recorded_by_name: recordedBy,
+              recordedByName: recordedBy,
+              arrival_date: arrDate,
+              arrivalDate: arrDate,
+              status: st,
+              distributor_name: distName,
+              distributorName: distName,
+              establishment_name: estName,
+              establishmentName: estName,
+              license_number: licNo,
+              licenseNumber: licNo
+            };
+          });
+
+          let rawRanges = res.allRanges || res.all_ranges || [];
+          let allRanges: any[] = [];
+          if (Array.isArray(rawRanges) && rawRanges.length > 0) {
+            allRanges = rawRanges.map((r: any) => ({
+              ref_no: r.refNo || r.ref_no || 'N/A',
+              refNo: r.refNo || r.ref_no || 'N/A',
+              from: r.from ?? r.fromRange ?? r.from_range ?? '',
+              to: r.to ?? r.toRange ?? r.to_range ?? '',
+              count: r.count ?? r.quantity ?? 0,
+              status: r.status || 'AVAILABLE',
+              arrival_date: r.arrivalDate || r.arrival_date,
+              arrivalDate: r.arrivalDate || r.arrival_date,
+              recorded_by_name: r.recordedByName || r.recorded_by_name || 'OIC Officer',
+              recordedByName: r.recordedByName || r.recorded_by_name || 'OIC Officer'
+            }));
+          } else {
+            for (const b of batches) {
+              for (const r of (b.hologram_ranges || [])) {
+                allRanges.push({
+                  ref_no: b.imfl_hologram_ref_no,
+                  refNo: b.imfl_hologram_ref_no,
+                  from: r.from,
+                  to: r.to,
+                  count: r.count || 0,
+                  status: r.status || 'AVAILABLE',
+                  arrival_date: b.arrival_date,
+                  arrivalDate: b.arrival_date,
+                  recorded_by_name: b.recorded_by_name || 'OIC Officer',
+                  recordedByName: b.recorded_by_name || 'OIC Officer'
+                });
+              }
+            }
+          }
+
+          const totProcured = stats.totalProcured ?? stats.total_procured ?? (batches.length > 0 ? 1000 : 0);
+          const totReceived = stats.totalReceived ?? stats.total_received ?? 0;
+          const totAvail = stats.totalAvailable ?? stats.total_available ?? (totReceived > 0 ? totReceived : totProcured);
+          const totUtil = stats.totalUtilizedInWarehouse ?? stats.total_utilized_in_warehouse ?? 0;
+          const totDisp = stats.totalDispatchedToRetailers ?? stats.total_dispatched_to_retailers ?? 0;
+          const totDam = stats.totalDamaged ?? stats.total_damaged ?? 0;
+
+          const normalizedStats = {
+            total_procured: totProcured,
+            totalProcured: totProcured,
+            total_received: totReceived,
+            totalReceived: totReceived,
+            total_available: totAvail,
+            totalAvailable: totAvail,
+            total_utilized_in_warehouse: totUtil,
+            totalUtilizedInWarehouse: totUtil,
+            total_dispatched_to_retailers: totDisp,
+            totalDispatchedToRetailers: totDisp,
+            total_damaged: totDam,
+            totalDamaged: totDam,
+            total_batches_count: batches.length,
+            totalBatchesCount: batches.length,
+            active_ranges_count: allRanges.length,
+            activeRangesCount: allRanges.length
+          };
+
+          const licNumber = distInfo.licenseNumber || distInfo.license_number || 'IMFL-DIST-SKM-2026-01';
+          const distName = distInfo.distributorName || distInfo.distributor_name || 'Distributor Licensee';
+          const estName = distInfo.establishmentName || distInfo.establishment_name || distName || 'Distributor Establishment';
+
+          const normalizedMappedOic = {
+            name: mappedOic.name || 'OIC Officer',
+            username: mappedOic.username || 'oic_officer',
+            designation: mappedOic.designation || 'Officer in Charge (Distributor)',
+            email: mappedOic.email && mappedOic.email !== 'N/A' ? mappedOic.email : '',
+            phone: mappedOic.phone && mappedOic.phone !== 'N/A' ? mappedOic.phone : '',
+            assignment_type: mappedOic.assignmentType || mappedOic.assignment_type || 'distributor',
+            assignmentType: mappedOic.assignmentType || mappedOic.assignment_type || 'distributor',
+            establishment_name: mappedOic.establishmentName || mappedOic.establishment_name || estName,
+            establishmentName: mappedOic.establishmentName || mappedOic.establishment_name || estName
+          };
+
+          const normalizedDistInfo = {
+            license_number: licNumber,
+            licenseNumber: licNumber,
+            distributor_name: distName,
+            distributorName: distName,
+            establishment_name: estName,
+            establishmentName: estName,
+            state: distInfo.state || 'Sikkim',
+            mapped_oic: normalizedMappedOic,
+            mappedOic: normalizedMappedOic
+          };
+
+          this.hologramOverviewData = {
+            distributor_info: normalizedDistInfo,
+            distributorInfo: normalizedDistInfo,
+            summary_stats: normalizedStats,
+            summaryStats: normalizedStats,
+            batches: batches,
+            all_ranges: allRanges,
+            allRanges: allRanges
+          };
+        } else {
+          this.hologramOverviewData = null;
+        }
         this.isLoadingHologramOverview = false;
         this.cdr.markForCheck();
       },
@@ -7450,12 +7626,12 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     const st = this.overviewStatusFilter.trim().toLowerCase();
 
     return batches.filter((b) => {
-      const ref = String(b.imfl_hologram_ref_no || '').toLowerCase();
-      const dist = String(b.distributor_name || '').toLowerCase();
-      const lic = String(b.license_number || '').toLowerCase();
-      const fromR = String(b.hologram_from_range || '').toLowerCase();
-      const toR = String(b.hologram_to_range || '').toLowerCase();
-      const officer = String(b.recorded_by_name || '').toLowerCase();
+      const ref = String(b.imfl_hologram_ref_no || b.imflHologramRefNo || '').toLowerCase();
+      const dist = String(b.distributor_name || b.distributorName || '').toLowerCase();
+      const lic = String(b.license_number || b.licenseNumber || '').toLowerCase();
+      const fromR = String(b.hologram_from_range || b.hologramFromRange || '').toLowerCase();
+      const toR = String(b.hologram_to_range || b.hologramToRange || '').toLowerCase();
+      const officer = String(b.recorded_by_name || b.recordedByName || '').toLowerCase();
       const status = String(b.status || 'RECEIVED').toLowerCase();
 
       let matchesStatus = true;
@@ -7469,15 +7645,15 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   }
 
   get filteredOverviewRanges(): any[] {
-    const ranges: any[] = this.hologramOverviewData?.all_ranges || [];
+    const ranges: any[] = this.hologramOverviewData?.all_ranges || this.hologramOverviewData?.allRanges || [];
     const q = this.overviewSearchFilter.trim().toLowerCase();
     const st = this.overviewStatusFilter.trim().toLowerCase();
 
     return ranges.filter((r) => {
-      const ref = String(r.ref_no || '').toLowerCase();
+      const ref = String(r.ref_no || r.refNo || '').toLowerCase();
       const fromR = String(r.from || '').toLowerCase();
       const toR = String(r.to || '').toLowerCase();
-      const officer = String(r.recorded_by_name || '').toLowerCase();
+      const officer = String(r.recorded_by_name || r.recordedByName || '').toLowerCase();
       const status = String(r.status || 'AVAILABLE').toLowerCase();
 
       let matchesStatus = true;
