@@ -7803,6 +7803,23 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
         });
       }
 
+      // Requisition / Permit Allocated Ranges
+      for (const u of (b.used_hologram_ranges || b.usedHologramRanges || [])) {
+        const reqRef = u.requisition_ref_no || u.requisitionRefNo || u.permit_application_ref || u.permitApplicationRef || 'IMFL Requisition';
+        usageItems.push({
+          activity_type: 'ALLOCATED_TO_PERMIT',
+          activity_label: 'Allocated to IMFL Permit Requisition',
+          ref_no: b.imfl_hologram_ref_no || b.imflHologramRefNo,
+          serial_range: `${u.from} → ${u.to}`,
+          quantity: Number(u.count || 0),
+          establishment_name: b.establishment_name || b.establishmentName || b.distributor_name,
+          recorded_by_name: u.applicant_name || u.applicantName || b.recorded_by_name || b.recordedByName || 'Distributor Licensee',
+          activity_date: u.assigned_at || u.assignedAt || b.arrival_date || b.arrivalDate,
+          status: 'ALLOCATED',
+          notes: `Assigned for Requisition / Permit: ${reqRef}`
+        });
+      }
+
       // Utilized / Affixed / Dispatched ranges
       for (const r of (b.hologram_ranges || b.hologramRanges || [])) {
         const st = String(r.status || 'AVAILABLE').toUpperCase();
