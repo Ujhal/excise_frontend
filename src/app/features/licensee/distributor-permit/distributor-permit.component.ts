@@ -2059,6 +2059,39 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     return total <= 0 || total > avail.units || this.isDispatchedCasesExceeded() || this.isDispatchedLooseExceeded();
   }
 
+  getDispatchedCasesShortfall(): { shortfallBottles: number; neededBottles: number; availableBottles: number; message: string } {
+    const avail = this.getAvailableStockForDispatch(this.dispatchForm.brandName, this.dispatchForm.packSize);
+    const pieces = Number(this.dispatchForm.piecesPerCase || 12);
+    const cases = Number(this.dispatchForm.dispatchedCases || 0);
+    const neededBottles = cases * pieces;
+    const availableBottles = avail.units;
+    const shortfallBottles = Math.max(0, neededBottles - availableBottles);
+    const message = shortfallBottles > 0
+      ? `Exceeds stock: Need ${shortfallBottles} more bottle${shortfallBottles > 1 ? 's' : ''} to complete ${cases} case${cases > 1 ? 's' : ''} (Warehouse has ${availableBottles}/${neededBottles} btls)`
+      : '';
+    return { shortfallBottles, neededBottles, availableBottles, message };
+  }
+
+  getDispatchedLooseShortfall(): { shortfallBottles: number; message: string } {
+    const loose = Number(this.dispatchForm.dispatchedLooseBottles || 0);
+    const maxLoose = this.getMaxPossibleLooseBottles();
+    const shortfallBottles = Math.max(0, loose - maxLoose);
+    const message = shortfallBottles > 0
+      ? `Exceeds available: Need ${shortfallBottles} more bottle${shortfallBottles > 1 ? 's' : ''} (Max available: ${maxLoose})`
+      : '';
+    return { shortfallBottles, message };
+  }
+
+  getDispatchTotalShortfall(): { shortfallBottles: number; message: string } {
+    const avail = this.getAvailableStockForDispatch(this.dispatchForm.brandName, this.dispatchForm.packSize);
+    const total = Number(this.dispatchForm.dispatchedBottles || 0);
+    const shortfallBottles = Math.max(0, total - avail.units);
+    const message = shortfallBottles > 0
+      ? `Need ${shortfallBottles} more bottle${shortfallBottles > 1 ? 's' : ''} to fulfill ${total} units (${avail.units} available)`
+      : '';
+    return { shortfallBottles, message };
+  }
+
   getDispatchedCasesInputBg(): string {
     if (this.isDispatchedCasesExceeded()) return '#fef2f2';
     const cases = Number(this.dispatchForm.dispatchedCases || 0);

@@ -5356,7 +5356,7 @@
                   <span class="input-group-text bg-white text-muted">Cases</span>
                 </div>
                 <small *ngIf="isDispatchedCasesExceeded()" class="text-danger fw-bold d-block mt-1" style="font-size: 10.5px;">
-                  <i class="bi bi-exclamation-circle-fill"></i> Exceeds available (Max: {{ getAvailableStockForDispatch().cases }} cases)
+                  <i class="bi bi-exclamation-circle-fill"></i> {{ getDispatchedCasesShortfall().message || ('Exceeds available (Max: ' + getAvailableStockForDispatch().cases + ' cases)') }}
                 </small>
                 <small *ngIf="!isDispatchedCasesExceeded()" class="text-muted d-block mt-1" style="font-size: 10.5px;">
                   Max: {{ getAvailableStockForDispatch().cases }} cases (1 case = {{ dispatchForm.piecesPerCase }} btls)
@@ -5380,7 +5380,7 @@
                   <span class="input-group-text bg-white text-muted">Bottles</span>
                 </div>
                 <small *ngIf="isDispatchedLooseExceeded()" class="text-danger fw-bold d-block mt-1" style="font-size: 10.5px;">
-                  <i class="bi bi-exclamation-circle-fill"></i> Exceeds available loose units (Max: {{ getMaxPossibleLooseBottles() }})
+                  <i class="bi bi-exclamation-circle-fill"></i> {{ getDispatchedLooseShortfall().message || ('Exceeds available loose units (Max: ' + getMaxPossibleLooseBottles() + ')') }}
                 </small>
                 <small *ngIf="!isDispatchedLooseExceeded()" class="text-muted d-block mt-1" style="font-size: 10.5px;">
                   Remaining loose units (Max: {{ getMaxPossibleLooseBottles() }})
@@ -5405,7 +5405,9 @@
                     [style.color]="isDispatchTotalUnitsExceeded() ? '#b91c1c' : '#64748b'"
                     style="font-size: 10px;"
                   >
-                    <span *ngIf="isDispatchTotalUnitsExceeded()"><i class="bi bi-x-circle-fill"></i> Exceeds stock ({{ getAvailableStockForDispatch().units }} available)</span>
+                    <span *ngIf="isDispatchTotalUnitsExceeded()">
+                      <i class="bi bi-x-circle-fill"></i> {{ getDispatchTotalShortfall().message || ('Exceeds stock (' + getAvailableStockForDispatch().units + ' available)') }}
+                    </span>
                     <span *ngIf="!isDispatchTotalUnitsExceeded()">will be deducted from stock</span>
                   </small>
                 </div>
