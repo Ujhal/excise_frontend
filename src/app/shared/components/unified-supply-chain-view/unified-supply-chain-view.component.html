@@ -186,7 +186,7 @@
                                             <tr *ngFor="let item of pDetail.line_items || pDetail.lineItems; let idx = index">
                                                 <td>{{ idx + 1 }}</td>
                                                 <td>{{ item.brand_name || item.brandName }}</td>
-                                                <td>{{ item.size_ml || item.sizeMl }} ml</td>
+                                                <td>{{ item.size_ml || item.sizeMl }} ml ({{ getPiecesPerCase(item.size_ml || item.sizeMl, item.pieces_per_case || item.piecesPerCase || item.bottles_per_case || item.bottlesPerCase) }} pcs/case)</td>
                                                 <td class="fw-bold">{{ item.cases }}</td>
                                                 <td>₹{{ item.import_pass_fee_per_case || item.importPassFeePerCase }}</td>
                                                 <td class="fw-bold text-success">₹{{ item.total_import || item.totalImport | number:'1.2-2' }}</td>
@@ -351,7 +351,7 @@
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
                                             <td class="fw-semibold text-primary">{{ item.brand_name || item.brandName }}</td>
-                                            <td>{{ item.size_ml || item.sizeMl }} ml</td>
+                                            <td>{{ item.size_ml || item.sizeMl }} ml ({{ getPiecesPerCase(item.size_ml || item.sizeMl, item.pieces_per_case || item.piecesPerCase || item.bottles_per_case || item.bottlesPerCase) }} pcs/case)</td>
                                             <td class="text-center fw-bold">{{ item.cases }}</td>
                                             <td class="text-end text-success">₹{{ (item.total_import || item.totalImport || 0) | number:'1.2-2' }}</td>
                                             <td class="text-end text-secondary">₹{{ (item.total_additional_ed || item.totalAdditionalEd || item.totalAddEd || 0) | number:'1.2-2' }}</td>

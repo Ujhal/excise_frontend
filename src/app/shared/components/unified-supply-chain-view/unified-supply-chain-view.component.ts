@@ -5322,4 +5322,14 @@ export class UnifiedSupplyChainViewComponent implements OnInit {
         const app = this.collabPaymentApplicationToProcess || this.applicationData;
         return app?.selected_brands || app?.selectedBrands || [];
     }
+
+    getPiecesPerCase(size: any, bpc?: any): number {
+        if (bpc && Number(bpc) > 0) return Number(bpc);
+        const s = Number(size);
+        if (s === 750) return 12;
+        if (s === 375) return 24;
+        if (s === 180) return 48;
+        if (s === 500 || s === 650 || s === 700) return 12;
+        return 12;
+    }
 }

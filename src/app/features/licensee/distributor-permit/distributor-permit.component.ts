@@ -489,10 +489,21 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   showUpdateArrivalModal = false;
   arrivalModalData: any = null;
   arrivalBrandItems: any[] = [];
+  arrivalAssignedHologramRanges: any[] = [];
   arrivalCommonVehicle = '';
   arrivalCommonDate = this.todayIso();
   arrivalCommonRemarks = '';
   isSavingArrival = false;
+
+  get totalAssignedHologramsForArrival(): number {
+    return (this.arrivalAssignedHologramRanges || []).reduce((sum, r) => sum + (Number(r.count) || 0), 0);
+  }
+
+  get arrivalAssignedHologramConsignments(): string {
+    return (this.arrivalAssignedHologramRanges || [])
+      .map(r => `${r.ref_no || 'IMFL_HOLO_PRO'}: ${r.from} → ${r.to} (${r.count} pcs)`)
+      .join(', ');
+  }
 
   // --- Brand History Modal State ---
   showBrandHistoryModal = false;
@@ -848,12 +859,51 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
 
   openUpdateBrandsArrivalModal(rowOrApp: any): void {
     const app = rowOrApp?.application || rowOrApp || {};
-    this.arrivalModalData = app;
-    let veh = this.getVehicleNumberForRow(rowOrApp) || app?.vehicle_number || app?.vehicleNumber || '';
+    const refNo = String(app.reference_no || app.referenceNo || app.id || rowOrApp?.applicationId || '').trim();
+    const fullApp = (this.applications || []).find((a: any) => {
+      const aRef = String(a.referenceNo || a.reference_no || a.id || '').trim();
+      return aRef && aRef.toLowerCase() === refNo.toLowerCase();
+    }) || app;
+
+    this.arrivalModalData = fullApp;
+    let veh = this.getVehicleNumberForRow(rowOrApp) || fullApp?.vehicle_number || fullApp?.vehicleNumber || app?.vehicle_number || app?.vehicleNumber || '';
     this.arrivalCommonVehicle = veh;
     this.arrivalCommonDate = this.todayIso();
     this.arrivalCommonRemarks = '';
     
+    // Extract assigned hologram ranges from requisition
+    let rawRanges = fullApp.assigned_hologram_ranges || fullApp.assignedHologramRanges ||
+                    app.assigned_hologram_ranges || app.assignedHologramRanges ||
+                    rowOrApp?.assigned_hologram_ranges || rowOrApp?.assignedHologramRanges || [];
+    if (typeof rawRanges === 'string') {
+      try { rawRanges = JSON.parse(rawRanges); } catch(e) { rawRanges = []; }
+    }
+
+    // Fallback search in usage details or overview if not directly attached
+    if ((!Array.isArray(rawRanges) || rawRanges.length === 0) && refNo) {
+      const matchingUsage = (this.usageDetailsList || []).filter((u: any) => {
+        const uRef = String(u.requisition_ref_no || u.requisitionRef || u.permit_number || u.permitNumber || '').toLowerCase().trim();
+        return uRef && (uRef === refNo.toLowerCase() || uRef.includes(refNo.toLowerCase()));
+      });
+      if (matchingUsage.length > 0) {
+        rawRanges = matchingUsage.map((u: any) => ({
+          ref_no: u.ref_no || u.imfl_hologram_ref_no || '',
+          from: String(u.from || ''),
+          to: String(u.to || ''),
+          count: Number(u.count || 0),
+          status: 'RESERVED'
+        }));
+      }
+    }
+
+    this.arrivalAssignedHologramRanges = (Array.isArray(rawRanges) ? rawRanges : []).map((rng: any) => ({
+      ref_no: rng.ref_no || rng.procurement_ref_no || rng.refNo || '',
+      from: String(rng.from || ''),
+      to: String(rng.to || ''),
+      count: Number(rng.count || 0),
+      status: rng.status || 'RESERVED'
+    }));
+
     // Extract permit details or line items
     let details = app.permit_wise_details || app.permitWiseDetails || rowOrApp?.permit_wise_details || rowOrApp?.permitWiseDetails;
     if (typeof details === 'string') {
@@ -908,6 +958,8 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
             hologram_to: '',
             arrived_hg_ranges: [{ from: '', to: '' }],
             hologram_count: expBottles,
+            assigned_hologram_ranges: [],
+            assigned_hg_label: '',
             damaged_cases_hg_from: '',
             damaged_cases_hg_to: '',
             damaged_cases_holograms: 'None',
@@ -953,6 +1005,8 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
           hologram_to: '',
           arrived_hg_ranges: [{ from: '', to: '' }],
           hologram_count: expBottles,
+          assigned_hologram_ranges: [],
+          assigned_hg_label: '',
           damaged_cases_hg_from: '',
           damaged_cases_hg_to: '',
           damaged_cases_holograms: 'None',
@@ -996,6 +1050,8 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
         hologram_to: '',
         arrived_hg_ranges: [{ from: '', to: '' }],
         hologram_count: expCases * pieces,
+        assigned_hologram_ranges: [],
+        assigned_hg_label: '',
         damaged_cases_hg_from: '',
         damaged_cases_hg_to: '',
         damaged_cases_holograms: 'None',
@@ -1008,9 +1064,134 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     }
 
     this.arrivalBrandItems = itemsToProcess;
+    
+    // Auto-map assigned hologram ranges to items if assigned ranges exist
+    if (this.arrivalAssignedHologramRanges.length > 0) {
+      this.autoAssignRequisitionRangesToBrands();
+    }
+
     this.isArrivalPageView = true;
     this.showUpdateArrivalModal = false;
     this.cdr.detectChanges();
+  }
+
+  autoAssignRequisitionRangesToBrands(): void {
+    if (!this.arrivalBrandItems || this.arrivalBrandItems.length === 0) return;
+    const ranges = this.arrivalAssignedHologramRanges || [];
+    if (ranges.length === 0) return;
+
+    let currentRangeIdx = 0;
+    let currentOffset = 0;
+
+    this.arrivalBrandItems.forEach((item) => {
+      const neededBottles = Number(item.arrived_bottles || item.expected_bottles || 0);
+      if (neededBottles <= 0 || currentRangeIdx >= ranges.length) {
+        return;
+      }
+
+      let remainingToAssign = neededBottles;
+      const assignedItemRanges: { from: string; to: string; ref_no?: string; count?: number }[] = [];
+
+      while (remainingToAssign > 0 && currentRangeIdx < ranges.length) {
+        const curRng = ranges[currentRangeIdx];
+        const matchF = String(curRng.from || '').trim().match(/^(.*?)(\d+)$/);
+        const matchT = String(curRng.to || '').trim().match(/^(.*?)(\d+)$/);
+        const prefix = matchF ? matchF[1] : '';
+        const fNum = matchF ? parseInt(matchF[2], 10) : 1;
+        const totalInRng = Number(curRng.count) || (matchT ? parseInt(matchT[2], 10) - fNum + 1 : 0);
+
+        const availableInCurRng = totalInRng - currentOffset;
+        if (availableInCurRng <= 0) {
+          currentRangeIdx++;
+          currentOffset = 0;
+          continue;
+        }
+
+        const take = Math.min(remainingToAssign, availableInCurRng);
+        const startNum = fNum + currentOffset;
+        const endNum = startNum + take - 1;
+
+        const padLen = matchF ? matchF[2].length : 0;
+        const startStr = padLen > 0 ? prefix + String(startNum).padStart(padLen, '0') : prefix + String(startNum);
+        const endStr = padLen > 0 ? prefix + String(endNum).padStart(padLen, '0') : prefix + String(endNum);
+
+        assignedItemRanges.push({
+          from: startStr,
+          to: endStr,
+          ref_no: curRng.ref_no || '',
+          count: take
+        });
+
+        currentOffset += take;
+        remainingToAssign -= take;
+
+        if (currentOffset >= totalInRng) {
+          currentRangeIdx++;
+          currentOffset = 0;
+        }
+      }
+
+      if (assignedItemRanges.length > 0) {
+        item.assigned_hologram_ranges = assignedItemRanges;
+        item.assigned_hg_label = assignedItemRanges.map(r => `${r.from} → ${r.to}`).join(', ');
+        item.arrived_hg_ranges = assignedItemRanges.map(r => ({ from: r.from, to: r.to }));
+        item.hologram_from = assignedItemRanges[0].from;
+        item.hologram_to = assignedItemRanges[assignedItemRanges.length - 1].to;
+        item.hologram_count = neededBottles;
+        item.hologram_ref_no = assignedItemRanges[0].ref_no || '';
+      }
+      this.onArrivalItemCalculationsChange(item);
+    });
+    this.cdr.detectChanges();
+  }
+
+  applyAssignedRangeToItem(item: any): void {
+    if (item.assigned_hologram_ranges && item.assigned_hologram_ranges.length > 0) {
+      item.arrived_hg_ranges = item.assigned_hologram_ranges.map((r: any) => ({ from: r.from, to: r.to }));
+      item.hologram_from = item.assigned_hologram_ranges[0].from;
+      item.hologram_to = item.assigned_hologram_ranges[item.assigned_hologram_ranges.length - 1].to;
+      item.hologram_count = item.arrived_bottles || item.expected_bottles;
+      this.onArrivalItemCalculationsChange(item);
+    } else if (this.arrivalAssignedHologramRanges.length > 0) {
+      this.autoAssignRequisitionRangesToBrands();
+    }
+  }
+
+  getBrandGoodHologramsLabel(item: any): string {
+    const arrivedRanges = (item.arrived_hg_ranges || []).filter((r: any) => r.from && r.to);
+    if (arrivedRanges.length === 0) return 'Pending Arrived Range';
+    const goodBottles = Number(item.good_bottles || 0);
+    if (goodBottles <= 0) return 'None (0 btls)';
+
+    const totalDamaged = Number(item.total_damaged_bottles) || Number(item.damaged_bottles) || 0;
+    if (totalDamaged === 0) {
+      return arrivedRanges.map((r: any) => `${r.from} → ${r.to}`).join(', ') + ` (${goodBottles} btls)`;
+    }
+
+    const first = arrivedRanges[0];
+    const matchF = String(first.from).trim().match(/^(.*?)(\d+)$/);
+    if (matchF) {
+      const prefix = matchF[1];
+      const startNum = parseInt(matchF[2], 10);
+      const endNum = startNum + goodBottles - 1;
+      const padLen = matchF[2].length;
+      const toStr = padLen > 0 ? prefix + String(endNum).padStart(padLen, '0') : prefix + String(endNum);
+      return `${first.from} → ${toStr} (${goodBottles} btls)`;
+    }
+    return `Usable: ${goodBottles} btls`;
+  }
+
+  getBrandDamagedHologramsLabel(item: any): string {
+    const totalDamaged = Number(item.total_damaged_bottles) || Number(item.damaged_bottles) || 0;
+    if (totalDamaged <= 0) return 'No Damage';
+    const parts: string[] = [];
+    if (item.damaged_cases_holograms && item.damaged_cases_holograms !== 'None') {
+      parts.push(`Cases: ${item.damaged_cases_holograms}`);
+    }
+    if (item.damaged_holograms && item.damaged_holograms !== 'None') {
+      parts.push(`Loose: ${item.damaged_holograms}`);
+    }
+    return parts.length > 0 ? parts.join(' | ') : `${totalDamaged} btls damaged`;
   }
 
   onArrivalItemCalculationsChange(item: any): void {
@@ -1242,9 +1423,13 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
         damaged_cases: it.damaged_cases || 0,
         good_bottles: it.good_bottles || 0,
         good_cases: it.good_cases || 0,
-        hologram_from: it.hologram_from || '',
-        hologram_to: it.hologram_to || '',
+        hologram_from: it.hologram_from || (it.arrived_hg_ranges?.[0]?.from || ''),
+        hologram_to: it.hologram_to || (it.arrived_hg_ranges?.[it.arrived_hg_ranges?.length - 1]?.to || ''),
         hologram_count: it.hologram_count || it.arrived_bottles || 0,
+        hologram_ref_no: it.hologram_ref_no || it.assigned_hologram_ranges?.[0]?.ref_no || '',
+        assigned_hologram_ranges: it.assigned_hologram_ranges || [],
+        arrived_hg_ranges: it.arrived_hg_ranges || [],
+        good_holograms_label: this.getBrandGoodHologramsLabel(it),
         damaged_holograms: it.damaged_holograms || '',
         damaged_cases_holograms: it.damaged_cases_holograms || '',
         vehicle_number: it.vehicle_number || this.arrivalCommonVehicle,
@@ -2417,11 +2602,12 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
 
   getPiecesInCase(size: any, packObj?: any): number {
     if (packObj && packObj.pieces_per_case) return packObj.pieces_per_case;
-    const s = Number(size);
+    const strVal = String(size || '').replace(/[^\d]/g, '');
+    const s = Number(strVal || 750);
     if (s === 750) return 12;
     if (s === 375) return 24;
     if (s === 180) return 48;
-    if (s === 500 || s === 650) return 12;
+    if (s === 500 || s === 650 || s === 700) return 12;
     return 12;
   }
 
@@ -7682,12 +7868,12 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
             }
           }
 
-          const totProcured = stats.totalProcured ?? stats.total_procured ?? (batches.length > 0 ? 1000 : 0);
-          const totReceived = stats.totalReceived ?? stats.total_received ?? 0;
-          const totAvail = stats.totalAvailable ?? stats.total_available ?? (totReceived > 0 ? totReceived : totProcured);
-          const totUtil = stats.totalUtilizedInWarehouse ?? stats.total_utilized_in_warehouse ?? 0;
-          const totDisp = stats.totalDispatchedToRetailers ?? stats.total_dispatched_to_retailers ?? 0;
-          const totDam = stats.totalDamaged ?? stats.total_damaged ?? 0;
+          const totProcured = Number(stats.totalProcured ?? stats.total_procured ?? 0);
+          const totReceived = Number(stats.totalReceived ?? stats.total_received ?? 0);
+          const totAvail = Number(stats.totalAvailable ?? stats.total_available ?? 0);
+          const totUtil = Number(stats.totalUtilizedInWarehouse ?? stats.total_utilized_in_warehouse ?? 0);
+          const totDisp = Number(stats.totalDispatchedToRetailers ?? stats.total_dispatched_to_retailers ?? 0);
+          const totDam = Number(stats.totalDamaged ?? stats.total_damaged ?? 0);
 
           const normalizedStats = {
             total_procured: totProcured,
