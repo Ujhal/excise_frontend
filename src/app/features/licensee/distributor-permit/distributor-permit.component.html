@@ -1338,7 +1338,7 @@
                       <ng-container *ngFor="let act of (item.allowed_actions || item.allowedActions || [])">
                         <button
                           type="button"
-                          class="btn btn-sm fw-bold px-2 py-1 shadow-sm"
+                          class="btn btn-sm fw-bold px-2 py-1 shadow-sm d-inline-flex align-items-center gap-1"
                           *ngIf="act !== 'PAY'"
                           [ngClass]="{
                             'btn-primary text-white': act.includes('FORWARD'),
@@ -1346,11 +1346,12 @@
                             'btn-danger text-white': act.includes('REJECT'),
                             'btn-secondary text-white': !act.includes('FORWARD') && !act.includes('APPROVE') && !act.includes('REJECT') && !act.includes('FINAL')
                           }"
-                          (click)="onHologramActionClick(item, act)"
+                          (click)="$event.stopPropagation(); onHologramActionClick(item, act)"
                           [disabled]="isProcessingHologramAction"
                           title="Execute {{ act }}"
                         >
-                          {{ act }}
+                          <span class="spinner-border spinner-border-sm" *ngIf="isProcessingHologramAction && processingHologramId === item.id"></span>
+                          <span>{{ act }}</span>
                         </button>
                       </ng-container>
                     </div>
@@ -6367,7 +6368,7 @@
         <ng-container *ngFor="let act of (selectedHologramItem.allowed_actions || selectedHologramItem.allowedActions || [])">
           <button
             type="button"
-            class="btn btn-sm fw-bold px-3 py-1.5 shadow-sm"
+            class="btn btn-sm fw-bold px-3 py-1.5 shadow-sm d-inline-flex align-items-center gap-1"
             *ngIf="act !== 'PAY'"
             [ngClass]="{
               'btn-primary text-white': act.includes('FORWARD'),
@@ -6375,10 +6376,11 @@
               'btn-danger text-white': act.includes('REJECT'),
               'btn-secondary text-white': !act.includes('FORWARD') && !act.includes('APPROVE') && !act.includes('REJECT') && !act.includes('FINAL')
             }"
-            (click)="onHologramActionClick(selectedHologramItem, act)"
+            (click)="$event.stopPropagation(); onHologramActionClick(selectedHologramItem, act)"
             [disabled]="isProcessingHologramAction"
           >
-            {{ act }}
+            <span class="spinner-border spinner-border-sm" *ngIf="isProcessingHologramAction && processingHologramId === selectedHologramItem.id"></span>
+            <span>{{ act }}</span>
           </button>
         </ng-container>
       </div>

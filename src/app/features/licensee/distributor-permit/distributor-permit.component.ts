@@ -7198,10 +7198,12 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  processingHologramId: number | null = null;
+
   closeHologramDetailsModal(): void {
     this.showHologramDetailsModal = false;
     this.selectedHologramItem = null;
-    this.cdr.markForCheck();
+    this.cdr.detectChanges();
   }
 
   onHologramActionClick(item: IMFLHologramProcurementItem, action: string): void {
@@ -7216,7 +7218,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       };
       this.actionRemarksText = '';
       this.actionRemarksModalOpen = true;
-      this.cdr.markForCheck();
+      this.cdr.detectChanges();
       return;
     }
 
@@ -7224,31 +7226,61 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     if (!item || !item.id) return;
     const itemId: number = item.id;
     this.isProcessingHologramAction = true;
-    this.cdr.markForCheck();
+    this.processingHologramId = itemId;
+    this.cdr.detectChanges();
 
     this.imflHoloService.performAction(itemId, actionUpper, `Action '${actionUpper}' performed`).subscribe({
       next: (res) => {
         this.isProcessingHologramAction = false;
+        this.processingHologramId = null;
+
+        const updatedData = res?.data || res;
+        if (updatedData && updatedData.id) {
+          const idx = this.hologramProcurements.findIndex(p => p.id === updatedData.id);
+          if (idx !== -1) {
+            this.hologramProcurements[idx] = {
+              ...this.hologramProcurements[idx],
+              ...updatedData,
+              current_stage_name: updatedData.current_stage_name || updatedData.status || this.hologramProcurements[idx].current_stage_name,
+              status: updatedData.status || updatedData.current_stage_name || this.hologramProcurements[idx].status,
+              allowed_actions: updatedData.allowed_actions || updatedData.allowedActions || []
+            };
+            this.hologramProcurements = [...this.hologramProcurements];
+          }
+          const currDetails = this.selectedHologramItem;
+          if (this.showHologramDetailsModal && currDetails && currDetails.id === updatedData.id) {
+            this.selectedHologramItem = {
+              ...currDetails,
+              ...updatedData,
+              current_stage_name: updatedData.current_stage_name || updatedData.status || currDetails.current_stage_name,
+              status: updatedData.status || updatedData.current_stage_name || currDetails.status,
+              allowed_actions: updatedData.allowed_actions || updatedData.allowedActions || []
+            };
+          }
+        }
+
         Swal.fire({
           icon: 'success',
           title: 'Action Successful',
-          text: `Action '${actionUpper}' executed successfully.`
+          text: `Action '${actionUpper}' executed successfully.`,
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: true
         });
-        this.loadHologramProcurements();
-        if (this.showHologramDetailsModal && this.selectedHologramItem?.id === item.id) {
-          this.selectedHologramItem = { ...this.selectedHologramItem, ...res.data };
-        }
-        this.cdr.markForCheck();
+
+        this.loadHologramProcurements(true);
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.isProcessingHologramAction = false;
+        this.processingHologramId = null;
         console.error('Error performing action:', err);
         Swal.fire({
           icon: 'error',
           title: 'Action Failed',
           text: err?.error?.error || err?.error?.detail || 'Failed to perform workflow action.'
         });
-        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       }
     });
   }
@@ -7258,32 +7290,64 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     const { item, action } = this.pendingHologramAction;
     const itemId: number = item.id!;
     this.isProcessingHologramAction = true;
+    this.processingHologramId = itemId;
+    this.cdr.detectChanges();
 
     this.imflHoloService.performAction(itemId, action, this.actionRemarksText || `Action '${action}' performed`).subscribe({
       next: (res) => {
         this.isProcessingHologramAction = false;
+        this.processingHologramId = null;
         this.actionRemarksModalOpen = false;
         this.pendingHologramAction = null;
+        this.actionRemarksText = '';
+
+        const updatedData = res?.data || res;
+        if (updatedData && updatedData.id) {
+          const idx = this.hologramProcurements.findIndex(p => p.id === updatedData.id);
+          if (idx !== -1) {
+            this.hologramProcurements[idx] = {
+              ...this.hologramProcurements[idx],
+              ...updatedData,
+              current_stage_name: updatedData.current_stage_name || updatedData.status || this.hologramProcurements[idx].current_stage_name,
+              status: updatedData.status || updatedData.current_stage_name || this.hologramProcurements[idx].status,
+              allowed_actions: updatedData.allowed_actions || updatedData.allowedActions || []
+            };
+            this.hologramProcurements = [...this.hologramProcurements];
+          }
+          const currDetails = this.selectedHologramItem;
+          if (this.showHologramDetailsModal && currDetails && currDetails.id === updatedData.id) {
+            this.selectedHologramItem = {
+              ...currDetails,
+              ...updatedData,
+              current_stage_name: updatedData.current_stage_name || updatedData.status || currDetails.current_stage_name,
+              status: updatedData.status || updatedData.current_stage_name || currDetails.status,
+              allowed_actions: updatedData.allowed_actions || updatedData.allowedActions || []
+            };
+          }
+        }
+
         Swal.fire({
           icon: 'success',
           title: 'Action Successful',
-          text: `Action '${action}' executed successfully.`
+          text: `Action '${action}' executed successfully.`,
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: true
         });
-        this.loadHologramProcurements();
-        if (this.showHologramDetailsModal && this.selectedHologramItem?.id === item.id) {
-          this.selectedHologramItem = { ...this.selectedHologramItem, ...res.data };
-        }
-        this.cdr.markForCheck();
+
+        this.loadHologramProcurements(true);
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.isProcessingHologramAction = false;
+        this.processingHologramId = null;
         console.error('Error performing action:', err);
         Swal.fire({
           icon: 'error',
           title: 'Action Failed',
           text: err?.error?.error || err?.error?.detail || 'Failed to perform workflow action.'
         });
-        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       }
     });
   }
@@ -7292,7 +7356,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     this.actionRemarksModalOpen = false;
     this.pendingHologramAction = null;
     this.actionRemarksText = '';
-    this.cdr.markForCheck();
+    this.cdr.detectChanges();
   }
 
   showHologramPaymentModal = false;
@@ -7303,7 +7367,10 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
 
   get hologramPaymentPayableAmount(): number {
     if (!this.hologramPaymentItem) return 0;
-    return Number(this.hologramPaymentItem.total_amount || (this.hologramPaymentItem.quantity * 0.15));
+    return Number(
+      this.hologramPaymentItem.total_amount ??
+      (Number(this.hologramPaymentItem.quantity || 0) * 0.15)
+    );
   }
 
   get hologramBalanceAfterPayment(): number {
@@ -7336,7 +7403,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
         if (holoBal > 0) {
           this.hologramCurrentWalletBalance = holoBal;
           this.showHologramPaymentModal = true;
-          this.cdr.markForCheck();
+          this.cdr.detectChanges();
           return;
         }
 
@@ -7350,18 +7417,18 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
               }
               this.hologramCurrentWalletBalance = holoBal;
               this.showHologramPaymentModal = true;
-              this.cdr.markForCheck();
+              this.cdr.detectChanges();
             },
             error: () => {
               this.hologramCurrentWalletBalance = holoBal;
               this.showHologramPaymentModal = true;
-              this.cdr.markForCheck();
+              this.cdr.detectChanges();
             }
           });
         } else {
           this.hologramCurrentWalletBalance = holoBal;
           this.showHologramPaymentModal = true;
-          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         }
       },
       error: () => {
@@ -7372,18 +7439,18 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
               const holoW = wallets.find((w: any) => String(w.wallet_type || w.wallet_type_code || '').toLowerCase() === 'hologram');
               this.hologramCurrentWalletBalance = holoW ? Number(holoW.current_balance || 0) : 0;
               this.showHologramPaymentModal = true;
-              this.cdr.markForCheck();
+              this.cdr.detectChanges();
             },
             error: () => {
               this.hologramCurrentWalletBalance = 0;
               this.showHologramPaymentModal = true;
-              this.cdr.markForCheck();
+              this.cdr.detectChanges();
             }
           });
         } else {
           this.hologramCurrentWalletBalance = 0;
           this.showHologramPaymentModal = true;
-          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         }
       }
     });
@@ -7394,7 +7461,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     this.hologramPaymentItem = null;
     this.isHologramPaymentAgreed = false;
     this.isSubmittingHologramPayment = false;
-    this.cdr.markForCheck();
+    this.cdr.detectChanges();
   }
 
   confirmExecuteHologramPayment(): void {
@@ -7422,20 +7489,51 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
     const amount = this.hologramPaymentPayableAmount;
 
     this.isSubmittingHologramPayment = true;
+    this.cdr.detectChanges();
+
     this.imflHoloService.payViaWallet(itemId).subscribe({
       next: (res) => {
         this.isSubmittingHologramPayment = false;
         this.closeHologramPaymentModal();
+
+        const updatedData = res?.data || res;
+        if (updatedData && updatedData.id) {
+          const idx = this.hologramProcurements.findIndex(p => p.id === updatedData.id);
+          if (idx !== -1) {
+            this.hologramProcurements[idx] = {
+              ...this.hologramProcurements[idx],
+              ...updatedData,
+              current_stage_name: updatedData.current_stage_name || updatedData.status || this.hologramProcurements[idx].current_stage_name,
+              status: updatedData.status || updatedData.current_stage_name || this.hologramProcurements[idx].status,
+              payment_status: 'COMPLETED',
+              allowed_actions: updatedData.allowed_actions || updatedData.allowedActions || []
+            };
+            this.hologramProcurements = [...this.hologramProcurements];
+          }
+          const currDetails = this.selectedHologramItem;
+          if (this.showHologramDetailsModal && currDetails && currDetails.id === updatedData.id) {
+            this.selectedHologramItem = {
+              ...currDetails,
+              ...updatedData,
+              current_stage_name: updatedData.current_stage_name || updatedData.status || currDetails.current_stage_name,
+              status: updatedData.status || updatedData.current_stage_name || currDetails.status,
+              payment_status: 'COMPLETED',
+              allowed_actions: updatedData.allowed_actions || updatedData.allowedActions || []
+            };
+          }
+        }
+
         Swal.fire({
           icon: 'success',
           title: 'Payment Successful!',
-          text: `₹${amount.toFixed(2)} deducted from Hologram Wallet. Reference: ${res.data?.payment_details?.transaction_id || ''}`
+          text: `₹${amount.toFixed(2)} deducted from Hologram Wallet. Reference: ${res.data?.payment_details?.transaction_id || ''}`,
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: true
         });
-        this.loadHologramProcurements();
-        if (this.showHologramDetailsModal && this.selectedHologramItem?.id === item.id) {
-          this.selectedHologramItem = { ...this.selectedHologramItem, ...res.data };
-        }
-        this.cdr.markForCheck();
+
+        this.loadHologramProcurements(true);
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.isSubmittingHologramPayment = false;
@@ -7445,7 +7543,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
           title: 'Payment Failed',
           text: err?.error?.error || err?.error?.detail || 'Wallet payment failed. Please check your Hologram Wallet balance.'
         });
-        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       }
     });
   }
