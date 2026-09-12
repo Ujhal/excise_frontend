@@ -199,7 +199,7 @@ export class SidebarPendingBadgeService {
   }
 
   private fetchDistributorPermitDashboardCounts(
-    tab: 'requisition' | 'revalidation' | 'cancellation' | 'brand-arrival' | 'hologram-procurement',
+    tab: 'requisition' | 'revalidation' | 'cancellation' | 'brand-arrival' | 'hologram-procurement' | 'hologram-arrival',
     audience: BadgeAudience,
     force = false
   ): Observable<{ total: number; payment: number }> {
@@ -217,7 +217,7 @@ export class SidebarPendingBadgeService {
     );
   }
 
-  private mapDistributorPermitBadgeTab(section: string): 'requisition' | 'revalidation' | 'cancellation' | 'brand-arrival' | 'hologram-procurement' | null {
+  private mapDistributorPermitBadgeTab(section: string): 'requisition' | 'revalidation' | 'cancellation' | 'brand-arrival' | 'hologram-procurement' | 'hologram-arrival' | null {
     switch (section) {
       case 'distributor-permit':
       case 'imfl-permit':
@@ -240,6 +240,10 @@ export class SidebarPendingBadgeService {
       case 'imfl-hologram-procurement':
       case 'hologram-procurement':
         return 'hologram-procurement';
+      case 'distributor-permit-hologram-arrival':
+      case 'imfl-hologram-arrival':
+      case 'hologram-arrival':
+        return 'hologram-arrival';
       default:
         return null;
     }
@@ -296,6 +300,11 @@ export class SidebarPendingBadgeService {
       case 'distributor-permit-cancellation':
       case 'imfl-cancellation':
         return this.fetchDistributorPermitDashboardCounts('cancellation', audience).pipe(map(d => d.total));
+
+      case 'distributor-permit-hologram-arrival':
+      case 'imfl-hologram-arrival':
+      case 'hologram-arrival':
+        return this.fetchDistributorPermitDashboardCounts('hologram-arrival', audience).pipe(map(d => d.total));
 
       case 'requisition':
         if (audience === 'licensee') {

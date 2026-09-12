@@ -438,6 +438,14 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
         0
       );
     }
+    if (key === 'distributor-permit-hologram-arrival' || key === 'imfl-hologram-arrival' || key === 'hologram-arrival') {
+      return Number(
+        this.pendingBadgeCounts?.['distributor-permit-hologram-arrival'] ||
+        this.pendingBadgeCounts?.['imfl-hologram-arrival'] ||
+        this.pendingBadgeCounts?.['hologram-arrival'] ||
+        0
+      );
+    }
     if (key.includes('hologram-procurement:payment') || key.includes('imfl-hologram-procurement:payment')) {
       return Number(
         this.pendingBadgeCounts?.['distributor-permit-hologram-procurement:payment'] ||
@@ -634,7 +642,10 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
       'cancellation',
       'distributor-permit-hologram-procurement',
       'imfl-hologram-procurement',
-      'hologram-procurement'
+      'hologram-procurement',
+      'distributor-permit-hologram-arrival',
+      'imfl-hologram-arrival',
+      'hologram-arrival'
     ];
     for (const item of this.officerSectionItems) {
       if (!this.shouldShowOfficerSectionItem(item)) continue;
@@ -651,7 +662,8 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
     const rev = (isPS || isIT) ? 0 : (this.getPendingCount('distributor-permit-revalidation') || this.getPendingCount('imfl-revalidation'));
     const can = (isPS || isIT) ? 0 : (this.getPendingCount('distributor-permit-cancellation') || this.getPendingCount('imfl-cancellation'));
     const holo = isPS ? 0 : (this.getPendingCount('distributor-permit-hologram-procurement') || this.getPendingCount('imfl-hologram-procurement') || this.getPendingCount('hologram-procurement'));
-    return req + rev + can + holo;
+    const arrival = this.isDistributorOic() ? (this.getPendingCount('distributor-permit-hologram-arrival') || this.getPendingCount('imfl-hologram-arrival') || this.getPendingCount('hologram-arrival')) : 0;
+    return req + rev + can + holo + arrival;
   }
 
   public shouldShowOfficerSectionItem(item: {
@@ -1903,14 +1915,21 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
     const assignment = u?.oicAssignment || u?.oic_assignment || accountUser?.oicAssignment || accountUser?.oic_assignment;
     const assignmentType = String(assignment?.assignmentType || assignment?.assignment_type || '').toLowerCase();
 
-    if (assignmentType === 'distributor') {
+    if (assignmentType === 'distributor' || assignmentType.includes('distributor')) {
       return true;
     }
 
     const username = String(u?.username || accountUser?.username || '').toLowerCase();
     const estName = String(assignment?.establishmentName || assignment?.establishment_name || '').toLowerCase();
+    const roleName = String(u?.role?.name || u?.role?.displayName || accountUser?.role?.name || '').toLowerCase();
 
-    return username.startsWith('do') || estName.includes('distributor') || assignmentType.includes('distributor');
+    return (
+      username.startsWith('do') ||
+      username.startsWith('oo') ||
+      estName.includes('distributor') ||
+      assignmentType.includes('distributor') ||
+      roleName.includes('distributor')
+    );
   }
 
   isCommissionerUser(): boolean {

@@ -358,9 +358,10 @@ export class OfficerInChargeDashboardComponent implements OnInit {
   private loadImflCasesPendingCount(): void {
     const req$ = this.distributorPermitService.getDashboardCounts('requisition', true).pipe(catchError(() => of(null)));
     const arr$ = this.distributorPermitService.getDashboardCounts('brand-arrival', true).pipe(catchError(() => of(null)));
+    const holoArr$ = this.distributorPermitService.getDashboardCounts('hologram-arrival', true).pipe(catchError(() => of(null)));
 
-    forkJoin({ req: req$, arr: arr$ }).subscribe({
-      next: ({ req, arr }) => {
+    forkJoin({ req: req$, arr: arr$, holoArr: holoArr$ }).subscribe({
+      next: ({ req, arr, holoArr }) => {
         const reqApplied = Number(req?.applied || req?.total || 0);
         const reqPending = Number(req?.pending || 0);
         const reqApproved = Number(req?.approved || 0);
@@ -371,10 +372,15 @@ export class OfficerInChargeDashboardComponent implements OnInit {
         const arrApproved = Number(arr?.approved || 0);
         const arrRejected = Number(arr?.rejected || 0);
 
-        this.imflCasesAppliedCount = Math.max(reqApplied, arrApplied);
-        this.imflCasesPendingCount = reqPending + arrPending;
-        this.imflCasesApprovedCount = Math.max(reqApproved, arrApproved);
-        this.imflCasesRejectedCount = reqRejected + arrRejected;
+        const holoArrApplied = Number(holoArr?.applied || holoArr?.total || 0);
+        const holoArrPending = Number(holoArr?.pending || 0);
+        const holoArrApproved = Number(holoArr?.approved || 0);
+        const holoArrRejected = Number(holoArr?.rejected || 0);
+
+        this.imflCasesAppliedCount = Math.max(reqApplied, arrApplied) + holoArrApplied;
+        this.imflCasesPendingCount = reqPending + arrPending + holoArrPending;
+        this.imflCasesApprovedCount = Math.max(reqApproved, arrApproved) + holoArrApproved;
+        this.imflCasesRejectedCount = reqRejected + arrRejected + holoArrRejected;
       },
       error: () => {
         this.distributorPermitService.listApplications().subscribe({

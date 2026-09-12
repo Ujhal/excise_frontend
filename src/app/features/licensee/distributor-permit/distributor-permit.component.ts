@@ -8045,6 +8045,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
         });
         this.selectedArrivalIdToUpdate = null;
         this.loadHologramArrivals();
+        this.sidebarPendingBadgeService.triggerRefresh();
         this.cdr.markForCheck();
       },
       error: (err) => {
