@@ -223,15 +223,30 @@ export class PermitSectionDashboardComponent implements OnInit {
 
         list.forEach((item: any) => {
           const ref = String(item.reference_no || item.referenceNo || '').toUpperCase();
+          const stageName = String(item.current_stage?.name || item.currentStageName || item.status || '').toLowerCase();
+          const stageId = Number(item.current_stage_id || item.currentStageId || item.current_stage?.id || 0);
+          const isAtPS = stageId === 148 || stageId === 147 || stageId === 149 || stageId === 156 ||
+            (stageName.includes('permit') && !stageName.includes('commissioner')) ||
+            (stageName.includes('payslip') && stageName.includes('permit')) ||
+            stageName === 'pending' || stageName === 'submitted';
+
+          const backendActions = Array.isArray(item.allowedActions || item.allowed_actions)
+            ? (item.allowedActions || item.allowed_actions)
+            : [];
+
+          const allowedActions = backendActions.length > 0
+            ? backendActions
+            : (isAtPS ? ['VIEW', 'FORWARD', 'APPROVE', 'REJECT', 'RAISE_OBJECTION'] : ['VIEW']);
+
           const mapped: PermitData = {
             id: item.id || item.reference_no || item.referenceNo,
             referenceNo: item.reference_no || item.referenceNo,
             submissionDate: this.formatDate(item.submitted_at || item.submittedAt || item.created_at || item.createdAt),
             distilleryName: item.supplier_company_name || item.supplierCompanyName || item.applicant_name || item.applicantName || 'N/A',
-            status: item.status || 'PENDING',
+            status: item.current_stage?.name || item.status || 'PENDING',
             amount: String(item.total_import_value || item.totalImportValue || '0.00'),
             type: ref.startsWith('IMFLREV') ? 'imfl-revalidation' : (ref.startsWith('IMFLCAN') ? 'imfl-cancellation' : 'imfl-requisition'),
-            allowedActions: ['VIEW', 'FORWARD', 'APPROVE', 'REJECT', 'RAISE_OBJECTION'],
+            allowedActions: allowedActions,
             allowedActionConfigs: []
           };
 
@@ -666,7 +681,7 @@ export class PermitSectionDashboardComponent implements OnInit {
     const countedByActions = this.allPermits.filter((permit) => {
       const actions = Array.isArray(permit?.allowedActions) ? permit.allowedActions : [];
       const upper = actions.map((a) => String(a || '').toUpperCase());
-      return upper.includes('APPROVE') || upper.includes('REJECT');
+      return upper.includes('APPROVE') || upper.includes('REJECT') || upper.includes('FORWARD') || upper.includes('VERIFY');
     });
 
     const countedIds = new Set(countedByActions.map(p => p.id));
@@ -677,11 +692,11 @@ export class PermitSectionDashboardComponent implements OnInit {
     const countedByStatus = this.allPermits.filter((permit) => {
       if (countedIds.has(permit.id)) return false; // already counted above
       const st = String(permit.status || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (st.includes('permitsection') && (st.includes('forward') || st.includes('payslip') || st.includes('submit'))) {
+        return true;
+      }
       if (st.includes('approv') || st.includes('reject') || st.includes('cancel')) return false;
-      if (st === 'pending') return true;
-      // Payslip/forwarded back to Permit Section for action
-      if (st.includes('permitsection') &&
-          (st.includes('forward') || st.includes('payslip') || st.includes('submit'))) return true;
+      if (st === 'pending' || st === 'submitted') return true;
       return false;
     });
 

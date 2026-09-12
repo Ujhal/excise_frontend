@@ -592,7 +592,7 @@
                   <td class="fw-semibold">{{ row.applicationId }}</td>
                   <td>{{ row.submittedOn }}</td>
                   <td>
-                    <span class="payment-badge payment-badge--pending">
+                    <span class="payment-badge" [ngClass]="row.paymentStatus === 'Paid' ? 'payment-badge--success' : 'payment-badge--pending'">
                       {{ row.paymentStatus }}
                     </span>
                   </td>

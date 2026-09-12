@@ -6076,18 +6076,19 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
 
     const { isPermitSection, isCommissioner } = this.getUserRoleInfo();
 
-    const isCommissionerStage = stageId === 153 || stageId === 157 || stageId === 160 || stageId === 162 || stageId === 163 || value.includes('commissioner');
-    const isPermitSectionStage = stageId === 148 || stageId === 147 || stageId === 149 || stageId === 155 || stageId === 156 || value.includes('permit') || value.includes('oic');
+    const isCommissionerStage = stageId === 153 || stageId === 157 || stageId === 160 || stageId === 162 || stageId === 163 || (value.includes('commissioner') && !value.includes('payslip permit'));
+    const isPermitSectionStage = stageId === 148 || stageId === 147 || stageId === 149 || stageId === 155 || stageId === 156 || value.includes('permit') || value.includes('oic') || value.includes('payslip permit') || value.includes('forwarded payslip permit');
+    const isPaymentStage = stageId === 154 || (value.includes('payment') && !value.includes('payslip')) || value.includes('awaiting payment');
 
     if (isPermitSection) {
-      if (isCommissionerStage) {
+      if (isCommissionerStage || isPaymentStage) {
         return 'under_process';
       }
       if (isPermitSectionStage) {
         return 'pending';
       }
     } else if (isCommissioner) {
-      if (isPermitSectionStage || stageId === 154 || value.includes('payment') || value.includes('awaiting')) {
+      if (isPermitSectionStage || isPaymentStage) {
         return 'under_process';
       }
       if (isCommissionerStage) {
@@ -6879,7 +6880,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       distributorPermitRef: distributorPermitRef || 'N/A',
       submittedOn: this.formatDate(dateValue),
       submittedDate,
-      paymentStatus: application?.is_excise_duty_fee_paid ? 'Paid' : 'Pending',
+      paymentStatus: (application?.is_excise_duty_fee_paid || String(stageStr || '').toLowerCase().includes('payslip') || String(stageStr || '').toLowerCase().includes('paid')) ? 'Paid' : 'Pending',
       applicantName,
       supplierName,
       currentStage: this.getCurrentStage(stageStr),

@@ -595,6 +595,33 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
       return sections;
     }
 
+    if (this.isPermitSectionUser()) {
+      const sections: string[] = [
+        'distributor-permit',
+        'imfl-permit',
+        'distributor-permit-requisition',
+        'imfl-requisition'
+      ];
+      for (const item of this.officerSectionItems) {
+        if (!this.shouldShowOfficerSectionItem(item)) continue;
+        sections.push(item.section);
+      }
+      return sections;
+    }
+
+    if (this.isItCellUser()) {
+      const sections: string[] = [
+        'distributor-permit-hologram-procurement',
+        'imfl-hologram-procurement',
+        'hologram-procurement'
+      ];
+      for (const item of this.officerSectionItems) {
+        if (!this.shouldShowOfficerSectionItem(item)) continue;
+        sections.push(item.section);
+      }
+      return sections;
+    }
+
     const sections: string[] = [
       'distributor-permit',
       'imfl-permit',
@@ -617,10 +644,13 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   getImflPermitTotalPendingCount(): number {
-    const req = this.getPendingCount('distributor-permit') || this.getPendingCount('distributor-permit-requisition') || this.getPendingCount('imfl-requisition');
-    const rev = this.getPendingCount('distributor-permit-revalidation') || this.getPendingCount('imfl-revalidation');
-    const can = this.getPendingCount('distributor-permit-cancellation') || this.getPendingCount('imfl-cancellation');
-    const holo = this.getPendingCount('distributor-permit-hologram-procurement') || this.getPendingCount('imfl-hologram-procurement') || this.getPendingCount('hologram-procurement');
+    const isPS = this.isPermitSectionUser();
+    const isIT = this.isItCellUser();
+
+    const req = isIT ? 0 : (this.getPendingCount('distributor-permit') || this.getPendingCount('distributor-permit-requisition') || this.getPendingCount('imfl-requisition'));
+    const rev = (isPS || isIT) ? 0 : (this.getPendingCount('distributor-permit-revalidation') || this.getPendingCount('imfl-revalidation'));
+    const can = (isPS || isIT) ? 0 : (this.getPendingCount('distributor-permit-cancellation') || this.getPendingCount('imfl-cancellation'));
+    const holo = isPS ? 0 : (this.getPendingCount('distributor-permit-hologram-procurement') || this.getPendingCount('imfl-hologram-procurement') || this.getPendingCount('hologram-procurement'));
     return req + rev + can + holo;
   }
 
