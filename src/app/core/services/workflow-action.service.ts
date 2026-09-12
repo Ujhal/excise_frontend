@@ -347,14 +347,26 @@ export class WorkflowActionService {
     let endpoint = '';
 
     switch (data.type) {
-      case 'requisition':
+      case 'requisition': {
         // Requisition can be ENA Requisition or IMFL Requisition (Distributor Permit)
-        if (String(data.id || '').toUpperCase().startsWith('IMFL') || String(data.referenceNo || '').toUpperCase().startsWith('IMFL')) {
-          endpoint = `${environment.apiBaseUrl}/transactional/distributor-permit/${data.id}/perform-action/`;
+        const anyData = data as any;
+        const isImfl = (
+          String(anyData.id || '').toUpperCase().startsWith('IMFL') ||
+          String(anyData.referenceNo || '').toUpperCase().startsWith('IMFL') ||
+          String(anyData.reference_no || '').toUpperCase().startsWith('IMFL') ||
+          String(anyData.permit_number || '').toUpperCase().startsWith('IMFL') ||
+          String(anyData.permit_number || '').toUpperCase().startsWith('IMP') ||
+          String(anyData.permit_number || '').toUpperCase().startsWith('DP') ||
+          String(anyData.source || '').toLowerCase().includes('distributor')
+        );
+        if (isImfl) {
+          const targetId = encodeURIComponent(String(anyData.referenceNo || anyData.reference_no || anyData.id || '').trim());
+          endpoint = `${environment.apiBaseUrl}/transactional/distributor-permit/${targetId}/perform-action/`;
         } else {
           endpoint = `${environment.apiBaseUrl}/transactional/supply_chain/ena-requisitions/${data.id}/perform-action/`;
         }
         break;
+      }
       case 'revalidation':
         // Revalidation uses ViewSet with underscore
         endpoint = `${environment.apiBaseUrl}/transactional/supply_chain/ena-revalidations/${data.id}/perform_action/`;

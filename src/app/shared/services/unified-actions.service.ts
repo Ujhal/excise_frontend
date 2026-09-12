@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of, throwError, from } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
@@ -305,38 +305,62 @@ export class UnifiedActionsService {
     window.location.href = url;
   }
 
+  private isImflRequisitionItem(item: any, itemType?: string): boolean {
+    const typeStr = String(itemType || '').toLowerCase();
+    if (
+      typeStr === 'imfl-requisition' ||
+      typeStr === 'distributor-permit' ||
+      typeStr === 'distributor-permit-requisition'
+    ) {
+      return true;
+    }
+
+    const ref = String(
+      item?.referenceNo ||
+      item?.reference_no ||
+      item?.permit_number ||
+      item?.permitNumber ||
+      item?.requisition_number ||
+      item?.id ||
+      ''
+    ).toUpperCase();
+
+    if (ref.startsWith('IMFL') || ref.startsWith('IMP/') || ref.startsWith('DP/') || ref.startsWith('DIST/')) {
+      return true;
+    }
+
+    if (item?.assigned_hologram_ranges || item?.assignedHologramRanges || item?.is_excise_duty_fee_paid !== undefined || item?.brand_items || item?.brands) {
+      return true;
+    }
+
+    return false;
+  }
+
   private handleApproveAction(item: any, itemType: string, options?: ActionExecutionOptions): Observable<ActionResult> {
-    if (!item.id) {
+    const itemId = item?.id || item?.referenceNo || item?.reference_no;
+    if (!itemId) {
       return of({
         success: false,
         message: 'Item ID is required for approval'
       });
     }
-    switch (itemType) {
-      case 'imfl-requisition':
-      case 'distributor-permit':
-      case 'distributor-permit-requisition':
-        return this.toActionResult(
-          this.http.post<any>(`${environment.apiBaseUrl}/transactional/distributor-permit/${item.id}/perform-action/`, { action: 'APPROVE' }),
-          'Distributor permit requisition approved successfully',
-          'Failed to approve distributor permit requisition'
-        );
 
-      case 'requisition': {
-        const isImfl = String(item.id || '').toUpperCase().startsWith('IMFL') || String(item.referenceNo || '').toUpperCase().startsWith('IMFL');
-        if (isImfl) {
-          return this.toActionResult(
-            this.http.post<any>(`${environment.apiBaseUrl}/transactional/distributor-permit/${item.id}/perform-action/`, { action: 'APPROVE' }),
-            'Distributor permit requisition approved successfully',
-            'Failed to approve distributor permit requisition'
-          );
-        }
+    if (this.isImflRequisitionItem(item, itemType)) {
+      const targetId = encodeURIComponent(String(item.referenceNo || item.reference_no || item.id || '').trim());
+      return this.toActionResult(
+        this.http.post<any>(`${environment.apiBaseUrl}/transactional/distributor-permit/${targetId}/perform-action/`, { action: 'APPROVE' }),
+        'Distributor permit requisition approved successfully',
+        'Failed to approve distributor permit requisition'
+      );
+    }
+
+    switch (itemType) {
+      case 'requisition':
         return this.toActionResult(
           this.enaRequisitionService.performAction(item.id, 'APPROVE'),
           'Requisition approved successfully',
           'Failed to approve requisition'
         );
-      }
 
       case 'imfl-revalidation':
       case 'distributor-permit-revalidation':
@@ -402,8 +426,148 @@ export class UnifiedActionsService {
     }
   }
 
+  private promptRejectionReasonWithHologramImpact(item: any, itemType: string): Promise<string | null> {
+    const isImflRequisition = this.isImflRequisitionItem(item, itemType);
+
+    const refNo = String(item?.referenceNo || item?.reference_no || item?.id || 'N/A').trim();
+    
+    // Calculate allocated holograms
+    let ranges: any[] = [];
+    if (Array.isArray(item?.assigned_hologram_ranges) && item.assigned_hologram_ranges.length) {
+      ranges = item.assigned_hologram_ranges;
+    } else if (Array.isArray(item?.assignedHologramRanges) && item.assignedHologramRanges.length) {
+      ranges = item.assignedHologramRanges;
+    } else if (Array.isArray(item?.hologram_ranges) && item.hologram_ranges.length) {
+      ranges = item.hologram_ranges;
+    }
+
+    let serialRangeText = '';
+    let totalHologramCount = 0;
+
+    if (ranges.length > 0) {
+      const activeRanges = ranges.filter((r: any) => String(r?.status || '').toUpperCase() !== 'REVERTED');
+      if (activeRanges.length > 0) {
+        serialRangeText = activeRanges.map((r: any) => `${r.from} &rarr; ${r.to}`).join(', ');
+        totalHologramCount = activeRanges.reduce((acc: number, r: any) => {
+          const f = parseInt(String(r.from || 0).replace(/\D/g, ''), 10);
+          const t = parseInt(String(r.to || 0).replace(/\D/g, ''), 10);
+          const c = Number(r.count || (t >= f && f > 0 ? t - f + 1 : 0));
+          return acc + c;
+        }, 0);
+      }
+    }
+
+    if (!serialRangeText && (item?.hologram_from || item?.hologramFrom) && (item?.hologram_to || item?.hologramTo)) {
+      const fromVal = item.hologram_from || item.hologramFrom;
+      const toVal = item.hologram_to || item.hologramTo;
+      serialRangeText = `${fromVal} &rarr; ${toVal}`;
+      const f = parseInt(String(fromVal).replace(/\D/g, ''), 10);
+      const t = parseInt(String(toVal).replace(/\D/g, ''), 10);
+      totalHologramCount = Number(item.total_holograms_assigned || item.totalHolograms || (t >= f && f > 0 ? t - f + 1 : 0));
+    }
+
+    if (!totalHologramCount && item?.total_holograms_assigned) {
+      totalHologramCount = Number(item.total_holograms_assigned);
+    }
+    if (!totalHologramCount && item?.total_quantity_cases) {
+      const pieces = Array.isArray(item?.items) ? item.items.reduce((sum: number, it: any) => sum + Number(it.pieces || (it.cases * (it.pieces_per_case || 12)) || 0), 0) : 0;
+      if (pieces > 0) totalHologramCount = pieces;
+    }
+
+    const hasHologramReversion = isImflRequisition && (totalHologramCount > 0 || !!serialRangeText);
+
+    let htmlContent = `
+      <div style="text-align: left; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+    `;
+
+    if (hasHologramReversion) {
+      htmlContent += `
+        <!-- Hologram Reversion Alert Card -->
+        <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+          <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <i class="bi bi-arrow-counterclockwise" style="color: #b45309; font-size: 18px; font-weight: bold;"></i>
+            </div>
+            <div>
+              <div style="font-weight: 700; color: #92400e; font-size: 14px;">Automatic Hologram Reversal & Inventory Restoration</div>
+              <div style="font-size: 12px; color: #78350f; margin-top: 2px;">
+                Rejecting this requisition will cancel the assigned holograms and restore them back to <strong>Available Warehouse Inventory Stock</strong>.
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #ffffff; border: 1px solid #fef3c7; border-radius: 8px; padding: 10px;">
+            <div>
+              <div style="font-size: 11px; text-transform: uppercase; color: #6b7280; font-weight: 600;">Reverting Serial Range</div>
+              <div style="font-size: 13px; font-weight: 700; color: #111827; font-family: monospace; margin-top: 2px;">
+                ${serialRangeText || 'Allocated Serials'}
+              </div>
+            </div>
+            <div>
+              <div style="font-size: 11px; text-transform: uppercase; color: #6b7280; font-weight: 600;">Total Restored Quantity</div>
+              <div style="font-size: 14px; font-weight: 700; color: #047857; font-family: monospace; margin-top: 2px;">
+                ${totalHologramCount ? totalHologramCount.toLocaleString() + ' pcs' : 'All Allocated Holograms'}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    htmlContent += `
+        <!-- Rejection Reason Input -->
+        <div style="margin-bottom: 8px;">
+          <label for="swalRejectReasonInput" style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
+            Rejection Reason / Remarks <span style="color: #dc2626;">*</span>
+          </label>
+          <textarea
+            id="swalRejectReasonInput"
+            class="swal2-textarea"
+            rows="3"
+            style="width: 100%; box-sizing: border-box; margin: 0; font-size: 13px; border: 1.5px solid #d1d5db; border-radius: 8px; padding: 10px; resize: vertical; min-height: 80px;"
+            placeholder="Please enter the clear reason for rejecting this application (e.g. document mismatch, quota discrepancy, incorrect batch details)..."
+          ></textarea>
+        </div>
+        <div style="font-size: 11px; color: #6b7280;">
+          <i class="bi bi-shield-lock me-1"></i>This rejection reason will be stored in the workflow audit registry.
+        </div>
+      </div>
+    `;
+
+    return Swal.fire({
+      title: `<div style="font-size: 18px; font-weight: 700; color: #111827; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="bi bi-x-circle-fill text-danger" style="font-size: 22px;"></i>
+                Reject Application ${refNo !== 'N/A' ? '• ' + refNo : ''}
+              </div>`,
+      html: htmlContent,
+      icon: undefined,
+      showCancelButton: true,
+      confirmButtonText: '<i class="bi bi-x-octagon-fill me-1"></i> Confirm Rejection',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6c757d',
+      width: '560px',
+      focusConfirm: false,
+      preConfirm: () => {
+        const input = document.getElementById('swalRejectReasonInput') as HTMLTextAreaElement | null;
+        const val = String(input?.value || '').trim();
+        if (!val) {
+          Swal.showValidationMessage('Rejection reason / remark is required.');
+          return false as any;
+        }
+        return val;
+      }
+    }).then((result) => {
+      if (result.isConfirmed && result.value) {
+        return String(result.value).trim();
+      }
+      return null;
+    });
+  }
+
   private handleRejectAction(item: any, itemType: string): Observable<ActionResult> {
-    if (!item.id) {
+    const itemId = item?.id || item?.referenceNo || item?.reference_no;
+    if (!itemId) {
       return of({
         success: false,
         message: 'Item ID is required for rejection'
@@ -412,94 +576,90 @@ export class UnifiedActionsService {
 
     const hasInlineReason = !!item && Object.prototype.hasOwnProperty.call(item, '__rejectReason');
     const inlineReason = String(item?.__rejectReason ?? item?.rejectReason ?? '').trim();
-    const reason = hasInlineReason
-      ? inlineReason
-      : String(prompt('Enter rejection remark (required):') || '').trim();
 
-    if (!reason) {
-      return of({ success: false, message: 'Rejection cancelled (remark is required).' });
-    }
+    const getReason$: Observable<string | null> = (hasInlineReason && inlineReason)
+      ? of(inlineReason)
+      : from(this.promptRejectionReasonWithHologramImpact(item, itemType));
 
-    switch (itemType) {
-      case 'imfl-requisition':
-      case 'distributor-permit':
-      case 'distributor-permit-requisition':
-        return this.toActionResult(
-          this.http.post<any>(`${environment.apiBaseUrl}/transactional/distributor-permit/${item.id}/perform-action/`, { action: 'REJECT', remarks: reason }),
-          'Distributor permit requisition rejected successfully',
-          'Failed to reject distributor permit requisition'
-        );
+    return getReason$.pipe(
+      switchMap((reason) => {
+        if (!reason) {
+          return of({ success: false, message: 'Rejection cancelled (remark is required).' });
+        }
 
-      case 'requisition': {
-        const isImfl = String(item.id || '').toUpperCase().startsWith('IMFL') || String(item.referenceNo || '').toUpperCase().startsWith('IMFL');
-        if (isImfl) {
+        if (this.isImflRequisitionItem(item, itemType)) {
+          const targetId = encodeURIComponent(String(item.referenceNo || item.reference_no || item.id || '').trim());
           return this.toActionResult(
-            this.http.post<any>(`${environment.apiBaseUrl}/transactional/distributor-permit/${item.id}/perform-action/`, { action: 'REJECT', remarks: reason }),
+            this.http.post<any>(`${environment.apiBaseUrl}/transactional/distributor-permit/${targetId}/perform-action/`, { action: 'REJECT', remarks: reason }),
             'Distributor permit requisition rejected successfully',
             'Failed to reject distributor permit requisition'
           );
         }
-        return this.toActionResult(
-          this.enaRequisitionService.performAction(item.id, 'REJECT'),
-          'Requisition rejected successfully',
-          'Failed to reject requisition'
-        );
-      }
 
-      case 'imfl-revalidation':
-      case 'distributor-permit-revalidation':
-      case 'revalidation': {
-        const revId = item.id || item.referenceNo || item.reference_no || '';
-        return this.toActionResult(
-          this.supplyChainService.performRevalidationAction(revId, 'REJECT', reason),
-          'Revalidation rejected successfully',
-          'Failed to reject revalidation'
-        );
-      }
+        switch (itemType) {
+          case 'requisition':
+            return this.toActionResult(
+              this.enaRequisitionService.performAction(item.id, 'REJECT'),
+              'Requisition rejected successfully',
+              'Failed to reject requisition'
+            );
 
-      case 'imfl-cancellation':
-      case 'distributor-permit-cancellation':
-      case 'cancellation':
-        return this.toActionResult(
-          this.supplyChainService.performCancellationAction(item.id, 'REJECT', reason),
-          'Cancellation rejected successfully',
-          'Failed to reject cancellation'
-        );
+          case 'imfl-revalidation':
+          case 'distributor-permit-revalidation':
+          case 'revalidation': {
+            const revId = item.id || item.referenceNo || item.reference_no || '';
+            return this.toActionResult(
+              this.supplyChainService.performRevalidationAction(revId, 'REJECT', reason),
+              'Revalidation rejected successfully',
+              'Failed to reject revalidation'
+            );
+          }
 
-      case 'transit':
-        return this.toActionResult(
-          this.supplyChainService.performTransitPermitAction(item.id, 'REJECT', reason),
-          'Transit permit rejected successfully',
-          'Failed to reject transit permit'
-        );
+          case 'imfl-cancellation':
+          case 'distributor-permit-cancellation':
+          case 'cancellation':
+            return this.toActionResult(
+              this.supplyChainService.performCancellationAction(item.id, 'REJECT', reason),
+              'Cancellation rejected successfully',
+              'Failed to reject cancellation'
+            );
 
-      case 'hologram':
-        return this.performHologramWorkflowAction(item, 'reject', reason, 'Rejected');
-      case 'new-license':
-      case 'company-registration':
-      case 'company-collaboration':
-      case 'label-registration':
-      case 'salesman-barman-registration':
-      case 'special-permit':
-        return this.executeWorkflowReject(item, reason);
+          case 'transit':
+            return this.toActionResult(
+              this.supplyChainService.performTransitPermitAction(item.id, 'REJECT', reason),
+              'Transit permit rejected successfully',
+              'Failed to reject transit permit'
+            );
 
-      case 'license-renewal':
-        return this.toActionResult(
-          this.http.post<any>(
-            `${environment.apiBaseUrl}/transactional/license_renewal_application/${encodeURIComponent(this.getWorkflowApplicationId(item))}/reject/`,
-            { remarks: reason },
-            { headers: new HttpHeaders({ Accept: 'application/json' }) }
-          ),
-          'Renewal application rejected successfully',
-          'Failed to reject renewal application'
-        );
+          case 'hologram':
+            return this.performHologramWorkflowAction(item, 'reject', reason, 'Rejected');
+          case 'new-license':
+          case 'company-registration':
+          case 'company-collaboration':
+          case 'label-registration':
+          case 'salesman-barman-registration':
+          case 'special-permit':
+            return this.executeWorkflowReject(item, reason);
 
-      default:
-        return of({
-          success: false,
-          message: `Rejection not implemented for ${itemType}`
-        });
-    }
+          case 'license-renewal':
+            return this.toActionResult(
+              this.http.post<any>(
+                `${environment.apiBaseUrl}/transactional/license_renewal_application/${encodeURIComponent(this.getWorkflowApplicationId(item))}/reject/`,
+                { remarks: reason },
+                { headers: new HttpHeaders({ Accept: 'application/json' }) }
+              ),
+              'Renewal application rejected successfully',
+              'Failed to reject renewal application'
+            );
+
+          default:
+            return of({
+              success: false,
+              message: `Rejection not implemented for ${itemType}`
+            });
+        }
+      })
+    );
   }
 
   private handleViewRemarkAction(item: any, itemType: string): Observable<ActionResult> {
@@ -550,19 +710,18 @@ export class UnifiedActionsService {
   }
 
   private handleForwardAction(item: any, itemType: string, options?: ActionExecutionOptions): Observable<ActionResult> {
-    if (!item.id) {
+    const itemId = item?.id || item?.referenceNo || item?.reference_no;
+    if (!itemId) {
       return of({ success: false, message: 'Item ID is required for forward' });
     }
 
-    if (itemType === 'requisition') {
-      const isImfl = String(item.id || '').toUpperCase().startsWith('IMFL') || String(item.referenceNo || '').toUpperCase().startsWith('IMFL');
-      if (isImfl) {
-        return this.toActionResult(
-          this.http.post<any>(`${environment.apiBaseUrl}/transactional/distributor-permit/${item.id}/perform-action/`, { action: 'FORWARD' }),
-          'Distributor permit requisition forwarded successfully',
-          'Failed to forward distributor permit requisition'
-        );
-      }
+    if (this.isImflRequisitionItem(item, itemType)) {
+      const targetId = encodeURIComponent(String(item.referenceNo || item.reference_no || item.id || '').trim());
+      return this.toActionResult(
+        this.http.post<any>(`${environment.apiBaseUrl}/transactional/distributor-permit/${targetId}/perform-action/`, { action: 'FORWARD' }),
+        'Distributor permit requisition forwarded successfully',
+        'Failed to forward distributor permit requisition'
+      );
     }
 
     if (itemType === 'hologram') {
@@ -577,11 +736,21 @@ export class UnifiedActionsService {
   }
 
   private handleVerifyAction(item: any, itemType: string): Observable<ActionResult> {
-    if (!item.id) {
+    const itemId = item?.id || item?.referenceNo || item?.reference_no;
+    if (!itemId) {
       return of({
         success: false,
         message: 'Item ID is required for verification'
       });
+    }
+
+    if (this.isImflRequisitionItem(item, itemType)) {
+      const targetId = encodeURIComponent(String(item.referenceNo || item.reference_no || item.id || '').trim());
+      return this.toActionResult(
+        this.http.post<any>(`${environment.apiBaseUrl}/transactional/distributor-permit/${targetId}/perform-action/`, { action: 'VERIFY' }),
+        'Distributor permit requisition verified successfully',
+        'Failed to verify distributor permit requisition'
+      );
     }
 
     switch (itemType) {
@@ -675,14 +844,11 @@ export class UnifiedActionsService {
     }
 
     // IMFL Distributor Permit payment — directly call backend perform-action (PAY)
-    if (
-      itemType === 'distributor-permit' ||
-      itemType === 'distributor-permit-requisition' ||
-      String(itemType || '').startsWith('imfl-')
-    ) {
+    if (this.isImflRequisitionItem(item, itemType)) {
+      const targetId = encodeURIComponent(String(item.referenceNo || item.reference_no || item.id || '').trim());
       return this.toActionResult(
         this.http.post<any>(
-          `${environment.apiBaseUrl}/transactional/distributor-permit/${item.id}/perform-action/`,
+          `${environment.apiBaseUrl}/transactional/distributor-permit/${targetId}/perform-action/`,
           { action: 'PAY' }
         ),
         'Payment completed successfully. Application forwarded to Permit Section.',
@@ -828,17 +994,18 @@ export class UnifiedActionsService {
   }
 
   private handleForcePayAction(item: any, itemType: string): Observable<ActionResult> {
-    const id = item?.id || item?.referenceNo || item?.reference_no || item?.refNo;
-    if (!id) {
+    const rawId = item?.referenceNo || item?.reference_no || item?.refNo || item?.id;
+    if (!rawId) {
       return of({
         success: false,
         message: 'Item ID is required for force payment'
       });
     }
 
+    const targetId = encodeURIComponent(String(rawId).trim());
     return this.toActionResult(
       this.http.post<any>(
-        `${environment.apiBaseUrl}/transactional/distributor-permit/${id}/perform-action/`,
+        `${environment.apiBaseUrl}/transactional/distributor-permit/${targetId}/perform-action/`,
         { action: 'FORCE_PAY' }
       ),
       'Force payment completed successfully. Application forwarded to Permit Section.',
@@ -1290,19 +1457,38 @@ export class UnifiedActionsService {
   }
 
   private handleRaiseObjectionAction(item: any, itemType: string): Observable<ActionResult> {
-    if (itemType === 'requisition') {
-      const isImfl = String(item.id || '').toUpperCase().startsWith('IMFL') || String(item.referenceNo || '').toUpperCase().startsWith('IMFL');
-      if (isImfl) {
-        const remarks = String(prompt('Enter objection remarks (required):') || '').trim();
-        if (!remarks) {
-          return of({ success: false, message: 'Objection remarks required.' });
-        }
-        return this.toActionResult(
-          this.http.post<any>(`${environment.apiBaseUrl}/transactional/distributor-permit/${item.id}/perform-action/`, { action: 'RAISE_OBJECTION', remarks }),
-          'Objection raised successfully',
-          'Failed to raise objection'
-        );
-      }
+    if (this.isImflRequisitionItem(item, itemType)) {
+      const targetId = encodeURIComponent(String(item?.referenceNo || item?.reference_no || item?.id || '').trim());
+      return from(
+        Swal.fire({
+          title: 'Raise Objection',
+          input: 'textarea',
+          inputLabel: 'Objection Remarks (Required)',
+          inputPlaceholder: 'Enter the objection remarks...',
+          showCancelButton: true,
+          confirmButtonText: 'Submit Objection',
+          confirmButtonColor: '#f59e0b',
+          cancelButtonColor: '#6c757d',
+          inputValidator: (value) => {
+            if (!value || !value.trim()) {
+              return 'Objection remarks are required!';
+            }
+            return null;
+          }
+        })
+      ).pipe(
+        switchMap((result) => {
+          if (!result.isConfirmed || !result.value) {
+            return of({ success: false, message: 'Objection cancelled' });
+          }
+          const remarks = String(result.value).trim();
+          return this.toActionResult(
+            this.http.post<any>(`${environment.apiBaseUrl}/transactional/distributor-permit/${targetId}/perform-action/`, { action: 'RAISE_OBJECTION', remarks }),
+            'Objection raised successfully',
+            'Failed to raise objection'
+          );
+        })
+      );
     }
 
     if (!['new-license', 'company-registration', 'company-collaboration', 'label-registration', 'salesman-barman-registration'].includes(itemType)) {

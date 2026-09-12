@@ -8361,21 +8361,37 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
         });
       }
 
-      // Requisition / Permit Allocated Ranges
+      // Requisition / Permit Allocated or Reverted Ranges
       for (const u of (b.used_hologram_ranges || b.usedHologramRanges || [])) {
         const reqRef = u.requisition_ref_no || u.requisitionRefNo || u.permit_application_ref || u.permitApplicationRef || 'IMFL Requisition';
-        usageItems.push({
-          activity_type: 'ALLOCATED_TO_PERMIT',
-          activity_label: 'Allocated to IMFL Permit Requisition',
-          ref_no: b.imfl_hologram_ref_no || b.imflHologramRefNo,
-          serial_range: `${u.from} → ${u.to}`,
-          quantity: Number(u.count || 0),
-          establishment_name: b.establishment_name || b.establishmentName || b.distributor_name,
-          recorded_by_name: u.applicant_name || u.applicantName || b.recorded_by_name || b.recordedByName || 'Distributor Licensee',
-          activity_date: u.assigned_at || u.assignedAt || b.arrival_date || b.arrivalDate,
-          status: 'ALLOCATED',
-          notes: `Assigned for Requisition / Permit: ${reqRef}`
-        });
+        const isReverted = String(u.status || '').toUpperCase() === 'REVERTED' || String(u.status || '').toUpperCase() === 'CANCELLED' || String(u.status || '').toUpperCase() === 'RESTORED';
+        if (isReverted) {
+          usageItems.push({
+            activity_type: 'REVERTED',
+            activity_label: 'Reverted to Stock (Cancelled/Rejected)',
+            ref_no: b.imfl_hologram_ref_no || b.imflHologramRefNo,
+            serial_range: `${u.from} → ${u.to}`,
+            quantity: Number(u.count || 0),
+            establishment_name: b.establishment_name || b.establishmentName || b.distributor_name,
+            recorded_by_name: u.reverted_by || u.revertedByName || u.applicant_name || 'Excise Authority',
+            activity_date: u.reverted_at || u.revertedAt || u.assigned_at || u.assignedAt || b.arrival_date || b.arrivalDate,
+            status: 'REVERTED',
+            notes: u.notes || u.reversion_reason || `Allocated holograms restored to available stock (Requisition: ${reqRef})`
+          });
+        } else {
+          usageItems.push({
+            activity_type: 'ALLOCATED_TO_PERMIT',
+            activity_label: 'Allocated to IMFL Permit Requisition',
+            ref_no: b.imfl_hologram_ref_no || b.imflHologramRefNo,
+            serial_range: `${u.from} → ${u.to}`,
+            quantity: Number(u.count || 0),
+            establishment_name: b.establishment_name || b.establishmentName || b.distributor_name,
+            recorded_by_name: u.applicant_name || u.applicantName || b.recorded_by_name || b.recordedByName || 'Distributor Licensee',
+            activity_date: u.assigned_at || u.assignedAt || b.arrival_date || b.arrivalDate,
+            status: 'ALLOCATED',
+            notes: `Assigned for Requisition / Permit: ${reqRef}`
+          });
+        }
       }
 
       // Utilized / Affixed / Dispatched ranges

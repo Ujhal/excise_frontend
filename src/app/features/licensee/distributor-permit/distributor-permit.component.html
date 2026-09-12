@@ -1784,6 +1784,7 @@
                 <option value="received">Received</option>
                 <option value="available">Available</option>
                 <option value="utilized">Utilized</option>
+                <option value="reverted">Reverted</option>
                 <option value="damaged">Damaged</option>
                 <option value="pending_serials">Pending</option>
               </select>
@@ -1998,7 +1999,7 @@
                   <td class="ps-4 fw-semibold text-muted">{{ i + 1 }}</td>
                   <td>
                     <div class="fw-bold text-dark d-flex align-items-center gap-2">
-                      <i class="bi" [ngClass]="item.status === 'DAMAGED' ? 'bi-exclamation-triangle-fill text-danger' : item.status === 'DISPATCHED' ? 'bi-truck text-purple' : 'bi-boxes text-primary'"></i>
+                      <i class="bi" [ngClass]="item.status === 'DAMAGED' ? 'bi-exclamation-triangle-fill text-danger' : item.status === 'DISPATCHED' ? 'bi-truck text-purple' : item.status === 'REVERTED' ? 'bi-arrow-counterclockwise text-warning' : 'bi-boxes text-primary'"></i>
                       <span>{{ item.activity_label }}</span>
                     </div>
                     <small class="text-muted">{{ item.notes }}</small>
@@ -2007,7 +2008,7 @@
                     <span class="font-monospace fw-bold text-dark">{{ item.serial_range }}</span>
                   </td>
                   <td>
-                    <span class="badge" [ngClass]="item.status === 'DAMAGED' ? 'bg-danger bg-opacity-10 text-danger' : 'bg-primary bg-opacity-10 text-primary'" style="font-size: 13px;">
+                    <span class="badge" [ngClass]="item.status === 'DAMAGED' ? 'bg-danger bg-opacity-10 text-danger' : item.status === 'REVERTED' ? 'bg-warning bg-opacity-10 text-dark' : 'bg-primary bg-opacity-10 text-primary'" style="font-size: 13px;">
                       {{ item.quantity | number }} pcs
                     </span>
                   </td>
@@ -2024,7 +2025,7 @@
                     <span class="small text-muted">{{ item.activity_date | date:'dd MMM yyyy, hh:mm a' }}</span>
                   </td>
                   <td class="pe-4">
-                    <span class="badge px-2.5 py-1.5 rounded-pill fw-bold" [ngClass]="item.status === 'DAMAGED' ? 'bg-danger text-white' : item.status === 'DISPATCHED' ? 'bg-purple text-white' : 'bg-primary text-white'">
+                    <span class="badge px-2.5 py-1.5 rounded-pill fw-bold" [ngClass]="item.status === 'DAMAGED' ? 'bg-danger text-white' : item.status === 'DISPATCHED' ? 'bg-purple text-white' : item.status === 'REVERTED' ? 'bg-warning text-dark' : 'bg-primary text-white'">
                       {{ item.status }}
                     </span>
                   </td>

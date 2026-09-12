@@ -574,6 +574,16 @@ export class UnifiedActionButtonsComponent implements OnInit, OnChanges {
   }
 
   private showConfirmationDialog(button: ActionButtonConfig): void {
+    const action = this.normalizeActionName(button?.action);
+    if (action === 'REJECT') {
+      if (this.shouldShowTransitOicRejectDeclaration(button)) {
+        this.showTransitOicRejectDeclaration(button);
+        return;
+      }
+      this.executeAction(button);
+      return;
+    }
+
     Swal.fire({
       title: `Confirm ${button.label}`,
       text: button.confirmationMessage || `Are you sure you want to ${button.label.toLowerCase()}?`,
