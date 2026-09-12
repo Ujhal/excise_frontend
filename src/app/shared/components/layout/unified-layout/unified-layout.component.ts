@@ -430,6 +430,22 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
         0
       );
     }
+    if (key === 'distributor-permit-hologram-procurement' || key === 'imfl-hologram-procurement' || key === 'hologram-procurement') {
+      return Number(
+        this.pendingBadgeCounts?.['distributor-permit-hologram-procurement'] ||
+        this.pendingBadgeCounts?.['imfl-hologram-procurement'] ||
+        this.pendingBadgeCounts?.['hologram-procurement'] ||
+        0
+      );
+    }
+    if (key.includes('hologram-procurement:payment') || key.includes('imfl-hologram-procurement:payment')) {
+      return Number(
+        this.pendingBadgeCounts?.['distributor-permit-hologram-procurement:payment'] ||
+        this.pendingBadgeCounts?.['imfl-hologram-procurement:payment'] ||
+        this.pendingBadgeCounts?.['hologram-procurement:payment'] ||
+        0
+      );
+    }
     return count;
   }
 

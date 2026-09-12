@@ -1339,7 +1339,7 @@
                         <button
                           type="button"
                           class="btn btn-sm fw-bold px-2 py-1 shadow-sm d-inline-flex align-items-center gap-1"
-                          *ngIf="act !== 'PAY'"
+                          *ngIf="act !== 'PAY' && !(act.includes('REJECT') && (item.payment_status === 'COMPLETED' || item.payment_status === 'SUCCESS'))"
                           [ngClass]="{
                             'btn-primary text-white': act.includes('FORWARD'),
                             'btn-success text-white': act.includes('APPROVE') || act.includes('FINAL'),
@@ -6369,7 +6369,7 @@
           <button
             type="button"
             class="btn btn-sm fw-bold px-3 py-1.5 shadow-sm d-inline-flex align-items-center gap-1"
-            *ngIf="act !== 'PAY'"
+            *ngIf="act !== 'PAY' && !(act.includes('REJECT') && (selectedHologramItem.payment_status === 'COMPLETED' || selectedHologramItem.payment_status === 'SUCCESS'))"
             [ngClass]="{
               'btn-primary text-white': act.includes('FORWARD'),
               'btn-success text-white': act.includes('APPROVE') || act.includes('FINAL'),

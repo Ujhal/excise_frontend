@@ -5596,7 +5596,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       } catch {}
     }
     const roleName = String(user?.role?.name || user?.role?.displayName || user?.role || '').toLowerCase();
-    if (roleId === 3 || roleId === 12) return true;
+    if ([3, 6, 12].includes(roleId)) return true;
     return roleName.includes('it cell') || roleName.includes('it_cell') || roleName.includes('itcell');
   }
 
@@ -7056,7 +7056,10 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       const applicant = String(item.applicant_name || item.distributor_name || '').toLowerCase();
       const est = String(item.establishment_name || '').toLowerCase();
 
-      const isApproved = stageName.includes('approved by commissioner') || stageName.includes('final approval') || stageName.includes('production completed');
+      const isItCell = this.isItCellUser;
+      const isApproved = isItCell
+        ? (stageName.includes('approved') || stageName.includes('forwarded to commissioner') || stageName.includes('production completed'))
+        : (stageName.includes('approved by commissioner') || stageName.includes('final approval') || stageName.includes('production completed'));
       const isRejected = stageName.includes('rejected') || stageName.includes('cancelled');
       const isPaymentPending = (stageName.includes('approved for payment') || stageName.includes('payment')) && stageName !== 'payment completed' && paymentStatus !== 'COMPLETED';
 
@@ -7077,13 +7080,16 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   }
 
   get hologramCounts(): { total: number; approved: number; pending: number; paymentPending: number; rejected: number } {
+    const isItCell = this.isItCellUser;
     return (this.hologramProcurements || []).reduce(
       (acc, item) => {
         acc.total += 1;
         const stage = String(item.current_stage_name || item.status || '').toLowerCase();
         const paymentStatus = String(item.payment_status || item.paymentStatus || '').toUpperCase();
 
-        const isApproved = stage.includes('approved by commissioner') || stage.includes('final approval') || stage.includes('production completed');
+        const isApproved = isItCell
+          ? (stage.includes('approved') || stage.includes('forwarded to commissioner') || stage.includes('production completed'))
+          : (stage.includes('approved by commissioner') || stage.includes('final approval') || stage.includes('production completed'));
         const isRejected = stage.includes('rejected') || stage.includes('cancelled');
         const isPaymentPending = (stage.includes('approved for payment') || stage.includes('payment')) && stage !== 'payment completed' && paymentStatus !== 'COMPLETED';
 
