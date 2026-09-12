@@ -1296,10 +1296,13 @@ export class CommissionerDashboardComponent implements OnInit {
   // Dashboard statistics methods
   getDashboardStatistics() {
     if (this.selectedModule && this.selectedModule !== 'all') {
-      const mc = this.moduleCounts?.[this.selectedModule];
+      let mc = this.moduleCounts?.[this.selectedModule];
+      if (!mc && (this.selectedModule.includes('hologram-procurement') || this.selectedModule === 'imfl-hologram-procurement' || this.selectedModule === 'distributor-permit-hologram-procurement')) {
+        mc = this.moduleCounts?.['distributor-permit-hologram-procurement'] || this.moduleCounts?.['imfl-hologram-procurement'] || this.moduleCounts?.['hologram-procurement'];
+      }
       if (mc) {
         return {
-          applied: Number(mc.applied || 0),
+          applied: Number(mc.applied ?? mc.total ?? 0),
           pending: Number(mc.pending || 0),
           objection: Number(mc.objection || 0),
           approved: Number(mc.approved || 0),
