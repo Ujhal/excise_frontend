@@ -217,7 +217,7 @@ export class SidebarPendingBadgeService {
     );
   }
 
-  private mapDistributorPermitBadgeTab(section: string): 'requisition' | 'revalidation' | 'cancellation' | 'brand-arrival' | null {
+  private mapDistributorPermitBadgeTab(section: string): 'requisition' | 'revalidation' | 'cancellation' | 'brand-arrival' | 'hologram-procurement' | null {
     switch (section) {
       case 'distributor-permit':
       case 'imfl-permit':
@@ -236,6 +236,10 @@ export class SidebarPendingBadgeService {
       case 'distributor-permit-cancellation':
       case 'imfl-cancellation':
         return 'cancellation';
+      case 'distributor-permit-hologram-procurement':
+      case 'imfl-hologram-procurement':
+      case 'hologram-procurement':
+        return 'hologram-procurement';
       default:
         return null;
     }

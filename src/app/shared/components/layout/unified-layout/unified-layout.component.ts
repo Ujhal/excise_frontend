@@ -493,7 +493,16 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
         return false;
       };
 
-      const licenseeSections: string[] = ['new-license', 'license-renewal', 'salesman-barman-registration', 'company-registration', 'company-collaboration', 'special-permit', 'distributor-permit'];
+      const licenseeSections: string[] = [
+        'new-license',
+        'license-renewal',
+        'salesman-barman-registration',
+        'company-registration',
+        'company-collaboration',
+        'special-permit',
+        'distributor-permit',
+        'distributor-permit-hologram-procurement'
+      ];
       // Distillery licensees always see Bulk Spirit menus even when DB navigation routes are incomplete.
       // Ensure Requisition payment-pending badge still loads in that case.
       if (this.showDistilleryMenus || hasDbRoute(/requisition|ena|bulk[_-]?spirit/)) {
@@ -579,7 +588,10 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
       'imfl-revalidation',
       'distributor-permit-cancellation',
       'imfl-cancellation',
-      'cancellation'
+      'cancellation',
+      'distributor-permit-hologram-procurement',
+      'imfl-hologram-procurement',
+      'hologram-procurement'
     ];
     for (const item of this.officerSectionItems) {
       if (!this.shouldShowOfficerSectionItem(item)) continue;
@@ -592,7 +604,8 @@ export class UnifiedLayoutComponent implements OnInit, OnDestroy, AfterViewInit 
     const req = this.getPendingCount('distributor-permit') || this.getPendingCount('distributor-permit-requisition') || this.getPendingCount('imfl-requisition');
     const rev = this.getPendingCount('distributor-permit-revalidation') || this.getPendingCount('imfl-revalidation');
     const can = this.getPendingCount('distributor-permit-cancellation') || this.getPendingCount('imfl-cancellation');
-    return req + rev + can;
+    const holo = this.getPendingCount('distributor-permit-hologram-procurement') || this.getPendingCount('imfl-hologram-procurement') || this.getPendingCount('hologram-procurement');
+    return req + rev + can + holo;
   }
 
   public shouldShowOfficerSectionItem(item: {

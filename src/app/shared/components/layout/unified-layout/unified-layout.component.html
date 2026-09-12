@@ -71,8 +71,8 @@
                 [class.group-expanded]="imflPermitExpanded">
                 <mat-icon class="nav-icon">local_shipping</mat-icon>
                 <span class="nav-text">IMFL Permit</span>
-                <span class="nav-badge nav-badge--group" *ngIf="!imflPermitExpanded && getPendingCount('distributor-permit') > 0">{{ getPendingCount('distributor-permit') }}</span>
-                <span class="nav-badge nav-badge--payment" *ngIf="!imflPermitExpanded && getPendingCount('distributor-permit:payment') as payCount" title="Awaiting Payment"><mat-icon>payment</mat-icon></span>
+                <span class="nav-badge nav-badge--group" *ngIf="!imflPermitExpanded && getImflPermitTotalPendingCount() > 0">{{ getImflPermitTotalPendingCount() }}</span>
+                <span class="nav-badge nav-badge--payment" *ngIf="!imflPermitExpanded && (getPendingCount('distributor-permit:payment') || getPendingCount('distributor-permit-hologram-procurement:payment')) as payCount" title="Awaiting Payment"><mat-icon>payment</mat-icon></span>
                 <mat-icon class="nav-chevron">{{ imflPermitExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
               </button>
 
@@ -97,6 +97,8 @@
                 <button class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('hologram-procurement')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('hologram-procurement')">
                   <mat-icon class="nav-icon">qr_code_2</mat-icon>
                   <span class="nav-text">IMFL Hologram Procurement</span>
+                  <span class="nav-badge" *ngIf="(getPendingCount('distributor-permit-hologram-procurement') || getPendingCount('imfl-hologram-procurement') || getPendingCount('hologram-procurement')) as pending">{{ pending }}</span>
+                  <span class="nav-badge nav-badge--payment" *ngIf="(getPendingCount('distributor-permit-hologram-procurement:payment') || getPendingCount('imfl-hologram-procurement:payment') || getPendingCount('hologram-procurement:payment')) as payCount" title="Awaiting Payment"><mat-icon>payment</mat-icon></span>
                 </button>
 
                 <button class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('hologram-overview')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('hologram-overview')">
@@ -335,6 +337,7 @@
                   <button *ngIf="isItCellUser() || isCommissionerUser()" class="nav-item nav-item--sub imfl-permit-sub-item" (click)="navigateToImflPermitTab('hologram-procurement')" [class.active]="isDashboardSectionActive('distributor-permit') && isImflTabActive('hologram-procurement')">
                     <mat-icon class="nav-icon">qr_code_2</mat-icon>
                     <span class="nav-text">IMFL Hologram Procurement</span>
+                    <span class="nav-badge" *ngIf="(getPendingCount('distributor-permit-hologram-procurement') || getPendingCount('imfl-hologram-procurement') || getPendingCount('hologram-procurement')) as pending">{{ pending }}</span>
                   </button>
                 </ng-container>
               </ng-container>

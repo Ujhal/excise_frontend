@@ -7035,7 +7035,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   isSubmittingHologram = false;
   hologramRatePerPiece = 0.15;
   hologramSearchFilter = '';
-  hologramStatusFilter = 'all';
+  hologramStatusFilter = 'pending';
   isProcessingHologramAction = false;
   actionRemarksModalOpen = false;
   pendingHologramAction: { item: IMFLHologramProcurementItem; action: string; title: string } | null = null;
@@ -7051,19 +7051,24 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
 
     return (this.hologramProcurements || []).filter((item) => {
       const stageName = String(item.current_stage_name || item.status || '').toLowerCase();
+      const paymentStatus = String(item.payment_status || item.paymentStatus || '').toUpperCase();
       const ref = String(item.ref_no || '').toLowerCase();
       const applicant = String(item.applicant_name || item.distributor_name || '').toLowerCase();
       const est = String(item.establishment_name || '').toLowerCase();
 
+      const isApproved = stageName.includes('approved by commissioner') || stageName.includes('final approval') || stageName.includes('production completed');
+      const isRejected = stageName.includes('rejected') || stageName.includes('cancelled');
+      const isPaymentPending = (stageName.includes('approved for payment') || stageName.includes('payment')) && stageName !== 'payment completed' && paymentStatus !== 'COMPLETED';
+
       let matchesStatus = true;
       if (stFilter === 'approved') {
-        matchesStatus = stageName.includes('approved') || stageName.includes('completed');
+        matchesStatus = isApproved;
       } else if (stFilter === 'pending') {
-        matchesStatus = stageName.includes('review') || stageName.includes('forwarded') || stageName.includes('submitted');
+        matchesStatus = !isApproved && !isRejected && !isPaymentPending;
       } else if (stFilter === 'payment') {
-        matchesStatus = stageName.includes('payment') || String(item.payment_status || '').toLowerCase() === 'pending';
+        matchesStatus = isPaymentPending;
       } else if (stFilter === 'rejected') {
-        matchesStatus = stageName.includes('rejected');
+        matchesStatus = isRejected;
       }
 
       const matchesSearch = !q || ref.includes(q) || applicant.includes(q) || est.includes(q);
@@ -7076,12 +7081,18 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
       (acc, item) => {
         acc.total += 1;
         const stage = String(item.current_stage_name || item.status || '').toLowerCase();
-        if (stage.includes('approved') || stage.includes('completed')) {
-          acc.approved += 1;
-        } else if (stage.includes('payment') || (String(item.payment_status || '').toLowerCase() === 'pending' && stage.includes('approved for payment'))) {
-          acc.paymentPending += 1;
-        } else if (stage.includes('rejected')) {
+        const paymentStatus = String(item.payment_status || item.paymentStatus || '').toUpperCase();
+
+        const isApproved = stage.includes('approved by commissioner') || stage.includes('final approval') || stage.includes('production completed');
+        const isRejected = stage.includes('rejected') || stage.includes('cancelled');
+        const isPaymentPending = (stage.includes('approved for payment') || stage.includes('payment')) && stage !== 'payment completed' && paymentStatus !== 'COMPLETED';
+
+        if (isRejected) {
           acc.rejected += 1;
+        } else if (isPaymentPending) {
+          acc.paymentPending += 1;
+        } else if (isApproved) {
+          acc.approved += 1;
         } else {
           acc.pending += 1;
         }
@@ -7113,6 +7124,9 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
           allowed_actions: item.allowed_actions || item.allowedActions || []
         }));
         this.isLoadingHologram = false;
+        if (!silent) {
+          this.autoSelectDefaultHologramStatusFilter();
+        }
         this.cdr.markForCheck();
       },
       error: (err) => {
@@ -7121,6 +7135,23 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       }
     });
+  }
+
+  autoSelectDefaultHologramStatusFilter(): void {
+    const statusParam = String(this.route.snapshot.queryParams['status'] || '').toLowerCase();
+    if (['all', 'approved', 'pending', 'payment', 'rejected'].includes(statusParam)) {
+      this.hologramStatusFilter = statusParam;
+      return;
+    }
+    if (this.hologramCounts.paymentPending > 0) {
+      this.hologramStatusFilter = 'payment';
+    } else if (this.hologramCounts.pending > 0) {
+      this.hologramStatusFilter = 'pending';
+    } else if (this.hologramCounts.approved > 0) {
+      this.hologramStatusFilter = 'approved';
+    } else {
+      this.hologramStatusFilter = 'all';
+    }
   }
 
   handleApplyNew(): void {
@@ -7268,6 +7299,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
           showConfirmButton: true
         });
 
+        this.sidebarPendingBadgeService.triggerRefresh();
         this.loadHologramProcurements(true);
         this.cdr.detectChanges();
       },
@@ -7335,6 +7367,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
           showConfirmButton: true
         });
 
+        this.sidebarPendingBadgeService.triggerRefresh();
         this.loadHologramProcurements(true);
         this.cdr.detectChanges();
       },
@@ -7532,6 +7565,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
           showConfirmButton: true
         });
 
+        this.sidebarPendingBadgeService.triggerRefresh();
         this.loadHologramProcurements(true);
         this.cdr.detectChanges();
       },
