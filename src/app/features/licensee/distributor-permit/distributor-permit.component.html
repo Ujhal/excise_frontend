@@ -1436,7 +1436,7 @@
                       <button
                         type="button"
                         class="btn btn-sm btn-success fw-bold px-2.5 py-1 shadow-sm text-white"
-                        *ngIf="isOfficerUser && !isHologramArrivalUpdated(item)"
+                        *ngIf="isOfficerUser && !isHologramArrivalUpdated(item) && !isHologramArrivalRejected(item)"
                         (click)="openEnterSerialsModal(item)"
                         title="Enter Serial Numbers"
                       >

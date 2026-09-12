@@ -7610,11 +7610,22 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   selectedHologramArrivalItem: IMFLHologramArrivalItem | null = null;
   showHologramArrivalDetailsModal = false;
 
+  isHologramArrivalRejected(item: any): boolean {
+    if (!item) return false;
+    const st = String(item.status || '').toLowerCase();
+    const stage = String(item.current_stage || item.current_stage_name || item.currentStage || item.currentStageName || '').toLowerCase();
+    const pStatus = String(item.procurement_status || item.procurementStatus || item.payment_status || item.paymentStatus || '').toLowerCase();
+    return st.includes('reject') || st.includes('cancel') || stage.includes('reject') || stage.includes('cancel') || pStatus.includes('reject') || pStatus.includes('cancel');
+  }
+
   get filteredHologramArrivals(): IMFLHologramArrivalItem[] {
     const q = this.hologramArrivalSearchFilter.trim().toLowerCase();
     const st = this.hologramArrivalStatusFilter;
 
     return (this.hologramArrivals || []).filter((item) => {
+      if (this.isHologramArrivalRejected(item)) {
+        return false;
+      }
       const ref = String(item.imfl_hologram_ref_no || item.procurement_ref_no || '').toLowerCase();
       const dist = String(item.distributor_name || '').toLowerCase();
       const lic = String(item.license_number || '').toLowerCase();
@@ -7641,7 +7652,7 @@ export class DistributorPermitComponent implements OnInit, OnDestroy {
   }
 
   get hologramArrivalCounts(): { totalRecords: number; totalHolograms: number; totalDamaged: number } {
-    return (this.hologramArrivals || []).reduce(
+    return (this.filteredHologramArrivals || []).reduce(
       (acc, item) => {
         acc.totalRecords += 1;
         // Count holograms only after serial numbers have actually been recorded/saved
