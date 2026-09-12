@@ -384,14 +384,20 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
           (this.dashboardCounts.awaitingPayment || 0);
     }
 
-    const scModules = ['requisition', 'revalidation', 'cancellation', 'transit', 'hologram'];
+    const scModules = [
+      'requisition', 'revalidation', 'cancellation', 'transit', 'hologram',
+      'distributor-permit', 'distributor-permit-requisition', 'distributor-permit-revalidation',
+      'distributor-permit-cancellation', 'distributor-permit-brand-arrival',
+      'distributor-permit-hologram-procurement', 'imfl-hologram-procurement'
+    ];
     if (scModules.includes(moduleName)) {
       const counts = this.supplyChainModuleCounts[moduleName];
+      if (!counts) return 0;
       if (counts?.applied != null && counts.applied > 0) return counts.applied;
       return (counts?.pending || 0) + (counts?.approved || 0) + (counts?.objection || 0) + (counts?.rejected || 0) + ((counts as any)?.awaitingPayment || 0);
     }
 
-    let sourceCounts: DashboardCount = this.dashboardCounts;
+    let sourceCounts: DashboardCount = { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0 };
 
     if (moduleName === 'newLicense') {
       sourceCounts = this.detailedCounts.newLicense;
@@ -449,6 +455,38 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onChartModuleChange(moduleName: string): void {
     this.selectedChartModule = moduleName;
+    const tabMap: Record<string, 'requisition' | 'revalidation' | 'cancellation' | 'brand-arrival' | 'hologram-procurement'> = {
+      'distributor-permit': 'requisition',
+      'distributor-permit-requisition': 'requisition',
+      'distributor-permit-revalidation': 'revalidation',
+      'distributor-permit-cancellation': 'cancellation',
+      'distributor-permit-brand-arrival': 'brand-arrival',
+      'distributor-permit-hologram-procurement': 'hologram-procurement',
+      'imfl-hologram-procurement': 'hologram-procurement'
+    };
+    const tab = tabMap[moduleName];
+    if (tab) {
+      this.distributorPermitService.getDashboardCounts(tab, true).subscribe({
+        next: (counts) => {
+          if (counts) {
+            const parsed = {
+              applied: Number(counts.applied ?? counts.total ?? 0),
+              pending: Number(counts.pending ?? 0),
+              approved: Number(counts.approved ?? 0),
+              objection: Number(counts.objection ?? 0),
+              rejected: Number(counts.rejected ?? 0),
+              awaitingPayment: Number(counts.awaitingPayment ?? counts.awaiting_payment ?? 0)
+            };
+            this.supplyChainModuleCounts[moduleName] = parsed;
+            if (moduleName === 'distributor-permit-hologram-procurement') {
+              this.supplyChainModuleCounts['imfl-hologram-procurement'] = parsed;
+            }
+            this.updateSingleWindowChart();
+          }
+        },
+        error: () => {}
+      });
+    }
     this.updateSingleWindowChart();
   }
 
@@ -641,6 +679,12 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (this.selectedChartModule !== 'all' && this.supplyChainModuleCounts[this.selectedChartModule]) {
       const sourceCounts = this.supplyChainModuleCounts[this.selectedChartModule];
+      if (status === 'applied') {
+        if (sourceCounts.applied != null && sourceCounts.applied > 0) {
+          return sourceCounts.applied;
+        }
+        return (sourceCounts.pending || 0) + (sourceCounts.approved || 0) + (sourceCounts.objection || 0) + (sourceCounts.rejected || 0) + ((sourceCounts as any).awaitingPayment || (sourceCounts as any)?.awaiting_payment || 0);
+      }
       if (status === 'pending') {
         const awaiting = (this.isLicenseeUser() || this.isDistributorUser()) && !this.shouldShowStatCard('awaitingPayment')
           ? ((sourceCounts as any).awaitingPayment || (sourceCounts as any)?.awaiting_payment || 0)
@@ -650,7 +694,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       return (sourceCounts as any)?.[status] || 0;
     }
 
-    let sourceCounts = this.dashboardCounts;
+    let sourceCounts: DashboardCount & { awaitingPayment?: number } = this.selectedChartModule === 'all'
+      ? this.dashboardCounts
+      : { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 };
     if (this.selectedChartModule === 'newLicense') {
       sourceCounts = this.detailedCounts.newLicense;
     } else if (this.selectedChartModule === 'renewal') {
@@ -1416,14 +1462,21 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private companyCollaborationService = inject(CompanyCollaborationService);
   public availableChartModules: { value: string; label: string }[] = [];
 
-  public supplyChainModuleCounts: Record<string, DashboardCount> = {
-    requisition: { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0 },
-    revalidation: { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0 },
-    cancellation: { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0 },
-    transit: { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0 },
-    hologram: { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0 },
-    company: { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0 },
-    'company-collaboration': { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0 }
+  public supplyChainModuleCounts: Record<string, DashboardCount & { awaitingPayment?: number }> = {
+    requisition: { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 },
+    revalidation: { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 },
+    cancellation: { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 },
+    transit: { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 },
+    hologram: { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 },
+    company: { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 },
+    'company-collaboration': { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 },
+    'distributor-permit': { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 },
+    'distributor-permit-requisition': { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 },
+    'distributor-permit-revalidation': { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 },
+    'distributor-permit-cancellation': { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 },
+    'distributor-permit-brand-arrival': { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 },
+    'distributor-permit-hologram-procurement': { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 },
+    'imfl-hologram-procurement': { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0, awaitingPayment: 0 }
   };
   private showBreweryOrDistilleryWalletViews = false;
   private showManufacturingWalletNav = false;

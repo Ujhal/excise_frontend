@@ -1879,20 +1879,22 @@ export class UnifiedSupplyChainViewComponent implements OnInit {
     }
 
     getUserContext(): UserContext {
-        const source = this.route.snapshot.queryParamMap.get('source');
+        // Priority 1: Check authenticated user's actual role directly
+        if (this.roleService.hasRole(10) || this.roleService.hasRole(11) || this.roleService.hasRole(12) || this.roleService.hasRole(1) || this.roleService.hasRole(3) || this.roleService.hasRole(9)) {
+            return USER_CONTEXTS.COMMISSIONER;
+        }
+        if (this.roleService.hasRole(5)) {
+            return USER_CONTEXTS.PERMIT_SECTION;
+        }
+        if (this.roleService.hasRole(6)) {
+            return USER_CONTEXTS.IT_CELL;
+        }
+        if (this.isOicUser() || this.roleService.hasRole(7) || this.roleService.hasRole(4)) {
+            return USER_CONTEXTS.OFFICER_IN_CHARGE;
+        }
 
-        // Verify if user is an officer (all non-licensee roles: 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14)
-        const isOfficer = this.roleService.hasRole(1) || 
-                          this.roleService.hasRole(3) || 
-                          this.roleService.hasRole(4) || 
-                          this.roleService.hasRole(5) || 
-                          this.roleService.hasRole(6) || 
-                          this.roleService.hasRole(7) || 
-                          this.roleService.hasRole(8) ||
-                          this.roleService.hasRole(9) ||
-                          this.roleService.hasRole(10) ||
-                          this.roleService.hasRole(11) ||
-                          this.roleService.hasRole(12) ||
+        const source = this.route.snapshot.queryParamMap.get('source');
+        const isOfficer = this.roleService.hasRole(8) ||
                           this.roleService.hasRole(14) ||
                           this.isOicUser();
 
@@ -1918,17 +1920,7 @@ export class UnifiedSupplyChainViewComponent implements OnInit {
         };
 
         if (source && contextMap[source]) {
-            const mapped = contextMap[source];
-            if (mapped !== USER_CONTEXTS.LICENSEE || !isOfficer) {
-                return mapped;
-            }
-        }
-
-        if (this.roleService.hasRole(10) || this.roleService.hasRole(11) || this.roleService.hasRole(12) || this.roleService.hasRole(1) || this.roleService.hasRole(3) || this.roleService.hasRole(4) || this.roleService.hasRole(8) || this.roleService.hasRole(9)) {
-            return USER_CONTEXTS.COMMISSIONER;
-        }
-        if (this.roleService.hasRole(5)) {
-            return USER_CONTEXTS.PERMIT_SECTION;
+            return contextMap[source];
         }
 
         const currentUrl = this.router.url;
