@@ -30,13 +30,18 @@ export interface ApplicationWorkflowData {
     | 'transit'
     | 'hologram'
     | 'hologram-procurement'
+    | 'imfl-requisition'
+    | 'imfl-revalidation'
+    | 'imfl-cancellation'
+    | 'distributor-permit'
     | 'new-license'
     | 'license-renewal'
     | 'company-registration'
     | 'company-collaboration'
     | 'label-registration'
     | 'salesman-barman-registration'
-    | 'special-permit';
+    | 'special-permit'
+    | string;
   status: string;
   referenceNo?: string;
   allowedActionConfigs?: WorkflowActionConfig[];

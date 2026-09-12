@@ -19,7 +19,7 @@ interface CommissionerData {
   distilleryName: string;
   status: string;
   amount: string;
-  type: 'requisition' | 'revalidation' | 'transit' | 'hologram' | 'cancellation';
+  type: 'requisition' | 'revalidation' | 'transit' | 'hologram' | 'cancellation' | 'imfl-requisition' | 'imfl-revalidation' | 'imfl-cancellation';
   localQtyLakh?: number;
   exportQtyLakh?: number;
   defenceQtyLakh?: number;
@@ -977,14 +977,28 @@ export class CommissionerDashboardComponent implements OnInit {
 
         list.forEach((item: any) => {
           const status = String(item.status || '').toUpperCase();
-          const stage = String(item.current_stage || item.currentStage || '').toLowerCase();
-          if (status === 'SUBMITTED' || status === 'DRAFT' || stage === 'permit_section') {
+          const stageName = String(
+            item.current_stage_name ||
+            item.currentStageName ||
+            (typeof item.current_stage === 'string' ? item.current_stage : item.current_stage?.name) ||
+            (typeof item.currentStage === 'string' ? item.currentStage : item.currentStage?.name) ||
+            ''
+          ).toLowerCase();
+          const stageId = Number(
+            item.current_stage_id ||
+            item.currentStageId ||
+            item.current_stage?.id ||
+            item.currentStage?.id ||
+            (typeof item.current_stage === 'number' ? item.current_stage : 0)
+          );
+
+          if (status === 'SUBMITTED' || status === 'DRAFT' || stageName === 'permit_section' || stageName === 'forwarded permit section' || stageId === 148) {
             return;
           }
 
-          const isApproved = status.includes('APPROV');
-          const isRejected = status.includes('REJECT') || status.includes('CANCEL');
-          const isPendingCommissioner = this.requiresCommissionerReview(item.status) || this.requiresCommissionerReview(item.current_stage);
+          const isApproved = status.includes('APPROV') || stageName.includes('approved');
+          const isRejected = status.includes('REJECT') || status.includes('CANCEL') || stageName.includes('rejected');
+          const isPendingCommissioner = stageId === 153 || stageId === 157 || this.requiresCommissionerReview(item.status) || this.requiresCommissionerReview(stageName);
 
           const actionsFromBackend = Array.isArray(item.allowedActions || item.allowed_actions)
             ? (item.allowedActions || item.allowed_actions)
@@ -993,7 +1007,7 @@ export class CommissionerDashboardComponent implements OnInit {
           const allowedActions = actionsFromBackend.length > 0
             ? actionsFromBackend
             : ((isPendingCommissioner && !isApproved && !isRejected)
-                ? ['VIEW', 'FORWARD', 'APPROVE', 'REJECT', 'RAISE_OBJECTION']
+                ? ['VIEW', 'APPROVE', 'REJECT', 'RAISE_OBJECTION']
                 : ['VIEW']);
 
           const ref = String(item.reference_no || item.referenceNo || '').toUpperCase();
@@ -1002,9 +1016,11 @@ export class CommissionerDashboardComponent implements OnInit {
             referenceNo: item.reference_no || item.referenceNo,
             submissionDate: this.formatDate(item.submitted_at || item.submittedAt || item.created_at || item.createdAt),
             distilleryName: item.supplier_company_name || item.supplierCompanyName || item.applicant_name || item.applicantName || 'N/A',
-            status: item.status || 'PENDING',
+            status: isPendingCommissioner && !isApproved && !isRejected
+              ? (stageId === 157 || stageName.includes('payslip') ? 'Forwarded PaySlip Commissioner' : 'Forwarded Commissioner')
+              : (item.status || 'PENDING'),
             amount: String(item.total_import_value || item.totalImportValue || '0.00'),
-            type: ref.startsWith('IMFLREV') ? 'revalidation' : (ref.startsWith('IMFLCAN') ? 'cancellation' : 'requisition'),
+            type: ref.startsWith('IMFLREV') ? 'imfl-revalidation' : (ref.startsWith('IMFLCAN') ? 'imfl-cancellation' : 'imfl-requisition'),
             allowedActions: allowedActions,
             allowedActionConfigs: []
           };
@@ -1018,9 +1034,9 @@ export class CommissionerDashboardComponent implements OnInit {
           }
         });
 
-        if (reqs.length > 0) this.updateApplications('requisition', reqs);
-        if (revals.length > 0) this.updateApplications('revalidation', revals);
-        if (cancs.length > 0) this.updateApplications('cancellation', cancs);
+        if (reqs.length > 0) this.updateApplications('imfl-requisition', reqs);
+        if (revals.length > 0) this.updateApplications('imfl-revalidation', revals);
+        if (cancs.length > 0) this.updateApplications('imfl-cancellation', cancs);
       },
       error: (err) => console.error('Error loading distributor permits for commissioner:', err)
     });
@@ -1264,12 +1280,13 @@ export class CommissionerDashboardComponent implements OnInit {
     return total * 0.15;
   }
 
-  private requiresCommissionerReview(status: string): boolean {
-    const statusLower = status?.toLowerCase() || '';
+  private requiresCommissionerReview(status: any): boolean {
+    const statusLower = (typeof status === 'string' ? status : (status as any)?.name || '')?.toLowerCase() || '';
     return statusLower.includes('commissioner') || 
            statusLower.includes('pending_commissioner') ||
            statusLower.includes('under_commissioner_review') ||
-           (statusLower.includes('forwarded') && statusLower.includes('commissioner'));
+           (statusLower.includes('forwarded') && statusLower.includes('commissioner')) ||
+           statusLower.includes('payslip commissioner');
   }
 
   private updateApplications(type: string, newApplications: CommissionerData[]): void {
@@ -1300,6 +1317,9 @@ export class CommissionerDashboardComponent implements OnInit {
       if (!mc && (this.selectedModule.includes('hologram-procurement') || this.selectedModule === 'imfl-hologram-procurement' || this.selectedModule === 'distributor-permit-hologram-procurement')) {
         mc = this.moduleCounts?.['distributor-permit-hologram-procurement'] || this.moduleCounts?.['imfl-hologram-procurement'] || this.moduleCounts?.['hologram-procurement'];
       }
+      if (!mc && (this.selectedModule === 'imfl-requisition' || this.selectedModule === 'distributor-permit-requisition' || this.selectedModule === 'distributor-permit')) {
+        mc = this.moduleCounts?.['distributor-permit-requisition'] || this.moduleCounts?.['distributor-permit'] || this.moduleCounts?.['imfl-requisition'];
+      }
       if (mc) {
         return {
           applied: Number(mc.applied ?? mc.total ?? 0),
@@ -1321,13 +1341,14 @@ export class CommissionerDashboardComponent implements OnInit {
         return upper.includes('APPROVE') || upper.includes('REJECT');
       });
 
-    const countedIds = new Set(countedByActions.map(app => app.id));
+    const countedIds = new Set(countedByActions.map(app => app.id || app.referenceNo));
 
     // Also count items with no allowedActions that are specifically at the commissioner's stage
     const countedByStatus = this.allApplications
       .filter(app => app.type !== 'hologram')
       .filter(app => {
-        if (countedIds.has(app.id)) return false;
+        const appKey = app.id || app.referenceNo;
+        if (countedIds.has(appKey)) return false;
         const st = String(app?.status || '').toLowerCase().replace(/[^a-z0-9]/g, '');
         if (st.includes('approv') || st.includes('reject') || st.includes('cancel')) return false;
         // Forwarded to commissioner or pending specifically at commissioner level
@@ -1335,13 +1356,19 @@ export class CommissionerDashboardComponent implements OnInit {
         return false;
       });
 
-    const otherPending = countedByActions.length + countedByStatus.length;
-    const effectiveHologramPending = this.hologramPendingCount;
+    const distReqPendingFromCounts = Number(this.moduleCounts?.['distributor-permit-requisition']?.pending || this.moduleCounts?.['distributor-permit']?.pending || 0);
+    const distRevPendingFromCounts = Number(this.moduleCounts?.['distributor-permit-revalidation']?.pending || 0);
+    const distCanPendingFromCounts = Number(this.moduleCounts?.['distributor-permit-cancellation']?.pending || 0);
+    const distHoloPendingFromCounts = Number(this.moduleCounts?.['distributor-permit-hologram-procurement']?.pending || this.moduleCounts?.['imfl-hologram-procurement']?.pending || 0);
+    const distPermitPendingFromCounts = distReqPendingFromCounts + distRevPendingFromCounts + distCanPendingFromCounts;
+
+    const otherPending = Math.max(countedByActions.length + countedByStatus.length, distPermitPendingFromCounts);
+    const effectiveHologramPending = Math.max(this.hologramPendingCount, distHoloPendingFromCounts);
     const totalPending = effectiveHologramPending + otherPending;
 
     return {
-      applied: this.getStatusCount('APPLIED') + this.getStatusCount('SUBMITTED') + (this.unifiedCounts?.applied || 0),
-      pending: totalPending,
+      applied: this.getStatusCount('APPLIED') + this.getStatusCount('SUBMITTED') + (this.unifiedCounts?.applied || 0) + this.allApplications.length,
+      pending: totalPending + (this.unifiedCounts?.pending || 0),
       objection: this.getStatusCount('OBJECTION') + (this.unifiedCounts?.objection || 0),
       approved: this.getStatusCount('APPROVED') + this.getStatusCount('APPROVED_BY_COMMISSIONER') + (this.unifiedCounts?.approved || 0),
       rejected: this.getStatusCount('REJECTED') + this.getStatusCount('REJECTED_BY_COMMISSIONER') + (this.unifiedCounts?.rejected || 0)

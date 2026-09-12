@@ -163,7 +163,7 @@ export interface ActionButtonConfig {
 })
 export class UnifiedActionButtonsComponent implements OnInit, OnChanges {
   @Input() item!: ActionItem;
-  @Input() itemType: ApplicationType = 'requisition';
+  @Input() itemType: ApplicationType | string = 'requisition';
   @Input() context: 'licensee' | 'permit-section' | 'commissioner' | 'itcell' | 'officer-in-charge' = 'licensee';
   @Input() displayMode: 'table' | 'detailed' = 'table';
   @Input() includeActions: string[] | null = null;
@@ -253,7 +253,16 @@ export class UnifiedActionButtonsComponent implements OnInit, OnChanges {
       : (Array.isArray(this.item?.['allowed_actions']) && (this.item['allowed_actions'] as any[]).length > 0 ? (this.item['allowed_actions'] as any[]) : []);
 
     if (itemAllowedActions.length > 0) {
-      this.availableActionConfigs = this.normalizeActionConfigs(itemAllowedActions.map((act: string) => ({ action: act })));
+      let actions = itemAllowedActions.map((act: string) => String(act || '').toUpperCase().trim());
+      if (this.context === 'permit-section') {
+        if (actions.includes('FORWARD') && actions.includes('APPROVE')) {
+          actions = actions.filter(a => a !== 'APPROVE');
+        } else if (actions.includes('APPROVE') && !actions.includes('FORWARD')) {
+          actions = actions.map(a => a === 'APPROVE' ? 'FORWARD' : a);
+        }
+        actions = actions.filter(a => a !== 'VERIFY');
+      }
+      this.availableActionConfigs = this.normalizeActionConfigs(actions.map((act: string) => ({ action: act })));
       this.isLoading = false;
       console.log('UNIFIED BUTTONS: Using item.allowedActions:', this.availableActionConfigs);
       return;
@@ -261,7 +270,18 @@ export class UnifiedActionButtonsComponent implements OnInit, OnChanges {
 
     // Step 1: If item already has configs from parent, use them
     if (this.item.allowedActionConfigs && this.item.allowedActionConfigs.length > 0) {
-      this.availableActionConfigs = this.normalizeActionConfigs(this.item.allowedActionConfigs);
+      let configs = this.item.allowedActionConfigs;
+      if (this.context === 'permit-section') {
+        const hasForward = configs.some(c => this.normalizeActionName(c?.action) === 'FORWARD');
+        const hasApprove = configs.some(c => this.normalizeActionName(c?.action) === 'APPROVE');
+        if (hasForward && hasApprove) {
+          configs = configs.filter(c => this.normalizeActionName(c?.action) !== 'APPROVE');
+        } else if (hasApprove && !hasForward) {
+          configs = configs.map(c => this.normalizeActionName(c?.action) === 'APPROVE' ? { ...c, action: 'FORWARD', label: 'Forward to Commissioner', icon: 'send', color: 'primary' as const } : c);
+        }
+        configs = configs.filter(c => this.normalizeActionName(c?.action) !== 'VERIFY');
+      }
+      this.availableActionConfigs = this.normalizeActionConfigs(configs);
       this.isLoading = false;
       console.log('UNIFIED BUTTONS: Using pre-loaded configs from parent:', this.availableActionConfigs);
       return;
@@ -285,6 +305,16 @@ export class UnifiedActionButtonsComponent implements OnInit, OnChanges {
     this.workflowActionService.getAvailableActions(requestData).subscribe({
       next: (configs) => {
         let normalized = this.normalizeActionConfigs(configs || []);
+        if (this.context === 'permit-section') {
+          const hasForward = normalized.some(c => c.action === 'FORWARD');
+          const hasApprove = normalized.some(c => c.action === 'APPROVE');
+          if (hasForward && hasApprove) {
+            normalized = normalized.filter(c => c.action !== 'APPROVE');
+          } else if (hasApprove && !hasForward) {
+            normalized = normalized.map(c => c.action === 'APPROVE' ? { ...c, action: 'FORWARD', label: 'Forward to Commissioner', icon: 'send', color: 'primary' as const } : c);
+          }
+          normalized = normalized.filter(c => c.action !== 'VERIFY');
+        }
         const itemTypeStr = String(this.itemType || '');
         if (normalized.length === 0 && (itemTypeStr === 'requisition' || itemTypeStr === 'imfl-requisition')) {
           normalized = this.getRequisitionFallbackActionConfigs();
@@ -333,7 +363,6 @@ export class UnifiedActionButtonsComponent implements OnInit, OnChanges {
       // 1. Payslip review stage at Permit Section
       if (status.includes('PAYSLIP') && !status.includes('COMMISSIONER')) {
         return [
-          { action: 'VERIFY', label: 'Verify Payslip', icon: 'verified', color: 'success', tooltip: 'Verify Payslip & Forward' },
           { action: 'FORWARD', label: 'Forward to Commissioner', icon: 'send', color: 'primary', tooltip: 'Forward to Commissioner' },
           { action: 'REJECT', label: 'Reject', icon: 'cancel', color: 'warn', tooltip: 'Reject Application' }
         ];

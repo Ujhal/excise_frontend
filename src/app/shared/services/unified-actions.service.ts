@@ -50,7 +50,7 @@ export class UnifiedActionsService {
   executeAction(
     action: string,
     item: any,
-    itemType: ApplicationType,
+    itemType: ApplicationType | string,
     context?: string,
     options?: ActionExecutionOptions
   ): Observable<ActionResult> {
@@ -81,7 +81,7 @@ export class UnifiedActionsService {
   private executeActionInternal(
     action: string,
     item: any,
-    itemType: ApplicationType,
+    itemType: ApplicationType | string,
     context?: string,
     options?: ActionExecutionOptions
   ): Observable<ActionResult> {
@@ -313,6 +313,15 @@ export class UnifiedActionsService {
       });
     }
     switch (itemType) {
+      case 'imfl-requisition':
+      case 'distributor-permit':
+      case 'distributor-permit-requisition':
+        return this.toActionResult(
+          this.http.post<any>(`${environment.apiBaseUrl}/transactional/distributor-permit/${item.id}/perform-action/`, { action: 'APPROVE' }),
+          'Distributor permit requisition approved successfully',
+          'Failed to approve distributor permit requisition'
+        );
+
       case 'requisition': {
         const isImfl = String(item.id || '').toUpperCase().startsWith('IMFL') || String(item.referenceNo || '').toUpperCase().startsWith('IMFL');
         if (isImfl) {
@@ -329,6 +338,8 @@ export class UnifiedActionsService {
         );
       }
 
+      case 'imfl-revalidation':
+      case 'distributor-permit-revalidation':
       case 'revalidation': {
         const revId = item.id || item.referenceNo || item.reference_no || '';
         return this.toActionResult(
@@ -338,6 +349,8 @@ export class UnifiedActionsService {
         );
       }
 
+      case 'imfl-cancellation':
+      case 'distributor-permit-cancellation':
       case 'cancellation': {
         const cancelId = item.id || item.referenceNo || item.reference_no || '';
         return this.toActionResult(
@@ -408,6 +421,15 @@ export class UnifiedActionsService {
     }
 
     switch (itemType) {
+      case 'imfl-requisition':
+      case 'distributor-permit':
+      case 'distributor-permit-requisition':
+        return this.toActionResult(
+          this.http.post<any>(`${environment.apiBaseUrl}/transactional/distributor-permit/${item.id}/perform-action/`, { action: 'REJECT', remarks: reason }),
+          'Distributor permit requisition rejected successfully',
+          'Failed to reject distributor permit requisition'
+        );
+
       case 'requisition': {
         const isImfl = String(item.id || '').toUpperCase().startsWith('IMFL') || String(item.referenceNo || '').toUpperCase().startsWith('IMFL');
         if (isImfl) {
@@ -424,6 +446,8 @@ export class UnifiedActionsService {
         );
       }
 
+      case 'imfl-revalidation':
+      case 'distributor-permit-revalidation':
       case 'revalidation': {
         const revId = item.id || item.referenceNo || item.reference_no || '';
         return this.toActionResult(
@@ -433,6 +457,8 @@ export class UnifiedActionsService {
         );
       }
 
+      case 'imfl-cancellation':
+      case 'distributor-permit-cancellation':
       case 'cancellation':
         return this.toActionResult(
           this.supplyChainService.performCancellationAction(item.id, 'REJECT', reason),

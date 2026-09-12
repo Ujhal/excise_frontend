@@ -3384,6 +3384,8 @@ export class UnifiedSupplyChainViewComponent implements OnInit {
             return [];
         }
 
+        const context = this.getUserContext();
+
         const rawAllowedActions = this.applicationData.allowedActions ?? this.applicationData['allowed_actions'];
         if (Array.isArray(rawAllowedActions)) {
             let actions = (rawAllowedActions as string[])
@@ -3408,6 +3410,15 @@ export class UnifiedSupplyChainViewComponent implements OnInit {
                 actions = actions.filter(a => a !== 'REJECT');
             }
 
+            if (context === USER_CONTEXTS.PERMIT_SECTION) {
+                if (actions.includes('FORWARD') && actions.includes('APPROVE')) {
+                    actions = actions.filter(a => a !== 'APPROVE');
+                } else if (actions.includes('APPROVE') && !actions.includes('FORWARD')) {
+                    actions = actions.map(a => a === 'APPROVE' ? 'FORWARD' : a);
+                }
+                actions = actions.filter(a => a !== 'VERIFY');
+            }
+
             return Array.from(new Set(actions));
         }
 
@@ -3422,8 +3433,6 @@ export class UnifiedSupplyChainViewComponent implements OnInit {
         const status = String(this.applicationData.status || '').toUpperCase().trim();
         const stageId = Number(this.applicationData.currentStage || (this.applicationData as any)?.current_stage?.id || (this.applicationData as any)?.current_stage_id || 0);
         const stageName = String(this.applicationData.currentStageName || (this.applicationData as any)?.current_stage?.name || (this.applicationData as any)?.current_stage_name || '').toUpperCase().trim();
-
-        const context = this.getUserContext();
 
         if (context === USER_CONTEXTS.PERMIT_SECTION) {
             // If already forwarded to Commissioner, in payment stage, or finished, Permit Section has no action
@@ -3445,7 +3454,7 @@ export class UnifiedSupplyChainViewComponent implements OnInit {
             ) {
                 // Only allow actions if it's the payslip verification stage for permit section (stage 156)
                 if (stageId === 156 || (status.includes('PAYSLIP') && !status.includes('COMMISSIONER'))) {
-                    return ['VERIFY', 'FORWARD', 'REJECT'];
+                    return ['FORWARD', 'REJECT'];
                 }
                 return [];
             }
@@ -3467,7 +3476,7 @@ export class UnifiedSupplyChainViewComponent implements OnInit {
             }
         } else if (context === USER_CONTEXTS.PERMIT_SECTION) {
             if (status.includes('PAYSLIP') || status.includes('PAYMENT')) {
-                actions = ['VERIFY', 'FORWARD', 'REJECT'];
+                actions = ['FORWARD', 'REJECT'];
             } else if (
                 status === 'SUBMITTED' ||
                 status === 'PENDING' ||
@@ -3479,7 +3488,7 @@ export class UnifiedSupplyChainViewComponent implements OnInit {
                 if (this.applicationType === 'cancellation' || this.applicationType === 'revalidation') {
                     actions = ['FORWARD', 'REJECT'];
                 } else {
-                    actions = ['FORWARD', 'APPROVE', 'REJECT', 'RAISE_OBJECTION'];
+                    actions = ['FORWARD', 'REJECT', 'RAISE_OBJECTION'];
                 }
             }
         } else if (context === USER_CONTEXTS.LICENSEE) {

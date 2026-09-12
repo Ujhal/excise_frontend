@@ -2792,7 +2792,15 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       return modules.reduce((sum, m) => sum + this.getSupplyChainPendingCount(m), 0);
     }
     if (this.isCommissionerUser()) {
-      return this.getSupplyChainPendingCount('distributor-permit-hologram-procurement');
+      const distReqPending = this.getSupplyChainPendingCount('distributor-permit-requisition') || this.getSupplyChainPendingCount('distributor-permit');
+      const distHoloPending = this.getSupplyChainPendingCount('distributor-permit-hologram-procurement') || this.getSupplyChainPendingCount('imfl-hologram-procurement');
+      return this.getSupplyChainPendingCount('requisition') +
+             distReqPending +
+             this.getSupplyChainPendingCount('distributor-permit-revalidation') +
+             this.getSupplyChainPendingCount('distributor-permit-cancellation') +
+             this.getSupplyChainPendingCount('hologram') +
+             distHoloPending +
+             this.getSupplyChainPendingCount('company-collaboration');
     }
     if (this.isLicenseeUser()) {
       const licModules = ['requisition', 'revalidation', 'cancellation', 'transit', 'hologram', 'distributor-permit-hologram-procurement'];
