@@ -393,8 +393,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     if (scModules.includes(moduleName)) {
       const counts = this.supplyChainModuleCounts[moduleName];
       if (!counts) return 0;
-      if (counts?.applied != null && counts.applied > 0) return counts.applied;
-      return (counts?.pending || 0) + (counts?.approved || 0) + (counts?.objection || 0) + (counts?.rejected || 0) + ((counts as any)?.awaitingPayment || 0);
+      if (counts?.applied !== undefined && counts.applied !== null) return Number(counts.applied || 0);
+      return Number((counts?.pending || 0) + (counts?.approved || 0) + (counts?.objection || 0) + (counts?.rejected || 0) + ((counts as any)?.awaitingPayment || 0));
     }
 
     let sourceCounts: DashboardCount = { applied: 0, pending: 0, approved: 0, objection: 0, rejected: 0 };
@@ -680,18 +680,18 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.selectedChartModule !== 'all' && this.supplyChainModuleCounts[this.selectedChartModule]) {
       const sourceCounts = this.supplyChainModuleCounts[this.selectedChartModule];
       if (status === 'applied') {
-        if (sourceCounts.applied != null && sourceCounts.applied > 0) {
-          return sourceCounts.applied;
+        if (sourceCounts.applied !== undefined && sourceCounts.applied !== null) {
+          return Number(sourceCounts.applied || 0);
         }
-        return (sourceCounts.pending || 0) + (sourceCounts.approved || 0) + (sourceCounts.objection || 0) + (sourceCounts.rejected || 0) + ((sourceCounts as any).awaitingPayment || (sourceCounts as any)?.awaiting_payment || 0);
+        return Number((sourceCounts.pending || 0) + (sourceCounts.approved || 0) + (sourceCounts.objection || 0) + (sourceCounts.rejected || 0) + ((sourceCounts as any).awaitingPayment || (sourceCounts as any)?.awaiting_payment || 0));
       }
       if (status === 'pending') {
         const awaiting = (this.isLicenseeUser() || this.isDistributorUser()) && !this.shouldShowStatCard('awaitingPayment')
-          ? ((sourceCounts as any).awaitingPayment || (sourceCounts as any)?.awaiting_payment || 0)
+          ? Number((sourceCounts as any).awaitingPayment || (sourceCounts as any)?.awaiting_payment || 0)
           : 0;
-        return (sourceCounts.pending || 0) + awaiting;
+        return Number(sourceCounts.pending || 0) + awaiting;
       }
-      return (sourceCounts as any)?.[status] || 0;
+      return Number((sourceCounts as any)?.[status] || 0);
     }
 
     let sourceCounts: DashboardCount & { awaitingPayment?: number } = this.selectedChartModule === 'all'

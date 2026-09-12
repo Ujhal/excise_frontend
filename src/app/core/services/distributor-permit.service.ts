@@ -64,8 +64,15 @@ export class DistributorPermitService {
         return this.http.get<any>(`${this.baseUrl}/dashboard-counts/`, { params });
       });
     }
-    const params = new HttpParams().set('tab', tab).set('_t', Date.now().toString());
-    return this.http.get<any>(`${this.baseUrl}/dashboard-counts/`, { params });
+    const params = new HttpParams()
+      .set('tab', tab)
+      .set('_t', Date.now().toString())
+      .set('nocache', '1')
+      .set('refresh', '1')
+      .set('force_refresh', '1');
+    return this.http.get<any>(`${this.baseUrl}/dashboard-counts/`, { params }).pipe(
+      tap((value) => this.responseCache.set(cacheKey, { value, fetchedAt: Date.now() }))
+    );
   }
 
   listApplications(status?: string): Observable<DistributorPermitApplication[]> {
